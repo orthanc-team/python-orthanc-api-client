@@ -6,6 +6,5 @@ build/
 dist/
 
 .env
-tests/
 .tox
 .cache
