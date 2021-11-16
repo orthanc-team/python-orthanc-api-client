@@ -1,6 +1,6 @@
 
-from resources import Resources
-from http_client import HttpClient
+from .resources import Resources
+from .http_client import HttpClient
 
 
 class Instances(Resources):
