@@ -1,6 +1,6 @@
-from http_client import HttpClient
-from resources import Resources
-from instances import Instances
+from .http_client import HttpClient
+from .resources import Resources
+from .instances import Instances
 
 class OrthancApiClient:
 

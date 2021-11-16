@@ -1,6 +1,6 @@
 import requests
 from typing import List
-from http_client import HttpClient
+from .http_client import HttpClient
 
 class Resources:
 
