@@ -2,6 +2,10 @@
 .venv/
 __pycache__/
 *.egg-info/
+build/
+dist/
 
 .env
 tests/
+.tox
+.cache
