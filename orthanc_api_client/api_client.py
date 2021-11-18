@@ -11,6 +11,7 @@ from .exceptions import *
 
 logger = logging.getLogger('api-client')
 
+
 class OrthancApiClient:
 
     def __init__(self, orthanc_url: str, user: str = None, pwd: str = None) -> None:
@@ -38,6 +39,10 @@ class OrthancApiClient:
             return True
         except Exception as e:
             return False
+
+    def delete_all_content(self):
+        """Deletes all content from Orthanc"""
+        self.patients.delete_all()
 
     def upload(self, buffer: bytes, ignore_errors: bool = False) -> List[str]:
         """Uploads the content of a binary buffer to Orthanc (can be a DICOM file or a zip file)

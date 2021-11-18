@@ -46,6 +46,15 @@ class HttpClient:
         self._raise_on_errors(response, url=url)
         return response
 
+    def delete(self, relative_url: str, **kwargs) -> requests.Response:
+        try:
+            url = self.get_abs_url(relative_url)
+            response = self._http_session.delete(url, **kwargs)
+        except requests.RequestException as request_exception:
+            self._translate_exception(request_exception, url=url)
+        
+        self._raise_on_errors(response, url = url)
+        return response
 
     def _raise_on_errors(self, response, url):
         if response.status_code == 200:
