@@ -43,15 +43,25 @@ class TestApiClient(unittest.TestCase):
         with self.assertRaises(api_exceptions.BadFileFormat):
             self.oa.upload_file( here / "__init__.py")   # __init__.py is not a valid DICOM file :-)
 
+    def test_upload_invalid_file_while_ignoring_errors(self):
+        self.oa.upload_file( here / "__init__.py", ignore_errors=True)   # __init__.py is not a valid DICOM file :-)
+        # should not throw !
+
     def test_upload_valid_zip(self):
         instances_ids = self.oa.upload_file( here / "stimuli/CT_small.zip")
 
         self.assertEqual('f689ddd2-662f8fe1-8b18180d-ec2a2cee-937917af', instances_ids[0])
 
     def test_upload_folder(self):
-        instances_ids = self.oa.upload_folder( here / "stimuli", skip_extensions = ['.zip'])
+        instances_ids = self.oa.upload_folder( here / "stimuli", skip_extensions=['.zip'])
 
-        self.assertGreaterEqual(1, len(instances_ids))
+        self.assertLessEqual(1, len(instances_ids))
+
+
+    def test_upload_folder_ignore_errors(self):
+        instances_ids = self.oa.upload_folder( here , skip_extensions=['.zip'], ignore_errors=True)  # here contains __init__.py which is invalid
+
+        self.assertLessEqual(1, len(instances_ids))
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

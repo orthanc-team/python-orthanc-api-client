@@ -63,7 +63,10 @@ class OrthancApiClient:
                 return [response.json()['ID']]
         except HttpError as ex:
             if ex.http_status_code == 400 and ex.request_response.json()['OrthancStatus'] == 15:
-                raise BadFileFormat(ex)
+                if ignore_errors:
+                    return []
+                else:
+                    raise BadFileFormat(ex)
             else:
                 raise ex        
 
@@ -113,8 +116,8 @@ class OrthancApiClient:
             full_path = os.path.join(folder_path, path)
             if os.path.isfile(full_path):
                 if not skip_extensions or not any([full_path.endswith(ext) for ext in skip_extensions]):
-                    instances_ids.extend(self.upload_file(full_path))
+                    instances_ids.extend(self.upload_file(full_path, ignore_errors=ignore_errors))
             elif os.path.isdir(full_path):
-                instances_ids.extend(self.upload_folder(full_path))
+                instances_ids.extend(self.upload_folder(full_path, ignore_errors=ignore_errors))
         
         return instances_ids
