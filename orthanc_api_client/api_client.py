@@ -118,6 +118,6 @@ class OrthancApiClient:
                 if not skip_extensions or not any([full_path.endswith(ext) for ext in skip_extensions]):
                     instances_ids.extend(self.upload_file(full_path, ignore_errors=ignore_errors))
             elif os.path.isdir(full_path):
-                instances_ids.extend(self.upload_folder(full_path, ignore_errors=ignore_errors))
+                instances_ids.extend(self.upload_folder(full_path, ignore_errors=ignore_errors, skip_extensions=skip_extensions))
         
         return instances_ids
