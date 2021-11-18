@@ -19,6 +19,6 @@ all_instances_ids = orthanc_a.instances.get_all_ids()
 
 dicom_file = orthanc_a.instances.get_file(instance_id=all_instances_ids[0])
 
-response = orthanc_b.upload_dicom(dicom=dicom_file)
+response = orthanc_b.upload(buffer=dicom_file)
 
 ```
