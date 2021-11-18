@@ -1,0 +1,10 @@
+version: "3"
+services:
+  orthanc-a:
+    image: osimis/orthanc:21.11.0
+    ports: ["10042:8042"]
+    environment:
+      VERBOSE_STARTUP: "true"
+      VERBOSE_ENABLED: "true"
+      ORTHANC__REGISTERED_USERS: |
+        {"test": "test"}
