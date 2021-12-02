@@ -36,10 +36,10 @@ class HttpClient:
     def get_binary(self, relative_url: str, **kwargs) -> Any:
         return self.get(relative_url, **kwargs).content
 
-    def post(self, relative_url: str, data: Any, **kwargs) -> requests.Response:
+    def post(self, relative_url: str, **kwargs) -> requests.Response:
         try:
             url = self.get_abs_url(relative_url)
-            response = self._http_session.post(url, data=data, **kwargs)
+            response = self._http_session.post(url, **kwargs)
         except requests.RequestException as request_exception:
             self._translate_exception(request_exception, url=url)
         
