@@ -18,6 +18,10 @@ class TimeoutError(OrthancApiException):
     def __init__(self, msg = "Timeout.  Orthanc took too long to respond.", url = None):
         super().__init__(msg = msg, url = url)
 
+class TooManyResourcesFound(OrthancApiException):
+    def __init__(self, msg = "Too many resources found with the same id.", url = None):
+        super().__init__(msg = msg, url = url)
+
 
 class HttpError(OrthancApiException):
 
@@ -34,7 +38,6 @@ class HttpError(OrthancApiException):
 class ResourceNotFound(HttpError):
     def __init__(self, msg = "Resource not found.  The resource you're trying to access does not exist in Orthanc.", url = None):
         super().__init__(http_status_code = 404, msg = msg, url = url)
-
 
 class NotAuthorized(HttpError):
     def __init__(self, http_status_code, msg = "Not authorized.  Make sure to provide login/pwd.", url = None):

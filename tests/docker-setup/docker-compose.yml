@@ -6,5 +6,24 @@ services:
     environment:
       VERBOSE_STARTUP: "true"
       VERBOSE_ENABLED: "true"
+      ORTHANC__DICOM_AET : ORTHANCA
       ORTHANC__REGISTERED_USERS: |
         {"test": "test"}
+      ORTHANC__DICOM_MODALITIES: |
+        {"orthanc-b": ["ORTHANCB", "orthanc-b", 4242]}
+      ORTHANC__DICOM_WEB__SERVERS: |
+        {"orthanc-b": ["http://orthanc-b:8042/dicom-web/", "test", "test"]}
+  orthanc-b:
+    image: osimis/orthanc:21.11.0
+    ports: ["10043:8042"]
+    environment:
+      VERBOSE_STARTUP: "true"
+      VERBOSE_ENABLED: "true"
+      ORTHANC__DICOM_AET : ORTHANCB
+      ORTHANC__REGISTERED_USERS: |
+        {"test": "test"}
+      ORTHANC__DICOM_MODALITIES: |
+        {"orthanc-a": ["ORTHANCA", "orthanc-a", 4242]}
+      ORTHANC__DICOM_WEB__SERVERS: |
+        {"orthanc-a": ["http://orthanc-a:8042/dicom-web/", "test", "test"]}
+
