@@ -28,6 +28,7 @@ dicom_file = orthanc_a.instances.get_file(instance_id=all_instances_ids[0])
 
 instances_ids = orthanc_b.upload(buffer=dicom_file)
 
+
 ```
 
 ## upload a folder to Orthanc
