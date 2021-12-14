@@ -26,3 +26,32 @@ class Resources:
             deleted_ids.append(id)
         
         return deleted_ids
+
+    def set_attachment(self, id, attachment_name, content = None, path = None, content_type = None):
+        if content is None and path is not None:
+            with open(path, 'rb') as f:
+                content = f.read()
+
+        if content_type is not None:
+            headers = {
+                'Content-Type': content_type
+            }
+        else:
+            headers = {}
+
+        self._api_client.put(
+            relative_url = f"/{self._url_segment}/{id}/attachments/{attachment_name}",
+            data = content,
+            headers = headers
+        )
+
+    def get_attachment(self, id, attachment_name) -> bytes:
+        return self._api_client.get(
+            relative_url = f"/{self._url_segment}/{id}/attachments/{attachment_name}/data"
+        ).content
+
+    def download_attachment(self, id, attachment_name, path):
+        content = self.get_attachment(id, attachment_name)
+
+        with open(path, 'wb') as f:
+            f.write(content)
