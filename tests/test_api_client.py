@@ -79,6 +79,18 @@ class TestApiClient(unittest.TestCase):
         self.assertLessEqual(1, len(instances_ids))
         self.assertIsNotNone(study_id)
 
+    def test_get_parents(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_file( here / "stimuli/CT_small.dcm")
+
+        instance_id = self.oa.instances.get_all_ids()[0]
+        series_id = self.oa.series.get_all_ids()[0]
+        study_id = self.oa.studies.get_all_ids()[0]
+
+        self.assertEqual(instance_id, instances_ids[0])
+        self.assertEqual(series_id, self.oa.instances.get_parent_series_id(instance_id))
+        self.assertEqual(study_id, self.oa.instances.get_parent_study_id(instance_id))
 
     def test_stow_rs(self):
         self.oa.delete_all_content()
@@ -95,6 +107,27 @@ class TestApiClient(unittest.TestCase):
 
         study_id = self.ob.studies.find('1.2.3')
         self.assertIsNotNone(study_id)
+
+
+    def test_attachments(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_file( here / "stimuli/CT_small.dcm")
+
+        content = b'123456789'
+        self.oa.instances.set_attachment(
+            id=instances_ids[0],
+            attachment_name=1025,
+            content = content,
+            content_type = 'application/octet-stream'
+            )
+
+        content_readback = self.oa.instances.get_attachment(
+            id=instances_ids[0],
+            attachment_name=1025
+        )
+
+        self.assertEqual(content, content_readback)
 
 
 if __name__ == '__main__':

@@ -6,6 +6,7 @@ from typing import List
 from .http_client import HttpClient
 from .resources import Resources
 from .instances import Instances
+from .series import Series
 from .studies import Studies
 from .helpers import wait_until
 from .exceptions import *
@@ -22,7 +23,7 @@ class OrthancApiClient(HttpClient):
 
         self.patients = Resources(api_client=self, url_segment='patients')
         self.studies = Studies(api_client=self)
-        self.series = Resources(api_client=self, url_segment='series')
+        self.series = Series(api_client=self)
         self.instances = Instances(api_client=self)
         self.dicomweb_servers = DicomWebServers(api_client=self)
 
