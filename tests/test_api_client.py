@@ -130,6 +130,104 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual(content, content_readback)
 
 
+    def test_attachments_with_revision(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_file( here / "stimuli/CT_small.dcm")
+
+        content = b'123456789'
+        self.oa.instances.set_attachment(
+            id=instances_ids[0],
+            attachment_name=1025,
+            content = content,
+            content_type = 'application/octet-stream'
+            )
+
+        # get current revision
+        content_readback, revision = self.oa.instances.get_attachment_with_revision(
+            id=instances_ids[0],
+            attachment_name=1025
+        )
+
+        self.assertEqual(content, content_readback)
+
+        updated_content = b'abcdefg'
+
+        # update if match current revision
+        self.oa.instances.set_attachment(
+            id=instances_ids[0],
+            attachment_name=1025,
+            content = updated_content,
+            content_type = 'application/octet-stream',
+            match_revision = revision
+            )
+
+        # tye to update if match another revision -> fails
+        with self.assertRaises(api_exceptions.HttpError):
+            self.oa.instances.set_attachment(
+                id=instances_ids[0],
+                attachment_name=1025,
+                content = updated_content,
+                content_type = 'application/octet-stream',
+                match_revision = '"1-bad-checksum"'
+                )
+
+        # get current revision
+        content_readback, revision = self.oa.instances.get_attachment_with_revision(
+            id=instances_ids[0],
+            attachment_name=1025
+        )
+
+        self.assertEqual(updated_content, content_readback)
+
+    def test_metadata_with_revision(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_file( here / "stimuli/CT_small.dcm")
+
+        content = b'123456789'
+        self.oa.instances.set_metadata(
+            id=instances_ids[0],
+            metadata_name=1025,
+            content = content
+            )
+
+        # get current revision
+        content_readback, revision = self.oa.instances.get_metadata_with_revision(
+            id=instances_ids[0],
+            metadata_name=1025
+        )
+
+        self.assertEqual(content, content_readback)
+
+        updated_content = b'abcdefg'
+
+        # update if match current revision
+        self.oa.instances.set_metadata(
+            id=instances_ids[0],
+            metadata_name=1025,
+            content = updated_content,
+            match_revision = revision
+            )
+
+        # tye to update if match another revision -> fails
+        with self.assertRaises(api_exceptions.HttpError):
+            self.oa.instances.set_metadata(
+                id=instances_ids[0],
+                metadata_name=1025,
+                content = updated_content,
+                match_revision = '"1-bad-checksum"'
+                )
+
+        # get current revision
+        content_readback, revision = self.oa.instances.get_metadata_with_revision(
+            id=instances_ids[0],
+            metadata_name=1025
+        )
+
+        self.assertEqual(updated_content, content_readback)
+
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     unittest.main()
