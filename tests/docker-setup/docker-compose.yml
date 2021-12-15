@@ -13,6 +13,9 @@ services:
         {"orthanc-b": ["ORTHANCB", "orthanc-b", 4242]}
       ORTHANC__DICOM_WEB__SERVERS: |
         {"orthanc-b": ["http://orthanc-b:8042/dicom-web/", "test", "test"]}
+
+      ORTHANC__CHECK_REVISIONS: "true"
+
   orthanc-b:
     image: osimis/orthanc:21.11.0
     ports: ["10043:8042"]
