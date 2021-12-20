@@ -1,19 +1,25 @@
 import os
 import logging
 import typing
+import datetime
 from typing import List
+from urllib.parse import urlunsplit, urlencode
 
 from .http_client import HttpClient
 from .resources import Resources
+
 from .instances import Instances
 from .series import Series
 from .studies import Studies
 from .helpers import wait_until
 from .exceptions import *
 from .dicomweb_servers import DicomWebServers
+from .change import Change, ChangeType, ResourceType
 
 
 logger = logging.getLogger('api-client')
+
+    
 
 
 class OrthancApiClient(HttpClient):
@@ -157,3 +163,43 @@ class OrthancApiClient(HttpClient):
                     resources.append(r['ID'])
 
         return resources
+
+    def get_changes(self, since: int = None, limit: int = None) -> typing.Tuple[List[Change], int, bool]:
+        """ get the changes
+
+        Parameters:
+        ----------
+        since: request changes from this sequence_id
+        limit: limit the number of changes in the response
+
+        Returns:
+        -------
+        - the list of changes
+        - the last sequence id returned
+        - a boolean indicating if there are more changes to load
+        """
+
+        args = {}
+        
+        if since:
+            args['since'] = since
+        if limit:
+            args['limit'] = limit
+
+        response = self.get_json(
+            relative_url = "/changes?" + urlencode(args)
+        )
+
+        changes = []
+        for c in response['Changes']:
+            changes.append(Change(
+                change_type=c.get('ChangeType'),
+                timestamp=datetime.datetime.strptime(c.get('Date'), "%Y%m%dT%H%M%S"),
+                sequence_id=c.get('Seq'),
+                resource_type=c.get('ResourceType'),
+                resource_id=c.get('ID')
+            ))
+        done = response['Done']
+        last_sequence_id = response['Last']
+
+        return changes, last_sequence_id, done

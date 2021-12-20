@@ -1,7 +1,7 @@
 import unittest
 import subprocess
 import logging
-from orthanc_api_client import OrthancApiClient, generate_test_dicom_file
+from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType
 import orthanc_api_client.exceptions as api_exceptions
 import pathlib
 import os
@@ -226,6 +226,23 @@ class TestApiClient(unittest.TestCase):
         )
 
         self.assertEqual(updated_content, content_readback)
+
+
+    def test_changes(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_file( here / "stimuli/CT_small.dcm")
+
+        changes, seq_id, done = self.oa.get_changes()
+
+        self.assertEqual(ChangeType.NEW_INSTANCE, changes[0].change_type)
+        self.assertEqual(ChangeType.INSTANCE, changes[0].resource_type)
+        self.assertEqual(instances[0], changes[0].resource_id)
+
+        changes, seq_id, done = self.oa.get_changes(since=seq_id)
+        self.assertEqual(0, len(changes))
+        self.assertTrue(done)
+
 
 
 if __name__ == '__main__':
