@@ -74,16 +74,13 @@ class Resources:
             f.write(content)
 
 
-    def set_metadata(self, id, metadata_name, content = None, path = None, content_type = None, match_revision = None):
+    def set_metadata(self, id, metadata_name, content = None, path = None, match_revision = None):
         
         if content is None and path is not None:
             with open(path, 'rb') as f:
                 content = f.read()
 
         headers = {}
-
-        if content_type:
-            headers['Content-Type'] = content_type
 
         if match_revision:
             headers['If-Match'] = match_revision
