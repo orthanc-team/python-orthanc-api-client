@@ -236,8 +236,8 @@ class TestApiClient(unittest.TestCase):
         changes, seq_id, done = self.oa.get_changes()
 
         self.assertEqual(ChangeType.NEW_INSTANCE, changes[0].change_type)
-        self.assertEqual(ChangeType.INSTANCE, changes[0].resource_type)
-        self.assertEqual(instances[0], changes[0].resource_id)
+        self.assertEqual(ResourceType.INSTANCE, changes[0].resource_type)
+        self.assertEqual(instances_ids[0], changes[0].resource_id)
 
         changes, seq_id, done = self.oa.get_changes(since=seq_id)
         self.assertEqual(0, len(changes))
