@@ -34,7 +34,7 @@ class TestApiClient(unittest.TestCase):
         self.oa.delete_all_content()
         self.assertEqual(0, len(self.oa.studies.get_all_ids()))
 
-        instances_ids = self.oa.upload_file( here / "stimuli/CT_small.dcm")
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
 
         self.assertEqual('f689ddd2-662f8fe1-8b18180d-ec2a2cee-937917af', instances_ids[0])
         self.assertEqual(1, len(self.oa.studies.get_all_ids()))
@@ -44,24 +44,24 @@ class TestApiClient(unittest.TestCase):
 
     def test_upload_invalid_file(self):
         with self.assertRaises(api_exceptions.BadFileFormat):
-            self.oa.upload_file( here / "__init__.py")   # __init__.py is not a valid DICOM file :-)
+            self.oa.upload_file(here / "__init__.py")   # __init__.py is not a valid DICOM file :-)
 
     def test_upload_invalid_file_while_ignoring_errors(self):
-        self.oa.upload_file( here / "__init__.py", ignore_errors=True)   # __init__.py is not a valid DICOM file :-)
+        self.oa.upload_file(here / "__init__.py", ignore_errors=True)   # __init__.py is not a valid DICOM file :-)
         # should not throw !
 
     def test_upload_valid_zip(self):
-        instances_ids = self.oa.upload_file( here / "stimuli/CT_small.zip")
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.zip")
 
         self.assertEqual('f689ddd2-662f8fe1-8b18180d-ec2a2cee-937917af', instances_ids[0])
 
     def test_upload_folder(self):
-        instances_ids = self.oa.upload_folder( here / "stimuli", skip_extensions=['.zip'])
+        instances_ids = self.oa.upload_folder(here / "stimuli", skip_extensions=['.zip'])
 
         self.assertLessEqual(1, len(instances_ids))
 
     def test_upload_folder_ignore_errors(self):
-        instances_ids = self.oa.upload_folder( here , skip_extensions=['.zip'], ignore_errors=True)  # here contains __init__.py which is invalid
+        instances_ids = self.oa.upload_folder(here, skip_extensions=['.zip'], ignore_errors=True)  # here contains __init__.py which is invalid
 
         self.assertLessEqual(1, len(instances_ids))
 
@@ -82,7 +82,7 @@ class TestApiClient(unittest.TestCase):
     def test_get_parents(self):
         self.oa.delete_all_content()
 
-        instances_ids = self.oa.upload_file( here / "stimuli/CT_small.dcm")
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
 
         instance_id = self.oa.instances.get_all_ids()[0]
         series_id = self.oa.series.get_all_ids()[0]
@@ -112,7 +112,7 @@ class TestApiClient(unittest.TestCase):
     def test_attachments(self):
         self.oa.delete_all_content()
 
-        instances_ids = self.oa.upload_file( here / "stimuli/CT_small.dcm")
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
 
         content = b'123456789'
         self.oa.instances.set_attachment(
@@ -133,14 +133,14 @@ class TestApiClient(unittest.TestCase):
     def test_attachments_with_revision(self):
         self.oa.delete_all_content()
 
-        instances_ids = self.oa.upload_file( here / "stimuli/CT_small.dcm")
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
 
         content = b'123456789'
         self.oa.instances.set_attachment(
             id=instances_ids[0],
             attachment_name=1025,
-            content = content,
-            content_type = 'application/octet-stream'
+            content=content,
+            content_type='application/octet-stream'
             )
 
         # get current revision
@@ -157,8 +157,8 @@ class TestApiClient(unittest.TestCase):
         self.oa.instances.set_attachment(
             id=instances_ids[0],
             attachment_name=1025,
-            content = updated_content,
-            content_type = 'application/octet-stream',
+            content=updated_content,
+            content_type='application/octet-stream',
             match_revision = revision
             )
 
@@ -167,9 +167,9 @@ class TestApiClient(unittest.TestCase):
             self.oa.instances.set_attachment(
                 id=instances_ids[0],
                 attachment_name=1025,
-                content = updated_content,
-                content_type = 'application/octet-stream',
-                match_revision = '"1-bad-checksum"'
+                content=updated_content,
+                content_type='application/octet-stream',
+                match_revision='"1-bad-checksum"'
                 )
 
         # get current revision
@@ -183,13 +183,13 @@ class TestApiClient(unittest.TestCase):
     def test_metadata_with_revision(self):
         self.oa.delete_all_content()
 
-        instances_ids = self.oa.upload_file( here / "stimuli/CT_small.dcm")
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
 
         content = b'123456789'
         self.oa.instances.set_metadata(
             id=instances_ids[0],
             metadata_name=1025,
-            content = content
+            content=content
             )
 
         # get current revision
@@ -206,8 +206,8 @@ class TestApiClient(unittest.TestCase):
         self.oa.instances.set_metadata(
             id=instances_ids[0],
             metadata_name=1025,
-            content = updated_content,
-            match_revision = revision
+            content=updated_content,
+            match_revision=revision
             )
 
         # tye to update if match another revision -> fails
@@ -215,8 +215,8 @@ class TestApiClient(unittest.TestCase):
             self.oa.instances.set_metadata(
                 id=instances_ids[0],
                 metadata_name=1025,
-                content = updated_content,
-                match_revision = '"1-bad-checksum"'
+                content=updated_content,
+                match_revision='"1-bad-checksum"'
                 )
 
         # get current revision
@@ -231,7 +231,7 @@ class TestApiClient(unittest.TestCase):
     def test_changes(self):
         self.oa.delete_all_content()
 
-        instances_ids = self.oa.upload_file( here / "stimuli/CT_small.dcm")
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
 
         changes, seq_id, done = self.oa.get_changes()
 
