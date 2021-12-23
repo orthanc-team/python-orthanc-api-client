@@ -116,14 +116,14 @@ class TestApiClient(unittest.TestCase):
 
         content = b'123456789'
         self.oa.instances.set_attachment(
-            id=instances_ids[0],
+            orthanc_id=instances_ids[0],
             attachment_name=1025,
             content = content,
             content_type = 'application/octet-stream'
             )
 
         content_readback = self.oa.instances.get_attachment(
-            id=instances_ids[0],
+            orthanc_id=instances_ids[0],
             attachment_name=1025
         )
 
@@ -137,7 +137,7 @@ class TestApiClient(unittest.TestCase):
 
         content = b'123456789'
         self.oa.instances.set_attachment(
-            id=instances_ids[0],
+            orthanc_id=instances_ids[0],
             attachment_name=1025,
             content=content,
             content_type='application/octet-stream'
@@ -145,7 +145,7 @@ class TestApiClient(unittest.TestCase):
 
         # get current revision
         content_readback, revision = self.oa.instances.get_attachment_with_revision(
-            id=instances_ids[0],
+            orthanc_id=instances_ids[0],
             attachment_name=1025
         )
 
@@ -155,17 +155,17 @@ class TestApiClient(unittest.TestCase):
 
         # update if match current revision
         self.oa.instances.set_attachment(
-            id=instances_ids[0],
+            orthanc_id=instances_ids[0],
             attachment_name=1025,
             content=updated_content,
             content_type='application/octet-stream',
-            match_revision = revision
+            match_revision=revision
             )
 
         # tye to update if match another revision -> fails
         with self.assertRaises(api_exceptions.HttpError):
             self.oa.instances.set_attachment(
-                id=instances_ids[0],
+                orthanc_id=instances_ids[0],
                 attachment_name=1025,
                 content=updated_content,
                 content_type='application/octet-stream',
@@ -174,7 +174,7 @@ class TestApiClient(unittest.TestCase):
 
         # get current revision
         content_readback, revision = self.oa.instances.get_attachment_with_revision(
-            id=instances_ids[0],
+            orthanc_id=instances_ids[0],
             attachment_name=1025
         )
 
@@ -185,16 +185,24 @@ class TestApiClient(unittest.TestCase):
 
         instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
 
+        # try to read a metadata that does not exist
+        value = self.oa.instances.get_metadata(
+            instances_ids[0],
+            metadata_name=1024,
+            default_value=None
+        )
+        self.assertEqual(None, value)
+
         content = b'123456789'
         self.oa.instances.set_metadata(
-            id=instances_ids[0],
+            orthanc_id=instances_ids[0],
             metadata_name=1025,
             content=content
             )
 
         # get current revision
         content_readback, revision = self.oa.instances.get_metadata_with_revision(
-            id=instances_ids[0],
+            orthanc_id=instances_ids[0],
             metadata_name=1025
         )
 
@@ -204,7 +212,7 @@ class TestApiClient(unittest.TestCase):
 
         # update if match current revision
         self.oa.instances.set_metadata(
-            id=instances_ids[0],
+            orthanc_id=instances_ids[0],
             metadata_name=1025,
             content=updated_content,
             match_revision=revision
@@ -213,7 +221,7 @@ class TestApiClient(unittest.TestCase):
         # tye to update if match another revision -> fails
         with self.assertRaises(api_exceptions.HttpError):
             self.oa.instances.set_metadata(
-                id=instances_ids[0],
+                orthanc_id=instances_ids[0],
                 metadata_name=1025,
                 content=updated_content,
                 match_revision='"1-bad-checksum"'
@@ -221,7 +229,7 @@ class TestApiClient(unittest.TestCase):
 
         # get current revision
         content_readback, revision = self.oa.instances.get_metadata_with_revision(
-            id=instances_ids[0],
+            orthanc_id=instances_ids[0],
             metadata_name=1025
         )
 
