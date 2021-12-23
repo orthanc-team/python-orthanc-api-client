@@ -90,7 +90,7 @@ class OrthancApiClient(HttpClient):
 
         Returns
         -------
-        the list of instances ids (one if a single file, can be multiple )
+        the list of instances ids (one if a single file, can be multiple if the uploaded file is a zip)
         """
         logger.info(f"uploading {path}")
         with open(path, 'rb') as f:
