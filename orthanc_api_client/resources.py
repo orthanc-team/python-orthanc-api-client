@@ -1,6 +1,7 @@
 import requests
 import logging
 import typing
+from .exceptions import *
 
 from typing import List
 
@@ -21,14 +22,14 @@ class Resources:
         all_ids = self.get_all_ids()
         deleted_ids = []
 
-        for id in all_ids:
-            logger.info(f"deleting {self._url_segment} {id}")
-            self._api_client.delete(f"/{self._url_segment}/{id}")
-            deleted_ids.append(id)
+        for orthanc_id in all_ids:
+            logger.info(f"deleting {self._url_segment} {orthanc_id}")
+            self._api_client.delete(f"/{self._url_segment}/{orthanc_id}")
+            deleted_ids.append(orthanc_id)
         
         return deleted_ids
 
-    def set_attachment(self, id, attachment_name, content = None, path = None, content_type = None, match_revision = None):
+    def set_attachment(self, orthanc_id, attachment_name, content=None, path=None, content_type=None, match_revision=None):
         
         if content is None and path is not None:
             with open(path, 'rb') as f:
@@ -43,38 +44,37 @@ class Resources:
             headers['If-Match'] = match_revision
 
         self._api_client.put(
-            relative_url = f"/{self._url_segment}/{id}/attachments/{attachment_name}",
-            data = content,
-            headers = headers
+            relative_url=f"/{self._url_segment}/{orthanc_id}/attachments/{attachment_name}",
+            data=content,
+            headers=headers
         )
 
-    def get_attachment(self, id, attachment_name) -> bytes:
+    def get_attachment(self, orthanc_id, attachment_name) -> bytes:
 
         content, revision = self.get_attachment_with_revision(
-            id=id,
+            orthanc_id=orthanc_id,
             attachment_name=attachment_name
         )
         return content
 
-    def get_attachment_with_revision(self, id, attachment_name) -> typing.Tuple[bytes, str]:
+    def get_attachment_with_revision(self, orthanc_id, attachment_name) -> typing.Tuple[bytes, str]:
 
         headers = {}
 
         response = self._api_client.get(
-            relative_url = f"/{self._url_segment}/{id}/attachments/{attachment_name}/data",
-            headers = headers
+            relative_url=f"/{self._url_segment}/{orthanc_id}/attachments/{attachment_name}/data",
+            headers=headers
         )
 
         return response.content, response.headers.get('etag')
 
-    def download_attachment(self, id, attachment_name, path):
-        content = self.get_attachment(id, attachment_name)
+    def download_attachment(self, orthanc_id, attachment_name, path):
+        content = self.get_attachment(orthanc_id, attachment_name)
 
         with open(path, 'wb') as f:
             f.write(content)
 
-
-    def set_metadata(self, id, metadata_name, content = None, path = None, match_revision = None):
+    def set_metadata(self, orthanc_id, metadata_name, content=None, path=None, match_revision=None):
         
         if content is None and path is not None:
             with open(path, 'rb') as f:
@@ -86,27 +86,31 @@ class Resources:
             headers['If-Match'] = match_revision
 
         self._api_client.put(
-            relative_url = f"/{self._url_segment}/{id}/metadata/{metadata_name}",
-            data = content,
-            headers = headers
+            relative_url=f"/{self._url_segment}/{orthanc_id}/metadata/{metadata_name}",
+            data=content,
+            headers=headers
         )
 
-
-    def get_metadata(self, id, metadata_name) -> bytes:
+    def get_metadata(self, orthanc_id, metadata_name, default_value=None) -> bytes:
 
         content, revision = self.get_metadata_with_revision(
-            id=id,
-            metadata_name=attachment_name
+            orthanc_id=orthanc_id,
+            metadata_name=metadata_name,
+            default_value=default_value
         )
+
         return content
 
-    def get_metadata_with_revision(self, id, metadata_name) -> typing.Tuple[bytes, str]:
+    def get_metadata_with_revision(self, orthanc_id, metadata_name, default_value=None) -> typing.Tuple[bytes, str]:
 
         headers = {}
 
-        response = self._api_client.get(
-            relative_url = f"/{self._url_segment}/{id}/metadata/{metadata_name}",
-            headers = headers
-        )
+        try:
+            response = self._api_client.get(
+                relative_url=f"/{self._url_segment}/{orthanc_id}/metadata/{metadata_name}",
+                headers=headers
+            )
+        except ResourceNotFound:
+            return default_value, None
 
         return response.content, response.headers.get('etag')

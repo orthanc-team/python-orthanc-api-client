@@ -30,3 +30,4 @@ services:
       ORTHANC__DICOM_WEB__SERVERS: |
         {"orthanc-a": ["http://orthanc-a:8042/dicom-web/", "test", "test"]}
 
+      ORTHANC__CHECK_REVISIONS: "false"

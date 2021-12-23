@@ -6,14 +6,14 @@ Functionalities are very limited now !  Backward compat will break a lot in the 
 
 Installation:
 
-```
+```shell
 pip3 install orthanc-api-client
 ```
 
 
 Examples:
 
-```
+```python
 from orthanc_api_client import OrthancApiClient
 
 orthanc_a = OrthancApiClient('http://localhost:8042', user='orthanc', pwd='orthanc')
@@ -24,15 +24,17 @@ all_studies_ids = orthanc_a.studies.get_all_ids()
 all_series_ids = orthanc_a.series.get_all_ids()
 all_instances_ids = orthanc_a.instances.get_all_ids()
 
-dicom_file = orthanc_a.instances.get_file(instance_id=all_instances_ids[0])
+dicom_file = orthanc_a.instances.get_file(orthanc_id=all_instances_ids[0])
 
 instances_ids = orthanc_b.upload(buffer=dicom_file)
 
+orthanc_a.instances.set_metadata(orthanc_id=all_instances_ids[0], 1024, 'my-value')
 
 ```
 
 ## upload a folder to Orthanc
-```
+
+```python
 from orthanc_api_client import OrthancApiClient
 
 o = OrthancApiClient('http://localhost:8042', user='orthanc', pwd='orthanc')
