@@ -39,8 +39,27 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual('f689ddd2-662f8fe1-8b18180d-ec2a2cee-937917af', instances_ids[0])
         self.assertEqual(1, len(self.oa.studies.get_all_ids()))
 
-        self.oa.delete_all_content()
+        self.oa.instances.delete(orthanc_id=instances_ids[0])
         self.assertEqual(0, len(self.oa.studies.get_all_ids()))
+
+    def test_instances_get_tags(self):
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        tags = self.oa.instances.get_tags(instances_ids[0])
+
+        self.assertEqual("1CT1", tags['PatientID'])
+        self.assertEqual("CompressedSamples^CT1", tags['0010,0010'])
+        self.assertEqual("O", tags['0010-0040'])
+        self.assertEqual('072731', tags['InstanceCreationTime'])
+
+    def test_studies_get_tags(self):
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
+        tags = self.oa.studies.get_tags(study_id)
+
+        # study tags only contain study + patient module tags
+        self.assertEqual("1CT1", tags['PatientID'])
+        self.assertEqual("e+1", tags['StudyDescription'])
+        self.assertEqual(None, tags['InstanceCreationTime'])
 
     def test_upload_invalid_file(self):
         with self.assertRaises(api_exceptions.BadFileFormat):
@@ -56,9 +75,12 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual('f689ddd2-662f8fe1-8b18180d-ec2a2cee-937917af', instances_ids[0])
 
     def test_upload_folder(self):
+        self.oa.delete_all_content()
         instances_ids = self.oa.upload_folder(here / "stimuli", skip_extensions=['.zip'])
 
         self.assertLessEqual(1, len(instances_ids))
+        self.oa.instances.delete(orthanc_ids=instances_ids)
+        self.assertEqual(0, len(self.oa.studies.get_all_ids()))
 
     def test_upload_folder_ignore_errors(self):
         instances_ids = self.oa.upload_folder(here, skip_extensions=['.zip'], ignore_errors=True)  # here contains __init__.py which is invalid
@@ -250,6 +272,29 @@ class TestApiClient(unittest.TestCase):
         changes, seq_id, done = self.oa.get_changes(since=seq_id)
         self.assertEqual(0, len(changes))
         self.assertTrue(done)
+
+
+    def test_anonymize_study(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
+
+        # default anonymize
+        anon_study_id = self.oa.studies.anonymize(
+            orthanc_id=study_id,
+            keep_tags=['PatientName'],
+            replace_tags={
+                'PatientID': 'ANON'
+            },
+            force=True,
+            delete_original=False
+        )
+
+        self.assertEqual(self.oa.studies.get_tags(study_id)['PatientName'], self.oa.studies.get_tags(anon_study_id)['PatientName'])
+        self.assertNotEqual('ANON', self.oa.studies.get_tags(anon_study_id)['PatientName'])
+
+        instances_ids = self.oa.upload_folder(here / "stimuli", skip_extensions=['.zip'])
 
 
 

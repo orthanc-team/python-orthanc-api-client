@@ -27,8 +27,26 @@ all_instances_ids = orthanc_a.instances.get_all_ids()
 dicom_file = orthanc_a.instances.get_file(orthanc_id=all_instances_ids[0])
 
 instances_ids = orthanc_b.upload(buffer=dicom_file)
+study_id = orthanc_b.instances.get_parent_study_id(instances_ids[0])
 
 orthanc_a.instances.set_metadata(orthanc_id=all_instances_ids[0], 1024, 'my-value')
+
+tags = orthanc_a.instances.get_tags(orhtanc_id=all_instances_ids[0])
+
+patient_name = tags['PatientName']
+patient_id = tags['0010,0020']
+patient_sex = tags['0010-0040']
+
+anon_study_id = orthanc_b.studies.anonymize(
+    orthanc_id=study_id,
+    keep_tags=['PatientName'],
+    replace_tags={
+        'PatientID': 'ANON'
+    },
+    force=True,
+    delete_original=False
+)
+
 
 ```
 

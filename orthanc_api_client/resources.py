@@ -1,9 +1,8 @@
 import requests
 import logging
-import typing
+from typing import List, Tuple
 from .exceptions import *
 
-from typing import List
 
 
 logger = logging.getLogger('api-client')
@@ -18,13 +17,22 @@ class Resources:
     def get_all_ids(self) -> List[str]:
         return self._api_client.get_json(f"/{self._url_segment}/")
 
+    def delete(self, orthanc_id: str = None, orthanc_ids: List[str] = None):
+
+        if orthanc_ids:
+            for oi in orthanc_ids:
+                self.delete(orthanc_id=oi)
+
+        if orthanc_id:
+            logger.info(f"deleting {self._url_segment} {orthanc_id}")
+            self._api_client.delete(f"/{self._url_segment}/{orthanc_id}")
+
     def delete_all(self) -> List[str]:
         all_ids = self.get_all_ids()
         deleted_ids = []
 
         for orthanc_id in all_ids:
-            logger.info(f"deleting {self._url_segment} {orthanc_id}")
-            self._api_client.delete(f"/{self._url_segment}/{orthanc_id}")
+            self.delete(orthanc_id)
             deleted_ids.append(orthanc_id)
         
         return deleted_ids
@@ -57,7 +65,7 @@ class Resources:
         )
         return content
 
-    def get_attachment_with_revision(self, orthanc_id, attachment_name) -> typing.Tuple[bytes, str]:
+    def get_attachment_with_revision(self, orthanc_id, attachment_name) -> Tuple[bytes, str]:
 
         headers = {}
 
@@ -101,7 +109,7 @@ class Resources:
 
         return content
 
-    def get_metadata_with_revision(self, orthanc_id, metadata_name, default_value=None) -> typing.Tuple[bytes, str]:
+    def get_metadata_with_revision(self, orthanc_id, metadata_name, default_value=None) -> Tuple[bytes, str]:
 
         headers = {}
 
