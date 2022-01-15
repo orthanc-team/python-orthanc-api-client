@@ -1,6 +1,6 @@
 
 from .resources import Resources
-
+from .tags import Tags
 
 class Instances(Resources):
 
@@ -18,3 +18,7 @@ class Instances(Resources):
         return self._api_client.series.get_parent_study_id(
             orthanc_id=self.get_parent_series_id(orthanc_id)
         )
+
+    def get_tags(self, orthanc_id: str) -> Tags:
+        json_tags = self._api_client.get_json(f"/{self._url_segment}/{orthanc_id}/tags")
+        return Tags(json_tags)
