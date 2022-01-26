@@ -1,9 +1,11 @@
+import time
 import unittest
 import subprocess
 import logging
 from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType
 import orthanc_api_client.exceptions as api_exceptions
 import pathlib
+import asyncio
 import os
 
 here = pathlib.Path(__file__).parent.resolve()
@@ -295,6 +297,39 @@ class TestApiClient(unittest.TestCase):
         self.assertNotEqual('ANON', self.oa.studies.get_tags(anon_study_id)['PatientName'])
 
         instances_ids = self.oa.upload_folder(here / "stimuli", skip_extensions=['.zip'])
+
+    def test_asyncio(self):
+        self.oa.delete_all_content()
+
+        dicoms = []
+
+        for i in range(1, 10):
+            dicoms.append(generate_test_dicom_file(width=3200, height=3200, StudyInstanceUID='1.2.3'))
+
+        ##### upload synchronous
+        s = time.perf_counter()
+        # upload files one by one
+        instances_ids = []
+        for dicom in dicoms:
+            instances_ids.extend(self.oa.upload(buffer=dicom))
+        elapsed = time.perf_counter() - s
+
+        print(f"synchronous upload took: {elapsed:0.3f} seconds")
+
+        self.oa.delete_all_content()
+
+        ##### upload asynchronous
+        s = time.perf_counter()
+        # upload files one by one
+        future_instance_ids = []
+        for dicom in dicoms:
+            future_instance_ids.append(asyncio.to_thread(self.oa.upload, buffer=dicom))
+        result_list = asyncio.get_event_loop().run_until_complete(asyncio.gather(*future_instance_ids))
+        instances_ids = [i for r in result_list for i in r]
+        elapsed = time.perf_counter() - s
+
+        print(f"asynchronous upload took: {elapsed:0.3f} seconds")
+
 
 
 
