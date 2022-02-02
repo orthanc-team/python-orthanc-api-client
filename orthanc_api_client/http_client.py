@@ -7,12 +7,14 @@ from orthanc_api_client import exceptions as api_exceptions
 
 class HttpClient:
 
-    def __init__(self, root_url: str, user: str = None, pwd: str = None) -> None:
+    def __init__(self, root_url: str, user: str = None, pwd: str = None, headers: any = None) -> None:
         self._root_url = root_url
         self._http_session = requests.Session()
 
         if user and pwd:
             self._http_session.auth = requests.auth.HTTPBasicAuth(user, pwd)
+        if headers:
+            self._http_session.headers.update(headers)
 
         self._user = user
         self._pwd = pwd

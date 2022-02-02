@@ -32,6 +32,15 @@ class TestApiClient(unittest.TestCase):
     def test_is_alive(self):
         self.assertTrue(self.oa.is_alive())
 
+    def test_api_token_ctor(self):
+        # first retrieve the token through a special route implemented by a plugin (not safe ! don't run this experiment at home !)
+        auth_token = self.ob.get_binary('/api-token').decode('utf-8')
+
+        o = OrthancApiClient('http://localhost:10043', api_token=auth_token)
+        r = o.get('/system')
+        self.assertEqual(200, r.status_code)
+
+
     def test_upload_valid_dicom_and_delete(self):
         self.oa.delete_all_content()
         self.assertEqual(0, len(self.oa.studies.get_all_ids()))
