@@ -17,11 +17,12 @@ services:
       ORTHANC__CHECK_REVISIONS: "true"
 
   orthanc-b:
-    image: osimis/orthanc:21.11.0
+    build: orthanc-b
     ports: ["10043:8042"]
     environment:
       VERBOSE_STARTUP: "true"
       VERBOSE_ENABLED: "true"
+      ORTHANC__PYTHON_SCRIPT: "/scripts/plugin.py"
       ORTHANC__DICOM_AET : ORTHANCB
       ORTHANC__REGISTERED_USERS: |
         {"test": "test"}

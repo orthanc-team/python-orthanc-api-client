@@ -24,8 +24,27 @@ logger = logging.getLogger('api-client')
 
 class OrthancApiClient(HttpClient):
 
-    def __init__(self, orthanc_url: str, user: str = None, pwd: str = None) -> None:
-        super().__init__(root_url=orthanc_url, user=user, pwd=pwd)
+    def __init__(self, orthanc_url: str, user: str = None, pwd: str = None, api_token: str = None) -> None:
+        """Creates an HttpClient
+
+        Parameters
+        ----------
+        orthanc_url: base orthanc url: ex= 'http://localhost:8042'
+        user: an orthanc user name (for basic Auth)
+        pwd: the password for the orthanc user (for basic Auth)
+        api_token: a token obtained from inside an Orthanc python plugin through OrthancPluginGenerateRestApiAuthorizationToken
+                   format: 'Bearer 3d03892c-fe...' or '3d03892c-fe...'
+        """
+        headers = None
+        if api_token:
+            if api_token.startswith('Bearer '):
+                header_value = api_token
+            else:
+                header_value = f'Bearer {api_token}'
+            headers = {
+                'authorization': header_value
+            }
+        super().__init__(root_url=orthanc_url, user=user, pwd=pwd, headers=headers)
 
         self.patients = Resources(api_client=self, url_segment='patients')
         self.studies = Studies(api_client=self)
