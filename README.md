@@ -59,3 +59,33 @@ o = OrthancApiClient('http://localhost:8042', user='orthanc', pwd='orthanc')
 o.upload_folder('/home/o/files', ignore_errors=True)
 
 ```
+
+## running from inside an Orthanc python plugin
+
+```python
+from orthanc_api_client import OrthancApiClient
+import orthanc
+import json
+
+orthanc_client = None
+
+
+
+def OnChange(changeType, level, resource):
+    global orthanc_client
+
+    if changeType == orthanc.ChangeType.ORTHANC_STARTED:
+        orthanc.LogWarning("Starting python plugin")
+
+        # at startup, use the python SDK direct access to the Rest API to retrieve info to pass to the OrthancApiClient that is using 'requests'
+        system = json.loads(orthanc.RestApiGet('/system'))
+        api_token = orthanc.GenerateRestApiAuthorizationToken()
+
+        orthanc_client = OrthancApiClient(
+            orthanc_root_url=f"http://localhost:{system['HttpPort']}",
+            api_token=api_token
+        )
+        ...
+
+orthanc.RegisterOnChangeCallback(OnChange)
+```
