@@ -14,6 +14,9 @@ class Resources:
         self._url_segment = url_segment
         self._api_client = api_client
 
+    def get_json(self, orthanc_id: str):
+        return self._api_client.get_json(f"/{self._url_segment}/{orthanc_id}")
+
     def get_all_ids(self) -> List[str]:
         return self._api_client.get_json(f"/{self._url_segment}/")
 
