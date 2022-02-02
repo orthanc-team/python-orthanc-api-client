@@ -17,7 +17,7 @@ class TestApiClient(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         subprocess.run(["docker-compose", "down", "-v"], cwd=here/"docker-setup")
-        subprocess.run(["docker-compose", "up", "-d"], cwd=here/"docker-setup")
+        subprocess.run(["docker-compose", "up", "--build", "-d"], cwd=here/"docker-setup")
 
         cls.oa = OrthancApiClient('http://localhost:10042', user='test', pwd='test')
         cls.oa.wait_started()
@@ -124,6 +124,21 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual(instance_id, instances_ids[0])
         self.assertEqual(series_id, self.oa.instances.get_parent_series_id(instance_id))
         self.assertEqual(study_id, self.oa.instances.get_parent_study_id(instance_id))
+
+    def test_get_ordered_slices(self):
+        self.oa.delete_all_content()
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+
+        instance_id = self.oa.instances.get_all_ids()[0]
+        series_id = self.oa.series.get_all_ids()[0]
+
+        # we trust orthanc API to return the ordered slices correctly, so this test is very "basic" and just check we are parsing the response correctly !!
+        ordered_instances_ids = self.oa.series.get_ordered_instances_ids(orthanc_id=series_id)
+        self.assertEqual(1, len(ordered_instances_ids))
+        self.assertEqual(instance_id, ordered_instances_ids[0])
+
+        middle_instance_id = self.oa.series.get_middle_instance_id(orthanc_id=series_id)
+        self.assertEqual(instance_id, middle_instance_id)
 
     def test_stow_rs(self):
         self.oa.delete_all_content()
