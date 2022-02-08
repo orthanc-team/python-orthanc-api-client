@@ -156,6 +156,22 @@ class TestApiClient(unittest.TestCase):
         study_id = self.ob.studies.find('1.2.3')
         self.assertIsNotNone(study_id)
 
+    def test_modalities_send(self):
+        self.oa.delete_all_content()
+        self.ob.delete_all_content()
+
+        dicom = generate_test_dicom_file(width=33, height=33, StudyInstanceUID='1.2.3')
+        instances_ids = self.oa.upload(dicom)
+        dicom = generate_test_dicom_file(width=33, height=33, StudyInstanceUID='1.2.3')
+        instances_ids.extend(self.oa.upload(dicom))
+
+        study_id = self.oa.studies.find('1.2.3')
+
+        self.oa.modalities.send('orthanc-b', study_id)
+
+        study_id = self.ob.studies.find('1.2.3')
+        self.assertIsNotNone(study_id)
+
     def test_find_worklist(self):
 
         worklists = self.oa.modalities.find_worklist(

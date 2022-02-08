@@ -9,6 +9,10 @@ class DicomWebServers:
         self._api_client = api_client
         self._url_segment = 'dicom-web/servers'
 
+    def stow_rs(self, target_server: str, resources_ids: Union[List[str], str], synchronous: bool = True):
+        """alias for send"""
+        return self.send(target_server=target_server, resources_ids=resources_ids, synchronous=synchronous)
+
     def send(self, target_server: str, resources_ids: Union[List[str], str], synchronous: bool = True):
         """sends a list of resources to a remote DicomWeb server
 
