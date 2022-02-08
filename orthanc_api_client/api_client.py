@@ -14,6 +14,7 @@ from .studies import Studies
 from .helpers import wait_until
 from .exceptions import *
 from .dicomweb_servers import DicomWebServers
+from .modalities import DicomModalities
 from .change import Change, ChangeType, ResourceType
 
 
@@ -51,6 +52,7 @@ class OrthancApiClient(HttpClient):
         self.series = Series(api_client=self)
         self.instances = Instances(api_client=self)
         self.dicomweb_servers = DicomWebServers(api_client=self)
+        self.modalities = DicomModalities(api_client=self)
 
     def wait_started(self, timeout: float = None):
         wait_until(self.is_alive, timeout)

@@ -156,6 +156,18 @@ class TestApiClient(unittest.TestCase):
         study_id = self.ob.studies.find('1.2.3')
         self.assertIsNotNone(study_id)
 
+    def test_find_worklist(self):
+
+        worklists = self.oa.modalities.find_worklist(
+            modality='orthanc-b',
+            query={
+                'PatientID': "",
+                "StudyInstanceUID": ""
+            }
+        )
+        self.assertEqual(1, len(worklists))
+        self.assertEqual('1.2.3.4', worklists[0]['StudyInstanceUID'])
+
 
     def test_attachments(self):
         self.oa.delete_all_content()
