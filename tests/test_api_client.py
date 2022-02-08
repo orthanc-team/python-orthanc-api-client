@@ -67,10 +67,8 @@ class TestApiClient(unittest.TestCase):
         study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
         tags = self.oa.studies.get_tags(study_id)
 
-        # study tags only contain study + patient module tags
         self.assertEqual("1CT1", tags['PatientID'])
         self.assertEqual("e+1", tags['StudyDescription'])
-        self.assertEqual(None, tags['InstanceCreationTime'])
 
     def test_upload_invalid_file(self):
         with self.assertRaises(api_exceptions.BadFileFormat):
@@ -349,6 +347,107 @@ class TestApiClient(unittest.TestCase):
         self.assertNotEqual('ANON', self.oa.studies.get_tags(anon_study_id)['PatientName'])
 
         instances_ids = self.oa.upload_folder(here / "stimuli", skip_extensions=['.zip'])
+
+    def test_modify_series_instance_by_instance(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        series_id = self.oa.instances.get_parent_series_id(instances_ids[0])
+
+        original_tags = self.oa.series.get_tags(series_id)
+
+        # default anonymize
+        modified_series_id = self.oa.series.modify_instance_by_instance(
+            orthanc_id=series_id,
+            remove_tags=['InstitutionName'],
+            replace_tags={
+                'PatientID': 'modified-id',
+                'PatientName': 'modified-name',
+                'StudyInstanceUID': original_tags['StudyInstanceUID'],
+                'SeriesInstanceUID': original_tags['SeriesInstanceUID'],
+            },
+            delete_original=True
+        )
+
+        modified_tags = self.oa.series.get_tags(modified_series_id)
+
+        self.assertEqual(original_tags['StudyInstanceUID'], modified_tags['StudyInstanceUID'])
+        self.assertEqual(original_tags['SeriesInstanceUID'], modified_tags['SeriesInstanceUID'])
+        self.assertEqual('modified-id', modified_tags['PatientID'])
+
+    def test_modify_study_instance_by_instance(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
+
+        original_tags = self.oa.studies.get_tags(study_id)
+
+        # default anonymize
+        modified_study_id = self.oa.studies.modify_instance_by_instance(
+            orthanc_id=study_id,
+            remove_tags=['InstitutionName'],
+            replace_tags={
+                'PatientID': 'modified-id',
+                'PatientName': 'modified-name',
+                'StudyInstanceUID': original_tags['StudyInstanceUID'],
+                'SeriesInstanceUID': original_tags['SeriesInstanceUID'],
+            },
+            delete_original=True
+        )
+
+        modified_tags = self.oa.studies.get_tags(modified_study_id)
+
+        self.assertEqual(original_tags['StudyInstanceUID'], modified_tags['StudyInstanceUID'])
+        self.assertEqual(original_tags['SeriesInstanceUID'], modified_tags['SeriesInstanceUID'])
+        self.assertEqual('modified-id', modified_tags['PatientID'])
+
+    def test_modify_series(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        series_id = self.oa.instances.get_parent_series_id(instances_ids[0])
+
+        original_tags = self.oa.series.get_tags(series_id)
+
+        # default anonymize
+        modified_series_id = self.oa.series.modify(
+            orthanc_id=series_id,
+            remove_tags=['InstitutionName'],
+            replace_tags={
+                'SeriesDate': '20220208'
+            },
+            delete_original=False
+        )
+
+        modified_tags = self.oa.series.get_tags(modified_series_id)
+
+        self.assertFalse('InstitutionName' in modified_tags)
+        self.assertEqual('20220208', modified_tags['SeriesDate'])
+
+    def test_modify_study(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
+
+        original_tags = self.oa.studies.get_tags(study_id)
+
+        # default anonymize
+        modified_study_id = self.oa.studies.modify(
+            orthanc_id=study_id,
+            remove_tags=['InstitutionName'],
+            replace_tags={
+                'StudyInstanceUID': '1.2.3.4'
+            },
+            delete_original=False,
+            force=True
+        )
+
+        modified_tags = self.oa.studies.get_tags(modified_study_id)
+
+        self.assertFalse('InstitutionName' in modified_tags)
+        self.assertEqual('1.2.3.4', modified_tags['StudyInstanceUID'])
 
     def test_asyncio(self):
         self.oa.delete_all_content()
