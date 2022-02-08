@@ -1,13 +1,13 @@
 from typing import List, Union
 
-from .resources import Resources
 from .exceptions import *
 
 
-class DicomWebServers(Resources):
+class DicomWebServers:
 
     def __init__(self, api_client: 'OrthancApiClient'):
-        super().__init__(api_client=api_client, url_segment='dicom-web/servers')
+        self._api_client = api_client
+        self._url_segment = 'dicom-web/servers'
 
     def send(self, target_server: str, resources_ids: Union[List[str], str], synchronous: bool = True):
         """sends a list of resources to a remote DicomWeb server
