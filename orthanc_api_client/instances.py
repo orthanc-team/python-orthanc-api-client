@@ -1,6 +1,7 @@
 
 from .resources import Resources
 from .tags import Tags
+from typing import Union, List, Optional, Any
 
 class Instances(Resources):
 
@@ -22,3 +23,45 @@ class Instances(Resources):
     def get_tags(self, orthanc_id: str) -> Tags:
         json_tags = self._api_client.get_json(f"/{self._url_segment}/{orthanc_id}/tags")
         return Tags(json_tags)
+
+    def modify_bulk(self, orthanc_ids: List[str] = [], replace_tags: Any = {}, remove_tags: List[str] = [], delete_original: bool = True, force: bool = False) -> List[str]:
+        modified_instances_ids = []
+
+        for orthanc_id in orthanc_ids:
+            modified_dicom = self.modify(
+                orthanc_id=orthanc_id,
+                replace_tags=replace_tags,
+                remove_tags=remove_tags,
+                force=force
+            )
+
+            modified_instance_id = self._api_client.upload(modified_dicom)[0]
+            if delete_original and modified_instance_id != orthanc_id:
+                self.delete(orthanc_id)
+
+            modified_instances_ids.append(modified_instance_id)
+
+        return modified_instances_ids
+
+    def modify(self, orthanc_id: str, replace_tags: Any = {}, remove_tags: List[str] = [], force: bool = False) -> bytes:
+
+        query = {
+            "Force": force
+        }
+
+        if replace_tags is not None and len(replace_tags) > 0:
+            query['Replace'] = replace_tags
+
+        if remove_tags is not None and len(remove_tags) > 0:
+            query['Remove'] = remove_tags
+
+        r = self._api_client.post(
+            relative_url=f"/instances/{orthanc_id}/modify",
+            json=query)
+
+        if r.status_code == 200:
+            return r.content
+
+        return None  # TODO: raise ?
+
+

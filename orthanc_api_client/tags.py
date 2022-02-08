@@ -28,6 +28,9 @@ class Tags:
     def __getitem__(self, item):
         return self.get(item)
 
+    def __contains__(self, accessor):
+        return accessor in self._tags_by_name or accessor in self._tags_by_group_and_id
+
     def get(self, accessor):
         match_group_and_id = re.search('([0-9A-Fa-f]{4})[,-]([0-9A-Fa-f]{4})', accessor)
         if match_group_and_id:

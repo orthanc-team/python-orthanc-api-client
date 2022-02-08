@@ -1,12 +1,24 @@
 from .resources import Resources
 from .tags import Tags
 from .exceptions import *
+from typing import List, Any
 
 
 class Studies(Resources):
 
     def __init__(self, api_client: 'OrthancApiClient'):
         super().__init__(api_client=api_client, url_segment='studies')
+
+    def get_instances_ids(self, orthanc_id: str) -> List[str]:
+        instances_ids = []
+        study_info = self._api_client.get_json(f"{self._url_segment}/{orthanc_id}")
+        for series_id in study_info["Series"]:
+            instances_ids.extend(self._api_client.series.get_instances_ids(series_id))
+
+        return instances_ids
+
+    def get_first_instance_id(self, orthanc_id: str) -> str:
+        return self.get_instances_ids(orthanc_id=orthanc_id)[0]
 
     def find(self, StudyInstanceUID: str) -> str:
         """
@@ -25,45 +37,36 @@ class Studies(Resources):
         return None
 
     def anonymize(self, orthanc_id: str, replace_tags={}, keep_tags=[], delete_original=True, force=False) -> str:
-        """
-        anonymizes the study and possibly deletes the original study (the one that has not be anonymized)
+        return self._anonymize(
+            orthanc_id=orthanc_id,
+            replace_tags=replace_tags,
+            keep_tags=keep_tags,
+            delete_original=delete_original,
+            force=force
+        )
 
-        Args:
-            orthanc_id: the instance id to anonymize
-            replace_tags: a dico with OrthancTagsId <-> values of the tags you want to force
-            keep_tags: a list of the tags you want to keep the original values
-            delete_original: True to delete the original study (the one that has not been anonymized)
-            force: some tags like "PatientID" requires this flag set to True to confirm that you understand the risks
-        Returns:
-            the id of the new anonymized study
-        """
+    def modify(self, orthanc_id: str, replace_tags={}, remove_tags=[], delete_original=True, force=False) -> str:
+        return self._modify(
+            orthanc_id=orthanc_id,
+            replace_tags=replace_tags,
+            remove_tags=remove_tags,
+            delete_original=delete_original,
+            force=force
+        )
 
-        query = {
-            "Force": force
-        }
-        if replace_tags is not None and len(replace_tags) > 0:
-            query['Replace'] = replace_tags
-        if keep_tags is not None and len(keep_tags) > 0:
-            query['Keep'] = keep_tags
+    def modify_instance_by_instance(self, orthanc_id: str, replace_tags: Any = {}, remove_tags: List[str] = [], delete_original: bool = True, force: bool = True) -> str:
+        modified_instances_ids = self._api_client.instances.modify_bulk(
+            orthanc_ids=self.get_instances_ids(orthanc_id),
+            replace_tags=replace_tags,
+            remove_tags=remove_tags,
+            delete_original=delete_original,
+            force=force
+        )
 
-        r = self._api_client.post(
-            relative_url=f"/studies/{orthanc_id}/anonymize",
-            json=query)
-
-        if r.status_code == 200 and delete_original:
-            self.delete(orthanc_id)
-
-        return r.json()['ID']
+        return self._api_client.instances.get_parent_study_id(modified_instances_ids[0])
 
     def get_tags(self, orthanc_id: str) -> Tags:
         """
-        returns tags from the study and patient modules only
+        returns tags from a "random" instance in which you should safely get the study/patient tags
         """
-        study_module_json_tags = self._api_client.get_json(f"/{self._url_segment}/{orthanc_id}/module")
-        study_tags = Tags(study_module_json_tags)
-
-        patient_module_json_tags = self._api_client.get_json(f"/{self._url_segment}/{orthanc_id}/module-patient")
-        patient_tags = Tags(patient_module_json_tags)
-        study_tags.append(patient_tags)
-
-        return study_tags
+        return self._api_client.instances.get_tags(self.get_first_instance_id(orthanc_id=orthanc_id))
