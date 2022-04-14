@@ -29,7 +29,9 @@ dicom_file = orthanc_a.instances.get_file(orthanc_id=all_instances_ids[0])
 instances_ids = orthanc_b.upload(buffer=dicom_file)
 study_id = orthanc_b.instances.get_parent_study_id(instances_ids[0])
 
-orthanc_a.instances.set_metadata(orthanc_id=all_instances_ids[0], 1024, 'my-value')
+orthanc_a.instances.set_metadata(orthanc_id=all_instances_ids[0], 
+                                 metadata_name=1024, 
+                                 content='my-value')
 
 tags = orthanc_a.instances.get_tags(orhtanc_id=all_instances_ids[0])
 
