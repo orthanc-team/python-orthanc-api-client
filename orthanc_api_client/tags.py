@@ -1,6 +1,26 @@
 import re
 
 
+class SimplifiedTags:
+
+    def __init__(self, json_tags):
+        self._tags_by_name = {}
+        self._fill(json_tags)
+
+    def _fill(self, json_tags: object):
+        for name, value in json_tags.items():
+            self._tags_by_name[name] = value
+
+    def __getitem__(self, item):
+        return self.get(item)
+
+    def __contains__(self, name):
+        return name in self._tags_by_name
+
+    def get(self, name):
+        return self._tags_by_name.get(name)
+
+
 class Tags:
 
     def __init__(self, json_tags):
@@ -9,7 +29,7 @@ class Tags:
         self._tags_by_name = {}
         self._fill(json_tags)
 
-    def _fill(self, json_tags):
+    def _fill(self, json_tags: object):
         for group_and_id, json_value in json_tags.items():
             name = json_value["Name"]
             type_ = json_value["Type"]

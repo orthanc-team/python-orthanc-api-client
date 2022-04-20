@@ -1,7 +1,7 @@
 from .resources import Resources
-from .tags import Tags
+from ..tags import Tags
 from typing import List, Any
-from .exceptions import *
+from ..exceptions import *
 
 
 class Series(Resources):

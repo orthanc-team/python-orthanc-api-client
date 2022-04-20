@@ -6,11 +6,11 @@ from typing import List
 from urllib.parse import urlunsplit, urlencode
 
 from .http_client import HttpClient
-from .resources import Resources
+from .resources.resources import Resources
 
-from .instances import Instances
-from .series import Series
-from .studies import Studies
+from .resources.instances import Instances
+from .resources.series import Series
+from .resources.studies import Studies
 from .helpers import wait_until
 from .exceptions import *
 from .dicomweb_servers import DicomWebServers

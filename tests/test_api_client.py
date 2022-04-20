@@ -70,6 +70,16 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual("1CT1", tags['PatientID'])
         self.assertEqual("e+1", tags['StudyDescription'])
 
+    def test_study(self):
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
+
+        study = self.oa.studies.get(study_id)
+        self.assertEqual("1CT1", study.patient_main_dicom_tags.get('PatientID'))
+        self.assertEqual("e+1", study.main_dicom_tags.get('StudyDescription'))
+        self.assertEqual('1.3.6.1.4.1.5962.1.2.1.20040119072730.12322', study.dicom_id)
+        self.assertEqual('8a8cf898-ca27c490-d0c7058c-929d0581-2bbf104d', study.orthanc_id)
+
     def test_upload_invalid_file(self):
         with self.assertRaises(api_exceptions.BadFileFormat):
             self.oa.upload_file(here / "__init__.py")   # __init__.py is not a valid DICOM file :-)
