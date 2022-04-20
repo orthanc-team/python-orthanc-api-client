@@ -39,7 +39,17 @@ def write_dataset_to_bytes(dataset) -> bytes:
         return memory_dataset.read()
 
 
-def generate_test_dicom_file(width: int=128, height: int=128, StudyInstanceUID = None) -> bytes:
+def generate_test_dicom_file(
+        width: int=128,
+        height: int=128,
+        StudyInstanceUID = None,
+        SeriesInstanceUID = None,
+        Modality = "MR",
+        PatientID = "Test^Patient^ID",
+        PatientName = "Test^File",
+        StudyDescription = "Study description",
+        InstanceNumber = 1
+        ) -> bytes:
     buffer = bytearray(height * width * 2)
 
     meta = pydicom.Dataset()
@@ -54,12 +64,13 @@ def generate_test_dicom_file(width: int=128, height: int=128, StudyInstanceUID =
     ds.is_implicit_VR = False
 
     ds.SOPClassUID = pydicom._storage_sopclass_uids.MRImageStorage
-    ds.PatientName = "Test^File"
-    ds.PatientID = "Test^Patient^ID"
+    ds.PatientName = PatientName
+    ds.PatientID = PatientID
+    ds.StudyDescription = StudyDescription
 
-    ds.Modality = "MR"
+    ds.Modality = Modality
     ds.SOPInstanceUID = pydicom.uid.generate_uid()
-    ds.SeriesInstanceUID = pydicom.uid.generate_uid()
+    ds.SeriesInstanceUID = pydicom.uid.generate_uid() if not SeriesInstanceUID else SeriesInstanceUID
     ds.StudyInstanceUID = pydicom.uid.generate_uid() if not StudyInstanceUID else StudyInstanceUID
     ds.FrameOfReferenceUID = pydicom.uid.generate_uid()
 
@@ -70,9 +81,9 @@ def generate_test_dicom_file(width: int=128, height: int=128, StudyInstanceUID =
 
     ds.ImagesInAcquisition = "1"
 
-    ds.Rows =  height
+    ds.Rows = height
     ds.Columns = width
-    ds.InstanceNumber = 1
+    ds.InstanceNumber = InstanceNumber
 
     ds.ImagePositionPatient = r"0\0\1"
     ds.ImageOrientationPatient = r"1\0\0\0\-1\0"
