@@ -102,7 +102,7 @@ class TestApiClient(unittest.TestCase):
         study_id = self.oa.studies.find('1.2.3')
         self.assertIsNone(study_id)
 
-        dicom = generate_test_dicom_file(width=32, height=32, StudyInstanceUID='1.2.3')
+        dicom = generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '1.2.3'})
 
         instances_ids = self.oa.upload(dicom)
         study_id = self.oa.studies.find('1.2.3')
@@ -142,9 +142,9 @@ class TestApiClient(unittest.TestCase):
         self.oa.delete_all_content()
         self.ob.delete_all_content()
 
-        dicom = generate_test_dicom_file(width=33, height=33, StudyInstanceUID='1.2.3')
+        dicom = generate_test_dicom_file(width=33, height=33, tags={'StudyInstanceUID': '1.2.3'})
         instances_ids = self.oa.upload(dicom)
-        dicom = generate_test_dicom_file(width=33, height=33, StudyInstanceUID='1.2.3')
+        dicom = generate_test_dicom_file(width=33, height=33, tags={'StudyInstanceUID': '1.2.3'})
         instances_ids.extend(self.oa.upload(dicom))
 
         study_id = self.oa.studies.find('1.2.3')
@@ -158,9 +158,9 @@ class TestApiClient(unittest.TestCase):
         self.oa.delete_all_content()
         self.ob.delete_all_content()
 
-        dicom = generate_test_dicom_file(width=33, height=33, StudyInstanceUID='1.2.3')
+        dicom = generate_test_dicom_file(width=33, height=33, tags={'StudyInstanceUID': '1.2.3'})
         instances_ids = self.oa.upload(dicom)
-        dicom = generate_test_dicom_file(width=33, height=33, StudyInstanceUID='1.2.3')
+        dicom = generate_test_dicom_file(width=33, height=33, tags={'StudyInstanceUID': '1.2.3'})
         instances_ids.extend(self.oa.upload(dicom))
 
         study_id = self.oa.studies.find('1.2.3')
@@ -455,7 +455,7 @@ class TestApiClient(unittest.TestCase):
         dicoms = []
 
         for i in range(1, 10):
-            dicoms.append(generate_test_dicom_file(width=3200, height=3200, StudyInstanceUID='1.2.3'))
+            dicoms.append(generate_test_dicom_file(width=3200, height=3200, tags={'StudyInstanceUID': '1.2.3'}))
 
         ##### upload synchronous
         s = time.perf_counter()

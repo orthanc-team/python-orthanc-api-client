@@ -40,15 +40,9 @@ def write_dataset_to_bytes(dataset) -> bytes:
 
 
 def generate_test_dicom_file(
-        width: int=128,
-        height: int=128,
-        StudyInstanceUID = None,
-        SeriesInstanceUID = None,
-        Modality = "MR",
-        PatientID = "Test^Patient^ID",
-        PatientName = "Test^File",
-        StudyDescription = "Study description",
-        InstanceNumber = 1
+        width: int = 128,
+        height: int = 128,
+        tags: any = {}
         ) -> bytes:
     buffer = bytearray(height * width * 2)
 
@@ -63,28 +57,19 @@ def generate_test_dicom_file(
     ds.is_little_endian = True
     ds.is_implicit_VR = False
 
-    ds.SOPClassUID = pydicom._storage_sopclass_uids.MRImageStorage
-    ds.PatientName = PatientName
-    ds.PatientID = PatientID
-    ds.StudyDescription = StudyDescription
-
-    ds.Modality = Modality
+    ds.Modality = "MR"
     ds.SOPInstanceUID = pydicom.uid.generate_uid()
-    ds.SeriesInstanceUID = pydicom.uid.generate_uid() if not SeriesInstanceUID else SeriesInstanceUID
-    ds.StudyInstanceUID = pydicom.uid.generate_uid() if not StudyInstanceUID else StudyInstanceUID
+    ds.SeriesInstanceUID = pydicom.uid.generate_uid()
+    ds.StudyInstanceUID = pydicom.uid.generate_uid()
     ds.FrameOfReferenceUID = pydicom.uid.generate_uid()
 
-    ds.BitsStored = 16
-    ds.BitsAllocated = 16
-    ds.SamplesPerPixel = 1
-    ds.HighBit = 15
+    ds.PatientName = "Test^Patient^Name"
+    ds.PatientID = "Test-Patient-ID"
+    ds.PatientSex = "U"
+    ds.PatientBirthDate = "20000101"
 
     ds.ImagesInAcquisition = "1"
-
-    ds.Rows = height
-    ds.Columns = width
-    ds.InstanceNumber = InstanceNumber
-
+    ds.InstanceNumber = 1
     ds.ImagePositionPatient = r"0\0\1"
     ds.ImageOrientationPatient = r"1\0\0\0\-1\0"
     ds.ImageType = r"ORIGINAL\PRIMARY\AXIAL"
@@ -94,6 +79,30 @@ def generate_test_dicom_file(
     ds.PixelSpacing = r"1\1"
     ds.PhotometricInterpretation = "MONOCHROME2"
     ds.PixelRepresentation = 1
+
+    if ds.Modality == "MR":
+        ds.SOPClassUID = pydicom._storage_sopclass_uids.MRImageStorage
+    elif ds.Modality == "CT":
+        ds.SOPClassUID = pydicom._storage_sopclass_uids.CTImageStorage
+    elif ds.Modality == "CR":
+        ds.SOPClassUID = pydicom._storage_sopclass_uids.ComputedRadiographyImageStorage
+    elif ds.Modality == "DX":
+        ds.SOPClassUID = pydicom._storage_sopclass_uids.DigitalXRayImageStorageForPresentation
+    else:
+        raise NotImplementedError
+
+    # copy tags values in the dataset
+    for (k, v) in tags.items():
+        ds.__setattr__(k, v)
+
+
+    ds.BitsStored = 16
+    ds.BitsAllocated = 16
+    ds.SamplesPerPixel = 1
+    ds.HighBit = 15
+
+    ds.Rows = height
+    ds.Columns = width
 
     pydicom.dataset.validate_file_meta(ds.file_meta, enforce_standard=True)
 
