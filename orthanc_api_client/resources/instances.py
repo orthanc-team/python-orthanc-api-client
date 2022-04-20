@@ -1,7 +1,8 @@
 
 from .resources import Resources
-from .tags import Tags
+from ..tags import Tags
 from typing import Union, List, Optional, Any
+
 
 class Instances(Resources):
 

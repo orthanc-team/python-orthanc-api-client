@@ -1,7 +1,7 @@
 import requests
 import logging
 from typing import List, Tuple
-from .exceptions import *
+from ..exceptions import *
 
 
 

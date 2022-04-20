@@ -29,6 +29,12 @@ dicom_file = orthanc_a.instances.get_file(orthanc_id=all_instances_ids[0])
 instances_ids = orthanc_b.upload(buffer=dicom_file)
 study_id = orthanc_b.instances.get_parent_study_id(instances_ids[0])
 
+# access study info & simplified tags
+study = orthanc_b.studies.get(study_id)
+patient_id = study.patient_main_dicom_tags.get('PatientID')
+study_description = study.main_dicom_tags.get('StudyDescription')
+dicom_id = study.dicom_id
+
 orthanc_a.instances.set_metadata(orthanc_id=all_instances_ids[0], 
                                  metadata_name=1024, 
                                  content='my-value')

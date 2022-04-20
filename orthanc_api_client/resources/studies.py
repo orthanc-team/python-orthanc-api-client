@@ -1,6 +1,7 @@
 from .resources import Resources
-from .tags import Tags
-from .exceptions import *
+from ..tags import Tags
+from ..exceptions import *
+from ..study import StudyInfo, Study
 from typing import List, Any
 
 
@@ -8,6 +9,9 @@ class Studies(Resources):
 
     def __init__(self, api_client: 'OrthancApiClient'):
         super().__init__(api_client=api_client, url_segment='studies')
+
+    def get(self, orthanc_id: str) -> Study:
+        return Study(api_client=self._api_client, orthanc_id=orthanc_id)
 
     def get_instances_ids(self, orthanc_id: str) -> List[str]:
         instances_ids = []
