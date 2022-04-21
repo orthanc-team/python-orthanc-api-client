@@ -59,16 +59,22 @@ anon_study_id = orthanc_b.studies.anonymize(
 
 # find localy or on a remote modality
 
-study_id = orthanc_a.studies.find(dicom_id='1.2.3.4')
+study_id = orthanc_a.studies.lookup(dicom_id='1.2.3.4')
+studies = orthanc_a.studies.find(query={
+    'PatientName': 'A*', 
+    'StudyDate': '20220101-20220109'
+})
 
 remote_studies = orthanc_a.modalities.query_studies(
     from_modality='pacs',
-    query={'PatientName': '*', 'StudyDate': '20220101-20220109'}
+    query={'PatientName': 'A*', 'StudyDate': '20220101-20220109'}
 )
 orthanc_a.modalities.retrieve_study(
     from_modality=remote_studies[0].remote_modality_id,
     dicom_id=remote_studies[0].dicom_id
 )
+
+
 
 ```
 
