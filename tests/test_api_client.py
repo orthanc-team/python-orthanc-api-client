@@ -2,10 +2,11 @@ import time
 import unittest
 import subprocess
 import logging
-from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType
+from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType, Study
 import orthanc_api_client.exceptions as api_exceptions
 import pathlib
 import asyncio
+
 import os
 
 here = pathlib.Path(__file__).parent.resolve()
@@ -491,7 +492,32 @@ class TestApiClient(unittest.TestCase):
 
         print(f"asynchronous upload took: {elapsed:0.3f} seconds")
 
+    def test_query_study(self):
+        self.oa.delete_all_content()
+        self.ob.delete_all_content()
 
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
+
+        remote_studies = self.ob.modalities.query_studies(
+            from_modality='orthanc-a',
+            query={
+                'PatientID': '1C*',
+                'StudyDescription': ''
+            }
+        )
+
+        self.assertEqual(1, len(remote_studies))
+        self.assertEqual('1.3.6.1.4.1.5962.1.2.1.20040119072730.12322', remote_studies[0].dicom_id)
+        self.assertEqual('orthanc-a', remote_studies[0].remote_modality_id)
+        self.assertEqual("e+1", remote_studies[0].tags.get('StudyDescription'))
+
+        self.ob.modalities.retrieve_study(
+            from_modality=remote_studies[0].remote_modality_id,
+            dicom_id=remote_studies[0].dicom_id
+        )
+
+        self.assertEqual(study_id, self.ob.studies.find(dicom_id='1.3.6.1.4.1.5962.1.2.1.20040119072730.12322'))
 
 
 if __name__ == '__main__':

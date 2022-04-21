@@ -1,6 +1,31 @@
+import typing
 from typing import List, Union
+from .tags import SimplifiedTags
+from .study import Study
 
 from .exceptions import *
+
+
+class RemoteModalityStudy:
+
+    """
+    Represents a study on a remote modality.  This is populated with the results of a C-Find request on that modality
+
+    You can retrieve the study by calling:
+    orthanc.modalities.retrieve_study(remoteStudy.remote_mModality_id, remote_study.dicom_id)
+    """
+
+    def __init__(self):
+        self.dicom_id = None                    # the StudyInstanceUID dicom tag
+        self.remote_modality_id = None          # the alias of the modality where the study is
+        self.tags = None                        # the tags that have been retrieved (depends on the query used to find it)
+
+
+class QueryResult:
+
+    def __init__(self):
+        self.tags = None
+        self.retrieve_url = None
 
 
 class DicomModalities:
@@ -42,3 +67,71 @@ class DicomModalities:
             })
 
         return None
+
+    def retrieve_study(self, from_modality: str, dicom_id: str, timeout: float = None) -> str:
+        """
+        retrieves a study from a remote modality (C-Move)
+
+        this call is synchronous.  It completes once the C-Move is complete.
+
+        :param from_modality: the modality alias configured in orthanc
+        :param dicom_id: the StudyInstanceUid of the study to retrieve
+
+        Returns: a Study instance of the study once it has been retrieved in orthanc
+        """
+
+        # move the study from the remote modality to this orthanc
+        query = self._api_client.post(
+            relative_url=f"{self._url_segment}/{from_modality}/move",
+            json={'Level': 'Study',
+                  'Resources': [{'StudyInstanceUID': dicom_id}]
+                  })
+
+        # this request has no real response '{}' if it succeeds
+        return self._api_client.studies.find(dicom_id)
+
+    def query_studies(self, from_modality: str, query: object) -> typing.List[RemoteModalityStudy]:
+        """
+        queries a remote modality for studies
+
+        :param from_modality: the modality alias configured in orthanc
+        :param query: DICOM queries; i.e: {PatientName:'TOTO*', StudyDate:'20150503-'}
+        """
+
+        payload = {
+            'Level': 'Studies',
+            'Query': query
+        }
+
+        results = self._query(from_modality, payload)
+
+        remote_studies = []
+        for result in results:
+            remote_study = RemoteModalityStudy()
+            remote_study.dicom_id = result.tags.get('StudyInstanceUID')
+            remote_study.tags = result.tags
+            remote_study.remote_modality_id = from_modality
+
+            remote_studies.append(remote_study)
+
+        return remote_studies
+
+    def _query(self, from_modality, payload) -> typing.List[QueryResult]:
+
+        query = self._api_client.post(
+            relative_url=f"{self._url_segment}/{from_modality}/query",
+            json=payload)
+
+        query_id = query.json()['ID']
+
+        results = []
+
+        answers = self._api_client.get(relative_url = f"queries/{query_id}/answers")
+
+        for answer_id in answers.json():
+            result = QueryResult()
+            result.tags = SimplifiedTags(self._api_client.get(f"queries/{query_id}/answers/{answer_id}/content?simplify").json())
+            result.retrieve_url = f"queries/{query_id}/answers/{answer_id}/retrieve"
+            results.append(result)
+
+        return results

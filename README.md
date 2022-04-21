@@ -35,12 +35,14 @@ patient_id = study.patient_main_dicom_tags.get('PatientID')
 study_description = study.main_dicom_tags.get('StudyDescription')
 dicom_id = study.dicom_id
 
+# access metadata
 orthanc_a.instances.set_metadata(orthanc_id=all_instances_ids[0], 
                                  metadata_name=1024, 
                                  content='my-value')
 
 tags = orthanc_a.instances.get_tags(orhtanc_id=all_instances_ids[0])
 
+# anonymize
 patient_name = tags['PatientName']
 patient_id = tags['0010,0020']
 patient_sex = tags['0010-0040']
@@ -55,6 +57,18 @@ anon_study_id = orthanc_b.studies.anonymize(
     delete_original=False
 )
 
+# find localy or on a remote modality
+
+study_id = orthanc_a.studies.find(dicom_id='1.2.3.4')
+
+remote_studies = orthanc_a.modalities.query_studies(
+    from_modality='pacs',
+    query={'PatientName': '*', 'StudyDate': '20220101-20220109'}
+)
+orthanc_a.modalities.retrieve_study(
+    from_modality=remote_studies[0].remote_modality_id,
+    dicom_id=remote_studies[0].dicom_id
+)
 
 ```
 
