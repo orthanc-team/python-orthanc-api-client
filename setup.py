@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, find_namespace_packages
 import pathlib
 
 here = pathlib.Path(__file__).parent.resolve()
@@ -28,7 +28,7 @@ setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/guides/single-sourcing-package-version/
-    version='0.3.2',  # Required
+    version='0.3.3',  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
@@ -115,7 +115,11 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=["orthanc_api_client"],  # Required
+    packages=["orthanc_api_client", "orthanc_api_client.resources"],  # Required
+    # packages=find_namespace_packages(
+    #     where='orthanc_api_client'
+    # ),
+    # namespace_packages=['resources'],
 
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
