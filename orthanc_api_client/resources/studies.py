@@ -24,7 +24,7 @@ class Studies(Resources):
     def get_first_instance_id(self, orthanc_id: str) -> str:
         return self.get_instances_ids(orthanc_id=orthanc_id)[0]
 
-    def find(self, StudyInstanceUID: str) -> str:
+    def find(self, dicom_id: str) -> str:
         """
         finds a study in Orthanc based on its StudyInstanceUid
 
@@ -32,7 +32,7 @@ class Studies(Resources):
         -------
         the instance id of the study or None if not found
         """
-        study_ids = self._api_client.lookup(needle=StudyInstanceUID, filter='Study')
+        study_ids = self._api_client.lookup(needle=dicom_id, filter='Study')
         if len(study_ids) == 1:
             return study_ids[0]
 
