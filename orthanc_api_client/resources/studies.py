@@ -1,3 +1,5 @@
+import typing
+
 from .resources import Resources
 from ..tags import Tags
 from ..exceptions import *
@@ -24,7 +26,7 @@ class Studies(Resources):
     def get_first_instance_id(self, orthanc_id: str) -> str:
         return self.get_instances_ids(orthanc_id=orthanc_id)[0]
 
-    def find(self, dicom_id: str) -> str:
+    def lookup(self, dicom_id: str) -> str:
         """
         finds a study in Orthanc based on its StudyInstanceUid
 
@@ -39,6 +41,24 @@ class Studies(Resources):
         if len(study_ids) > 1:
             raise TooManyResourcesFound()        
         return None
+
+    def find(self, query: object, case_sensitive: bool = True) -> typing.List[Study]:
+        payload = {
+            "Level": "Study",
+            "Query": query,
+            "Expand": True,
+            "CaseSensitive": case_sensitive
+        }
+
+        r = self._api_client.post(
+            relative_url=f"/tools/find",
+            json=payload)
+
+        studies = []
+        for json_study in r.json():
+            studies.append(Study.from_json(self._api_client, json_study))
+
+        return studies
 
     def anonymize(self, orthanc_id: str, replace_tags={}, keep_tags=[], delete_original=True, force=False) -> str:
         return self._anonymize(

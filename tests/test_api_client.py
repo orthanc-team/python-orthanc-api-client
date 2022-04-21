@@ -110,13 +110,13 @@ class TestApiClient(unittest.TestCase):
     def test_generate_and_upload_test_file_find_study(self):
         self.oa.delete_all_content()
 
-        study_id = self.oa.studies.find('1.2.3')
+        study_id = self.oa.studies.lookup('1.2.3')
         self.assertIsNone(study_id)
 
         dicom = generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '1.2.3'})
 
         instances_ids = self.oa.upload(dicom)
-        study_id = self.oa.studies.find('1.2.3')
+        study_id = self.oa.studies.lookup('1.2.3')
 
         self.assertLessEqual(1, len(instances_ids))
         self.assertIsNotNone(study_id)
@@ -158,11 +158,11 @@ class TestApiClient(unittest.TestCase):
         dicom = generate_test_dicom_file(width=33, height=33, tags={'StudyInstanceUID': '1.2.3'})
         instances_ids.extend(self.oa.upload(dicom))
 
-        study_id = self.oa.studies.find('1.2.3')
+        study_id = self.oa.studies.lookup('1.2.3')
 
         self.oa.dicomweb_servers.send('orthanc-b', study_id)
 
-        study_id = self.ob.studies.find('1.2.3')
+        study_id = self.ob.studies.lookup('1.2.3')
         self.assertIsNotNone(study_id)
 
     def test_modalities_send(self):
@@ -174,11 +174,11 @@ class TestApiClient(unittest.TestCase):
         dicom = generate_test_dicom_file(width=33, height=33, tags={'StudyInstanceUID': '1.2.3'})
         instances_ids.extend(self.oa.upload(dicom))
 
-        study_id = self.oa.studies.find('1.2.3')
+        study_id = self.oa.studies.lookup('1.2.3')
 
         self.oa.modalities.send('orthanc-b', study_id)
 
-        study_id = self.ob.studies.find('1.2.3')
+        study_id = self.ob.studies.lookup('1.2.3')
         self.assertIsNotNone(study_id)
 
     def test_find_worklist(self):
@@ -517,7 +517,24 @@ class TestApiClient(unittest.TestCase):
             dicom_id=remote_studies[0].dicom_id
         )
 
-        self.assertEqual(study_id, self.ob.studies.find(dicom_id='1.3.6.1.4.1.5962.1.2.1.20040119072730.12322'))
+        self.assertEqual(study_id, self.ob.studies.lookup(dicom_id='1.3.6.1.4.1.5962.1.2.1.20040119072730.12322'))
+
+    def test_find_study(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
+
+        studies = self.oa.studies.find(
+            query={
+                'PatientID': '1C*',
+                'StudyDescription': ''
+            }
+        )
+
+        self.assertEqual(1, len(studies))
+        self.assertEqual('1.3.6.1.4.1.5962.1.2.1.20040119072730.12322', studies[0].dicom_id)
+        self.assertEqual("e+1", studies[0].main_dicom_tags.get('StudyDescription'))
 
 
 if __name__ == '__main__':

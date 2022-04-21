@@ -87,7 +87,7 @@ class DicomModalities:
         )
 
         # this request has no real response '{}' if it succeeds
-        return self._api_client.studies.find(dicom_id)
+        return self._api_client.studies.lookup(dicom_id)
 
     def move_study(self, from_modality: str, dicom_id: str, to_modality_aet: str = None):
         """

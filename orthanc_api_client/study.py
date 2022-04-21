@@ -18,6 +18,12 @@ class Study:
         self.orthanc_id = orthanc_id
         self._info = None
 
+    @staticmethod
+    def from_json(api_client, json_study: object):
+        study = Study(api_client, json_study.get('ID'))
+        study._info = StudyInfo(json_study)
+        return study
+
     @property
     def info(self):  # lazy loading of main dicom tags ....
         if self._info is None:
