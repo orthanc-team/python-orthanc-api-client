@@ -19,13 +19,27 @@ from orthanc_api_client import OrthancApiClient
 orthanc_a = OrthancApiClient('http://localhost:8042', user='orthanc', pwd='orthanc')
 orthanc_b = OrthancApiClient('http://localhost:8043', user='orthanc', pwd='orthanc')
 
+if not orthanc_a.wait_started(timeout=20):
+    print("Orthanc has not started after 20 sec")
+
+if not orthanc_a.is_alive():
+    print("Could not connect to Orthanc, check it is running")
+
+# upload files/folders
+orthanc_a.upload_folder('/home/o/files', ignore_errors=True)
+instances_ids = orthanc_a.upload_file('/home/o/files/a.dcm')
+instances_ids = orthanc_a.upload_file('/home/o/files/a.zip')
+with open('/home/o/files/a.dcm', 'rb') as f:
+    instances_ids = orthanc_a.upload(f.read())
+    
+# list all resources ids
 all_patients_ids = orthanc_a.patients.get_all_ids()
 all_studies_ids = orthanc_a.studies.get_all_ids()
 all_series_ids = orthanc_a.series.get_all_ids()
 all_instances_ids = orthanc_a.instances.get_all_ids()
 
+# instances methods
 dicom_file = orthanc_a.instances.get_file(orthanc_id=all_instances_ids[0])
-
 instances_ids = orthanc_b.upload(buffer=dicom_file)
 study_id = orthanc_b.instances.get_parent_study_id(instances_ids[0])
 
@@ -40,6 +54,7 @@ orthanc_a.instances.set_metadata(orthanc_id=all_instances_ids[0],
                                  metadata_name=1024, 
                                  content='my-value')
 
+# access tags
 tags = orthanc_a.instances.get_tags(orhtanc_id=all_instances_ids[0])
 
 # anonymize
@@ -57,14 +72,16 @@ anon_study_id = orthanc_b.studies.anonymize(
     delete_original=False
 )
 
-# find localy or on a remote modality
-
+# find locally in Orthanc
 study_id = orthanc_a.studies.lookup(dicom_id='1.2.3.4')
+study_id = orthanc_a.studies.lookup(dicom_id='1.2.3.4', filter="Study")
+
 studies = orthanc_a.studies.find(query={
     'PatientName': 'A*', 
     'StudyDate': '20220101-20220109'
 })
 
+# find in a remote modality
 remote_studies = orthanc_a.modalities.query_studies(
     from_modality='pacs',
     query={'PatientName': 'A*', 'StudyDate': '20220101-20220109'}
@@ -74,7 +91,29 @@ orthanc_a.modalities.retrieve_study(
     dicom_id=remote_studies[0].dicom_id
 )
 
+```
 
+## helpers methods
+
+```python
+import datetime
+from orthanc_api_client import helpers, OrthancApiClient
+
+dicom_date = helpers.to_dicom_date(datetime.date.today())
+standard_date = helpers.from_dicom_date(dicom_date)
+
+# for tests:
+o = OrthancApiClient('http://localhost:8042', user='orthanc', pwd='orthanc')
+helpers.wait_until(lambda: len(o.instances.get_all_ids() > 50), timeout=30)
+
+dicom_date = helpers.get_random_dicom_date(date_from=datetime.date(2000, 1, 1),
+                                           date_to=datetime.date.today())
+dicom_file = helpers.generate_test_dicom_file(width=128,
+                                              height=128,
+                                              tags={
+                                                  "PatientName": "Toto",
+                                                  "StudyInstanceUID": "123"
+                                              })
 
 ```
 
@@ -96,8 +135,6 @@ import orthanc
 import json
 
 orthanc_client = None
-
-
 
 def OnChange(changeType, level, resource):
     global orthanc_client
