@@ -51,8 +51,8 @@ class OrthancApiClient(HttpClient):
         self.dicomweb_servers = DicomWebServers(api_client=self)
         self.modalities = DicomModalities(api_client=self)
 
-    def wait_started(self, timeout: float = None):
-        wait_until(self.is_alive, timeout)
+    def wait_started(self, timeout: float = None) -> bool:
+        return wait_until(self.is_alive, timeout)
 
     def is_alive(self) -> bool:
         """Checks if the orthanc server can be reached.
@@ -150,7 +150,7 @@ class OrthancApiClient(HttpClient):
         
         return instances_ids
 
-    def lookup(self, needle:str, filter:typing.List[str] = None) -> List[str]:
+    def lookup(self, needle: str, filter: typing.List[str] = None) -> List[str]:
         """searches the Orthanc DB for the 'needle'
         
         Parameters:
@@ -163,22 +163,22 @@ class OrthancApiClient(HttpClient):
         the list of resources ids
         """
         response = self.post(
-            relative_url = "tools/lookup",
-            data = needle
+            relative_url="tools/lookup",
+            data=needle
         )
 
         resources = []
-        jsonResponse = response.json()
+        json_response = response.json()
         
-        for r in jsonResponse:
+        for r in json_response:
             if r['Type'] == 'Study' and (filter is None or filter == 'Study'):
-                    resources.append(r['ID'])
+                resources.append(r['ID'])
             elif r['Type'] == 'Patient' and (filter is None or filter == 'Patient'):
-                    resources.append(r['ID'])
+                resources.append(r['ID'])
             elif r['Type'] == 'Series' and (filter is None or filter == 'Series'):
-                    resources.append(r['ID'])
+                resources.append(r['ID'])
             elif r['Type'] == 'Instance' and (filter is None or filter == 'Instance'):
-                    resources.append(r['ID'])
+                resources.append(r['ID'])
 
         return resources
 
