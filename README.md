@@ -56,12 +56,11 @@ orthanc_a.instances.set_metadata(orthanc_id=all_instances_ids[0],
 
 # access tags
 tags = orthanc_a.instances.get_tags(orhtanc_id=all_instances_ids[0])
-
-# anonymize
 patient_name = tags['PatientName']
 patient_id = tags['0010,0020']
 patient_sex = tags['0010-0040']
 
+# anonymize
 anon_study_id = orthanc_b.studies.anonymize(
     orthanc_id=study_id,
     keep_tags=['PatientName'],

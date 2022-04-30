@@ -2,6 +2,7 @@ import time
 
 import pydicom
 import datetime
+import random
 from .helpers_internal import write_dataset_to_bytes
 from pydicom.dataset import Dataset, FileDataset
 from pydicom.uid import ExplicitVRLittleEndian
@@ -19,7 +20,7 @@ def wait_until(somepredicate, timeout, period=0.1, *args, **kwargs) -> bool:
   else:
     mustend = time.time() + timeout
     while time.time() < mustend:
-        if somepredicate(*args, **kwargs): 
+        if somepredicate(*args, **kwargs):
             return True
         time.sleep(period)
     return False
@@ -33,6 +34,7 @@ def get_random_dicom_date(date_from: datetime.date, date_to: datetime.date = dat
 
 def to_dicom_date(date: datetime.date) -> str:
     return '{0:4}{1:02}{2:02}'.format(date.year, date.month, date.day)
+
 
 def from_dicom_date(dicom_date: str) -> datetime.date:
     if dicom_date is None or len(dicom_date) == 0:
