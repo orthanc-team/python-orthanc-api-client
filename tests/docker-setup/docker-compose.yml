@@ -6,7 +6,8 @@ services:
     environment:
       VERBOSE_STARTUP: "true"
       VERBOSE_ENABLED: "true"
-      ORTHANC__DICOM_AET : ORTHANCA
+      ORTHANC__DICOM_AET: ORTHANCA
+      ORTHANC__NAME: orthanc-a-for-python-api-client-tests
       ORTHANC__REGISTERED_USERS: |
         {"test": "test"}
       ORTHANC__DICOM_MODALITIES: |
@@ -23,7 +24,8 @@ services:
       VERBOSE_STARTUP: "true"
       VERBOSE_ENABLED: "true"
       ORTHANC__PYTHON_SCRIPT: "/scripts/plugin.py"
-      ORTHANC__DICOM_AET : ORTHANCB
+      ORTHANC__DICOM_AET: ORTHANCB
+      ORTHANC__NAME: orthanc-b-for-python-api-client-tests
       ORTHANC__REGISTERED_USERS: |
         {"test": "test"}
       ORTHANC__DICOM_MODALITIES: |
