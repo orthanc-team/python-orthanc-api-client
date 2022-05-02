@@ -1,8 +1,10 @@
+import datetime
+
 import requests
 import logging
 from typing import List, Tuple
 from ..exceptions import *
-
+from ..helpers import to_dicom_date
 
 
 logger = logging.getLogger('api-client')
@@ -13,6 +15,16 @@ class Resources:
     def __init__(self, api_client: 'OrthancApiClient', url_segment: str):
         self._url_segment = url_segment
         self._api_client = api_client
+
+    def _get_level(self):
+        if self._url_segment == "studies":
+            return "Study"
+        elif self._url_segment == "series":
+            return "Series"
+        elif self._url_segment == "instances":
+            return "Instance"
+        elif self._url_segment == "patients":
+            return "Patient"
 
     def get_json(self, orthanc_id: str):
         return self._api_client.get_json(f"/{self._url_segment}/{orthanc_id}")
@@ -196,3 +208,39 @@ class Resources:
             return modified_id
 
         return None  # TODO: raise exception ???
+
+    def print_daily_stats(self, from_date: datetime.date = None, to_date: datetime.date = None):
+        if self._url_segment == "patients":
+            raise NotImplementedError("Print daily stats is not implemented for Patient level")
+
+        if to_date is None:
+            to_date = datetime.date.today()
+
+        if from_date is None:
+            from_date = to_date - datetime.timedelta(days=7)
+
+        level = self._get_level()
+        system = self._api_client.get_system()
+
+        print(f"Daily {level} stats for " + system["DicomAet"] + " - " + system["Name"])
+        print("---------------------------------------")
+
+        current_date = from_date
+
+        while current_date <= to_date:
+
+            payload = {
+                "Level": level,
+                "Query": {
+                    "StudyDate": to_dicom_date(current_date)
+                },
+                "Expand": False,
+                "CaseSensitive": False
+            }
+
+            r = self._api_client.post(
+                relative_url=f"/tools/find",
+                json=payload)
+
+            print(f"{current_date} - " + str(len(r.json())))
+            current_date += datetime.timedelta(days=1)

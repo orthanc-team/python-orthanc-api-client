@@ -2,7 +2,9 @@ import time
 import unittest
 import subprocess
 import logging
+import datetime
 from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType, Study
+from orthanc_api_client.helpers import to_dicom_date
 import orthanc_api_client.exceptions as api_exceptions
 import pathlib
 import asyncio
@@ -113,13 +115,25 @@ class TestApiClient(unittest.TestCase):
         study_id = self.oa.studies.lookup('1.2.3')
         self.assertIsNone(study_id)
 
-        dicom = generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '1.2.3'})
-
+        dicom = generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '1.2.3', 'StudyDate': to_dicom_date(datetime.date.today())})
         instances_ids = self.oa.upload(dicom)
         study_id = self.oa.studies.lookup('1.2.3')
 
         self.assertLessEqual(1, len(instances_ids))
         self.assertIsNotNone(study_id)
+
+    def test_daily_stats(self):
+        self.oa.delete_all_content()
+
+        self.oa.upload(generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '1.2.3', 'SeriesInstanceUID': '4.5.6', 'StudyDate': '20220205'}))
+        self.oa.upload(generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '1.2.3', 'SeriesInstanceUID': '4.5.7', 'StudyDate': '20220205'}))
+        self.oa.upload(generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '1.2.4', 'SeriesInstanceUID': '4.5.8', 'StudyDate': '20220206'}))
+        self.oa.upload(generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '1.2.4', 'SeriesInstanceUID': '4.5.8', 'StudyDate': '20220206'}))
+        self.oa.upload(generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '1.2.4', 'SeriesInstanceUID': '4.5.8', 'StudyDate': '20220206'}))
+
+        self.oa.studies.print_daily_stats(from_date=datetime.date(2022, 2, 4), to_date=datetime.date(2022, 2, 8))
+        self.oa.series.print_daily_stats(from_date=datetime.date(2022, 2, 4), to_date=datetime.date(2022, 2, 8))
+        self.oa.instances.print_daily_stats(from_date=datetime.date(2022, 2, 4), to_date=datetime.date(2022, 2, 8))
 
     def test_get_parents(self):
         self.oa.delete_all_content()

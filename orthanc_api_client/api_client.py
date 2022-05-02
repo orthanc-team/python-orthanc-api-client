@@ -68,6 +68,9 @@ class OrthancApiClient(HttpClient):
         except Exception as e:
             return False
 
+    def get_system(self) -> object:
+        return self.get_json('system')
+
     def delete_all_content(self):
         """Deletes all content from Orthanc"""
         self.patients.delete_all()

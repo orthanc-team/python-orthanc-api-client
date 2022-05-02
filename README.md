@@ -15,6 +15,7 @@ Examples:
 
 ```python
 from orthanc_api_client import OrthancApiClient
+import datetime
 
 orthanc_a = OrthancApiClient('http://localhost:8042', user='orthanc', pwd='orthanc')
 orthanc_b = OrthancApiClient('http://localhost:8043', user='orthanc', pwd='orthanc')
@@ -37,6 +38,11 @@ all_patients_ids = orthanc_a.patients.get_all_ids()
 all_studies_ids = orthanc_a.studies.get_all_ids()
 all_series_ids = orthanc_a.series.get_all_ids()
 all_instances_ids = orthanc_a.instances.get_all_ids()
+
+# show some daily stats
+orthanc_a.studies.print_daily_stats(from_date=datetime.date(2022, 2, 4), to_date=datetime.date(2022, 2, 8))
+orthanc_a.series.print_daily_stats() # show last 8 days per default
+orthanc_a.instances.print_daily_stats()
 
 # instances methods
 dicom_file = orthanc_a.instances.get_file(orthanc_id=all_instances_ids[0])
