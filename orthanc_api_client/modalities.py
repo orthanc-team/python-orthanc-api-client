@@ -120,13 +120,67 @@ class DicomModalities:
         this call is synchronous.  It completes once the C-Move is complete.
 
         :param from_modality: the modality alias configured in orthanc
+        :param dicom_id: the StudyInstanceUid of the study to move
+        :param to_modality_aet: the AET of the target modality
+        """
+        self._move(
+            level="Study",
+            dicom_tag_identifier="StudyInstanceUID",
+            dicom_id=dicom_id,
+            from_modality=from_modality,
+            to_modality_aet=to_modality_aet
+        )
+
+    def move_series(self, from_modality: str, dicom_id: str, to_modality_aet: str = None):
+        """
+        moves a series from a remote modality (C-Move) to a target modality (AET)
+
+        this call is synchronous.  It completes once the C-Move is complete.
+
+        :param from_modality: the modality alias configured in orthanc
+        :param dicom_id: the SeriesInstanceUid of the series to move
+        :param to_modality_aet: the AET of the target modality
+        """
+        self._move(
+            level="Series",
+            dicom_tag_identifier="SeriesInstanceUID",
+            dicom_id=dicom_id,
+            from_modality=from_modality,
+            to_modality_aet=to_modality_aet
+        )
+
+    def move_instance(self, from_modality: str, dicom_id: str, to_modality_aet: str = None):
+        """
+        moves an instance from a remote modality (C-Move) to a target modality (AET)
+
+        this call is synchronous.  It completes once the C-Move is complete.
+
+        :param from_modality: the modality alias configured in orthanc
+        :param dicom_id: the SOPInstanceUid of the instance to move
+        :param to_modality_aet: the AET of the target modality
+        """
+        self._move(
+            level="Instance",
+            dicom_tag_identifier="SOPInstanceUid",
+            dicom_id=dicom_id,
+            from_modality=from_modality,
+            to_modality_aet=to_modality_aet
+        )
+
+    def _move(self, level: str, dicom_tag_identifier: str, from_modality: str, dicom_id: str, to_modality_aet: str = None):
+        """
+        moves a study from a remote modality (C-Move) to a target modality (AET)
+
+        this call is synchronous.  It completes once the C-Move is complete.
+
+        :param from_modality: the modality alias configured in orthanc
         :param dicom_id: the StudyInstanceUid of the study to retrieve
         :param to_modality_aet: the AET of the target modality
         """
 
         payload = {
-            'Level': 'Study',
-            'Resources': [{'StudyInstanceUID': dicom_id}]
+            'Level': level,
+            'Resources': [{dicom_tag_identifier: dicom_id}]
         }
 
         if to_modality_aet:
@@ -135,7 +189,6 @@ class DicomModalities:
         self._api_client.post(
             relative_url=f"{self._url_segment}/{from_modality}/move",
             json=payload)
-
 
 
     def query_studies(self, from_modality: str, query: object) -> typing.List[RemoteModalityStudy]:
