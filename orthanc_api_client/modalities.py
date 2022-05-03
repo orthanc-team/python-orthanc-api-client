@@ -12,11 +12,35 @@ class RemoteModalityStudy:
     Represents a study on a remote modality.  This is populated with the results of a C-Find request on that modality
 
     You can retrieve the study by calling:
-    orthanc.modalities.retrieve_study(remoteStudy.remote_mModality_id, remote_study.dicom_id)
+    orthanc.modalities.retrieve_study(remote_study.remote_modality_id, remote_study.dicom_id)
     """
 
     def __init__(self):
         self.dicom_id = None                    # the StudyInstanceUID dicom tag
+        self.remote_modality_id = None          # the alias of the modality where the study is
+        self.tags = None                        # the tags that have been retrieved (depends on the query used to find it)
+
+
+class RemoteModalitySeries:
+
+    """
+    Represents a series on a remote modality.  This is populated with the results of a C-Find request on that modality
+    """
+
+    def __init__(self):
+        self.dicom_id = None                    # the SeriesInstanceUID dicom tag
+        self.remote_modality_id = None          # the alias of the modality where the study is
+        self.tags = None                        # the tags that have been retrieved (depends on the query used to find it)
+
+
+class RemoteModalityInstance:
+
+    """
+    Represents an instance on a remote modality.  This is populated with the results of a C-Find request on that modality
+    """
+
+    def __init__(self):
+        self.dicom_id = None                    # the SOPInstanceUID dicom tag
         self.remote_modality_id = None          # the alias of the modality where the study is
         self.tags = None                        # the tags that have been retrieved (depends on the query used to find it)
 
@@ -139,6 +163,58 @@ class DicomModalities:
             remote_studies.append(remote_study)
 
         return remote_studies
+
+    def query_series(self, from_modality: str, query: object) -> typing.List[RemoteModalitySeries]:
+        """
+        queries a remote modality for series
+
+        :param from_modality: the modality alias configured in orthanc
+        :param query: DICOM queries; i.e: {PatientName:'TOTO*', StudyDate:'20150503-'}
+        """
+
+        payload = {
+            'Level': 'Series',
+            'Query': query
+        }
+
+        results = self._query(from_modality, payload)
+
+        remote_series = []
+        for result in results:
+            remote_serie = RemoteModalitySeries()
+            remote_serie.dicom_id = result.tags.get('SeriesInstanceUID')
+            remote_serie.tags = result.tags
+            remote_serie.remote_modality_id = from_modality
+
+            remote_series.append(remote_serie)
+
+        return remote_series
+
+    def query_instances(self, from_modality: str, query: object) -> typing.List[RemoteModalityInstance]:
+        """
+        queries a remote modality for instances
+
+        :param from_modality: the modality alias configured in orthanc
+        :param query: DICOM queries; i.e: {PatientName:'TOTO*', StudyDate:'20150503-'}
+        """
+
+        payload = {
+            'Level': 'Instance',
+            'Query': query
+        }
+
+        results = self._query(from_modality, payload)
+
+        remote_instances = []
+        for result in results:
+            remote_instance = RemoteModalitySeries()
+            remote_instance.dicom_id = result.tags.get('SOPInstanceUID')
+            remote_instance.tags = result.tags
+            remote_instance.remote_modality_id = from_modality
+
+            remote_instances.append(remote_instance)
+
+        return remote_instances
 
     def _query(self, from_modality, payload) -> typing.List[QueryResult]:
 

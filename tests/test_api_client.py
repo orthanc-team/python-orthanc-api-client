@@ -533,6 +533,40 @@ class TestApiClient(unittest.TestCase):
 
         self.assertEqual(study_id, self.ob.studies.lookup(dicom_id='1.3.6.1.4.1.5962.1.2.1.20040119072730.12322'))
 
+    def test_query_series_instances(self):
+        self.oa.delete_all_content()
+        self.ob.delete_all_content()
+
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+
+        remote_series = self.ob.modalities.query_series(
+            from_modality='orthanc-a',
+            query={
+                'PatientID': '1C*',
+                'StudyDescription': ''
+            }
+        )
+
+        self.assertEqual(1, len(remote_series))
+        self.assertEqual('1.3.6.1.4.1.5962.1.3.1.1.20040119072730.12322', remote_series[0].dicom_id)
+        self.assertEqual('1.3.6.1.4.1.5962.1.2.1.20040119072730.12322', remote_series[0].tags.get('StudyInstanceUID'))
+        self.assertEqual('orthanc-a', remote_series[0].remote_modality_id)
+        self.assertEqual("e+1", remote_series[0].tags.get('StudyDescription'))
+
+        remote_instances = self.ob.modalities.query_instances(
+            from_modality='orthanc-a',
+            query={
+                'PatientID': '1C*',
+                'StudyDescription': ''
+            }
+        )
+
+        self.assertEqual(1, len(remote_instances))
+        self.assertEqual('1.3.6.1.4.1.5962.1.1.1.1.1.20040119072730.12322', remote_instances[0].dicom_id)
+        self.assertEqual('1.3.6.1.4.1.5962.1.2.1.20040119072730.12322', remote_instances[0].tags.get('StudyInstanceUID'))
+        self.assertEqual('orthanc-a', remote_instances[0].remote_modality_id)
+        self.assertEqual("e+1", remote_instances[0].tags.get('StudyDescription'))
+
     def test_find_study(self):
         self.oa.delete_all_content()
 
