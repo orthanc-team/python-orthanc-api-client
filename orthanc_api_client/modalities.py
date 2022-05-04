@@ -161,7 +161,7 @@ class DicomModalities:
         """
         self._move(
             level="Instance",
-            dicom_tag_identifier="SOPInstanceUid",
+            dicom_tag_identifier="SOPInstanceUID",
             dicom_id=dicom_id,
             from_modality=from_modality,
             to_modality_aet=to_modality_aet
