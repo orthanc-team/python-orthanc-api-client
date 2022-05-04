@@ -11,7 +11,7 @@ services:
       ORTHANC__REGISTERED_USERS: |
         {"test": "test"}
       ORTHANC__DICOM_MODALITIES: |
-        {"orthanc-b": ["ORTHANCB", "orthanc-b", 4242]}
+        {"orthanc-a": ["ORTHANCA", "orthanc-a", 4242], "orthanc-b": ["ORTHANCB", "orthanc-b", 4242], "orthanc-c": ["ORTHANCC", "orthanc-c", 4242]}
       ORTHANC__DICOM_WEB__SERVERS: |
         {"orthanc-b": ["http://orthanc-b:8042/dicom-web/", "test", "test"]}
 
@@ -29,8 +29,23 @@ services:
       ORTHANC__REGISTERED_USERS: |
         {"test": "test"}
       ORTHANC__DICOM_MODALITIES: |
-        {"orthanc-a": ["ORTHANCA", "orthanc-a", 4242]}
+        {"orthanc-a": ["ORTHANCA", "orthanc-a", 4242], "orthanc-b": ["ORTHANCB", "orthanc-b", 4242], "orthanc-c": ["ORTHANCC", "orthanc-c", 4242]}
       ORTHANC__DICOM_WEB__SERVERS: |
         {"orthanc-a": ["http://orthanc-a:8042/dicom-web/", "test", "test"]}
 
       ORTHANC__CHECK_REVISIONS: "false"
+
+  orthanc-c:
+    image: osimis/orthanc:21.11.0
+    ports: ["10044:8042"]
+    environment:
+      VERBOSE_STARTUP: "true"
+      VERBOSE_ENABLED: "true"
+      ORTHANC__DICOM_AET: ORTHANCC
+      ORTHANC__NAME: orthanc-c-for-python-api-client-tests
+      ORTHANC__REGISTERED_USERS: |
+        {"test": "test"}
+      ORTHANC__DICOM_MODALITIES: |
+        {"orthanc-a": ["ORTHANCA", "orthanc-a", 4242], "orthanc-b": ["ORTHANCB", "orthanc-b", 4242], "orthanc-c": ["ORTHANCC", "orthanc-c", 4242]}
+      ORTHANC__DICOM_WEB__SERVERS: |
+        {"orthanc-a": ["http://orthanc-a:8042/dicom-web/", "test", "test"]}

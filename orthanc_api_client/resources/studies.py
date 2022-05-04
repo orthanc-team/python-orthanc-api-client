@@ -34,13 +34,7 @@ class Studies(Resources):
         -------
         the instance id of the study or None if not found
         """
-        study_ids = self._api_client.lookup(needle=dicom_id, filter='Study')
-        if len(study_ids) == 1:
-            return study_ids[0]
-
-        if len(study_ids) > 1:
-            raise TooManyResourcesFound()        
-        return None
+        return self._lookup(filter='Study', dicom_id=dicom_id)
 
     def find(self, query: object, case_sensitive: bool = True) -> typing.List[Study]:
         payload = {
