@@ -28,6 +28,9 @@ class TestApiClient(unittest.TestCase):
         cls.ob = OrthancApiClient('http://localhost:10043', user='test', pwd='test')
         cls.ob.wait_started()
 
+        cls.oc = OrthancApiClient('http://localhost:10044', user='test', pwd='test')
+        cls.oc.wait_started()
+
     @classmethod
     def tearDownClass(cls):
         subprocess.run(["docker-compose", "down", "-v"], cwd=here/"docker-setup")
@@ -194,6 +197,45 @@ class TestApiClient(unittest.TestCase):
 
         study_id = self.ob.studies.lookup('1.2.3')
         self.assertIsNotNone(study_id)
+
+    def test_modalities_move(self):
+        self.oa.delete_all_content()
+        self.ob.delete_all_content()
+        self.oc.delete_all_content()
+
+        # upload a file to B
+        dicom = generate_test_dicom_file(width=33, height=33, tags={'StudyInstanceUID': '1.2.3', 'SeriesInstanceUID': '4.5.6', 'SOPInstanceUID': '7.8.9'})
+        instances_ids = self.ob.upload(dicom)
+        self.assertIsNotNone(self.ob.studies.lookup('1.2.3'))
+        self.assertIsNotNone(self.ob.series.lookup('4.5.6'))
+        self.assertIsNotNone(self.ob.instances.lookup('7.8.9'))
+
+        #request C to move it from B to A
+        self.oc.modalities.move_study(from_modality='orthanc-b', dicom_id='1.2.3', to_modality_aet='ORTHANCA')
+        self.assertIsNotNone(1, self.oa.studies.lookup('1.2.3'))
+        self.oa.delete_all_content()
+
+        self.oc.modalities.move_series(from_modality='orthanc-b', dicom_id='4.5.6', study_dicom_id='1.2.3', to_modality_aet='ORTHANCA')
+        self.assertIsNotNone(self.oa.series.lookup('4.5.6'))
+        self.oa.delete_all_content()
+
+        self.oc.modalities.move_instance(from_modality='orthanc-b', dicom_id='7.8.9', series_dicom_id='4.5.6', study_dicom_id='1.2.3', to_modality_aet='ORTHANCA')
+        self.assertIsNotNone(self.oa.instances.lookup('7.8.9'))
+        self.oa.delete_all_content()
+
+
+        #request A to move it from B to A (retrieve)
+        self.oa.modalities.move_study(from_modality='orthanc-b', dicom_id='1.2.3')
+        self.assertIsNotNone(1, self.oa.studies.lookup('1.2.3'))
+        self.oa.delete_all_content()
+
+        self.oa.modalities.move_series(from_modality='orthanc-b', dicom_id='4.5.6', study_dicom_id='1.2.3')
+        self.assertIsNotNone(self.oa.series.lookup('4.5.6'))
+        self.oa.delete_all_content()
+
+        self.oa.modalities.move_instance(from_modality='orthanc-b', dicom_id='7.8.9', series_dicom_id='4.5.6', study_dicom_id='1.2.3')
+        self.assertIsNotNone(self.oa.instances.lookup('7.8.9'))
+        self.oa.delete_all_content()
 
     def test_find_worklist(self):
 

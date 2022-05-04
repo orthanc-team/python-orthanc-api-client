@@ -65,4 +65,13 @@ class Instances(Resources):
 
         return None  # TODO: raise ?
 
+    def lookup(self, dicom_id: str) -> str:
+        """
+        finds an instance in Orthanc based on its SOPInstanceUID
+
+        Returns
+        -------
+        the instance id of the instance or None if not found
+        """
+        return self._lookup(filter='Instance', dicom_id=dicom_id)
 

@@ -244,3 +244,19 @@ class Resources:
 
             print(f"{current_date} - " + str(len(r.json())))
             current_date += datetime.timedelta(days=1)
+
+    def _lookup(self, filter: str, dicom_id: str) -> str:
+        """
+        finds a resource in Orthanc based on its dicom id
+
+        Returns
+        -------
+        the instance id of the study or None if not found
+        """
+        resource_ids = self._api_client.lookup(needle=dicom_id, filter=filter)
+        if len(resource_ids) == 1:
+            return resource_ids[0]
+
+        if len(resource_ids) > 1:
+            raise TooManyResourcesFound()
+        return None

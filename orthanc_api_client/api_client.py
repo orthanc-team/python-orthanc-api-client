@@ -153,7 +153,7 @@ class OrthancApiClient(HttpClient):
         
         return instances_ids
 
-    def lookup(self, needle: str, filter: typing.List[str] = None) -> List[str]:
+    def lookup(self, needle: str, filter: str = None) -> List[str]:
         """searches the Orthanc DB for the 'needle'
         
         Parameters:

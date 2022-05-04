@@ -66,3 +66,12 @@ class Series(Resources):
         """
         return self._api_client.instances.get_tags(self.get_first_instance_id(orthanc_id=orthanc_id))
 
+    def lookup(self, dicom_id: str) -> str:
+        """
+        finds a series in Orthanc based on its SeriesInstanceUid
+
+        Returns
+        -------
+        the instance id of the series or None if not found
+        """
+        return self._lookup(filter='Series', dicom_id=dicom_id)
