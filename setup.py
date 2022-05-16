@@ -28,7 +28,7 @@ setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/guides/single-sourcing-package-version/
-    version='0.3.11',  # Required
+    version='0.3.12',  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
@@ -61,15 +61,15 @@ setup(
     #
     # This field corresponds to the "Home-Page" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#home-page-optional
-    url='https://github.com/amazy/python-orthanc-api-client',  # Optional
+    url='https://github.com/orthanc-team/python-orthanc-api-client',  # Optional
 
     # This should be your name or the name of the organization which owns the
     # project.
-    author='Alain Mazy',  # Optional
+    author='Orthanc Team',  # Optional
 
     # This should be a valid email address corresponding to the author listed
     # above.
-    author_email='alain@mazy.be',  # Optional
+    author_email='info@orthanc.team',  # Optional
 
     # Classifiers help users find your project by categorizing it.
     #
@@ -83,7 +83,6 @@ setup(
 
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
-        'Topic :: Software Development :: Build Tools',
 
         # Pick your license as you wish
         'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
@@ -154,8 +153,8 @@ setup(
 
 
     project_urls={  # Optional
-        'Bug Reports': 'https://github.com/amazy/python-orthanc-api-client/issues',
-        'Funding': 'https://mazy.be/orthanc',
-        'Source': 'https://github.com/amazy/python-orthanc-api-client/',
+        'Bug Reports': 'https://github.com/orthanc-team/python-orthanc-api-client/issues',
+        'Funding': 'https://orthanc-team',
+        'Source': 'https://github.com/orthanc-team/python-orthanc-api-client/',
     },
 )
