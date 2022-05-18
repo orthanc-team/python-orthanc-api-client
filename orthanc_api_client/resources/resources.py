@@ -32,22 +32,26 @@ class Resources:
     def get_all_ids(self) -> List[str]:
         return self._api_client.get_json(f"/{self._url_segment}/")
 
-    def delete(self, orthanc_id: str = None, orthanc_ids: List[str] = None):
+    def delete(self, orthanc_id: str = None, orthanc_ids: List[str] = None, ignore_errors: bool = False):
 
         if orthanc_ids:
             for oi in orthanc_ids:
-                self.delete(orthanc_id=oi)
+                self.delete(orthanc_id=oi, ignore_errors=ignore_errors)
 
         if orthanc_id:
-            logger.info(f"deleting {self._url_segment} {orthanc_id}")
-            self._api_client.delete(f"/{self._url_segment}/{orthanc_id}")
+            logger.debug(f"deleting {self._url_segment} {orthanc_id}")
+            try:
+                self._api_client.delete(f"/{self._url_segment}/{orthanc_id}")
+            except ResourceNotFound as ex:
+                if not ignore_errors:
+                    raise ex
 
-    def delete_all(self) -> List[str]:
+    def delete_all(self, ignore_errors: bool = False) -> List[str]:
         all_ids = self.get_all_ids()
         deleted_ids = []
 
         for orthanc_id in all_ids:
-            self.delete(orthanc_id)
+            self.delete(orthanc_id, ignore_errors=ignore_errors)
             deleted_ids.append(orthanc_id)
         
         return deleted_ids

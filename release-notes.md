@@ -1,3 +1,7 @@
+v 0.4.1
+=======
+
+- added `ignore_errors` to `delete` methods
 
 v 0.4.0
 =======
