@@ -59,6 +59,12 @@ class TestApiClient(unittest.TestCase):
         self.oa.instances.delete(orthanc_id=instances_ids[0])
         self.assertEqual(0, len(self.oa.studies.get_all_ids()))
 
+        # make sure deleting an already deleted resource does not throw if ignore_errors is true
+        self.oa.instances.delete(orthanc_id=instances_ids[0], ignore_errors=True)
+
+        with self.assertRaises(api_exceptions.ResourceNotFound):
+            self.oa.instances.delete(orthanc_id=instances_ids[0], ignore_errors=False)
+
     def test_instances_get_tags(self):
         instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
         tags = self.oa.instances.get_tags(instances_ids[0])
