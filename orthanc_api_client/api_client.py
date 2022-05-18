@@ -6,7 +6,7 @@ from typing import List
 from urllib.parse import urlunsplit, urlencode
 
 from .http_client import HttpClient
-from .resources import Resources, Instances, Series, Studies
+from .resources import Resources, Instances, Series, Studies, Jobs
 
 from .helpers import wait_until
 from .exceptions import *
@@ -50,6 +50,7 @@ class OrthancApiClient(HttpClient):
         self.instances = Instances(api_client=self)
         self.dicomweb_servers = DicomWebServers(api_client=self)
         self.modalities = DicomModalities(api_client=self)
+        self.jobs = Jobs(api_client=self)
 
     def wait_started(self, timeout: float = None) -> bool:
         return wait_until(self.is_alive, timeout)
