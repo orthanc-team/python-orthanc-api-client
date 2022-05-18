@@ -3,8 +3,8 @@ import unittest
 import subprocess
 import logging
 import datetime
-from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType, Study
-from orthanc_api_client.helpers import to_dicom_date
+from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType, Study, Job, JobStatus, JobType
+from orthanc_api_client.helpers import to_dicom_date, wait_until
 import orthanc_api_client.exceptions as api_exceptions
 import pathlib
 import asyncio
@@ -177,7 +177,10 @@ class TestApiClient(unittest.TestCase):
 
         study_id = self.oa.studies.lookup('1.2.3')
 
-        self.oa.dicomweb_servers.send('orthanc-b', study_id)
+        job = self.oa.dicomweb_servers.send_asynchronous('orthanc-b', study_id)
+        self.assertEqual(JobType.DICOM_WEB_STOW_CLIENT, job.info.type)
+        wait_until(job.is_complete, 5)
+        self.assertEqual(JobStatus.SUCCESS, job.refresh().info.status)
 
         study_id = self.ob.studies.lookup('1.2.3')
         self.assertIsNotNone(study_id)

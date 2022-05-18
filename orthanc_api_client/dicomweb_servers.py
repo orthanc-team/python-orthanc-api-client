@@ -1,6 +1,7 @@
 from typing import List, Union
 
 from .exceptions import *
+from .job import Job
 
 
 class DicomWebServers:
@@ -13,7 +14,7 @@ class DicomWebServers:
         """alias for send"""
         return self.send(target_server=target_server, resources_ids=resources_ids, synchronous=synchronous)
 
-    def send(self, target_server: str, resources_ids: Union[List[str], str], synchronous: bool = True):
+    def send_asynchronous(self, target_server: str, resources_ids: Union[List[str], str]) -> Job:
         """sends a list of resources to a remote DicomWeb server
 
         Returns
@@ -28,7 +29,7 @@ class DicomWebServers:
             relative_url=f"{self._url_segment}/{target_server}/stow",
             json={
                 "Resources": resources_ids,
-                "Synchronous": synchronous
+                "Synchronous": False
             })
 
-        return None
+        return Job(api_client=self._api_client, orthanc_id=r.json()['ID'])

@@ -1,0 +1,61 @@
+from strenum import StrEnum
+from .tags import SimplifiedTags
+
+class JobType(StrEnum):
+
+    # TODO: complete enum
+    DICOM_WEB_STOW_CLIENT = 'DicomWebStowClient'
+
+
+class JobStatus(StrEnum):
+
+    PENDING = 'Pending'
+    RUNNING = 'Running'
+    SUCCESS = 'Success'
+    FAILURE = 'Failure'
+    PAUSED = 'Paused'
+    RETRY = 'Retry'
+
+class JobInfo:
+
+    def __init__(self, json_job: object):
+        self.orthanc_id = json_job.get('ID')
+        self.status = json_job.get('State')
+        self.type = json_job.get('Type')
+        self.content = json_job.get('Content')
+
+class Job:
+
+    def __init__(self, api_client, orthanc_id):
+        self._api_client = api_client
+        self.orthanc_id = orthanc_id
+        self._info = None
+
+    @staticmethod
+    def from_json(api_client, json_job: object):
+        job = Job(api_client, json_job.get('ID'))
+        job._info = JobInfo(json_job)
+        return job
+
+    @property
+    def info(self):  # lazy loading of job info ....
+        if self._info is None:
+            self._load_info()
+        return self._info
+
+    @property
+    def content(self):
+        return self._info.content
+
+    def refresh(self) -> "Job":
+        self._load_info()
+        return self;
+
+    def is_complete(self) -> bool:
+        self.refresh()
+
+        return self._info.status in [JobStatus.SUCCESS, JobStatus.FAILURE]
+
+    def _load_info(self):
+        json_job = self._api_client.jobs.get_json(self.orthanc_id)
+        self._info = JobInfo(json_job)
