@@ -167,7 +167,7 @@ class OrthancApiClient(HttpClient):
         the list of resources ids
         """
         response = self.post(
-            relative_url="tools/lookup",
+            endpoint="tools/lookup",
             data=needle
         )
 
@@ -209,7 +209,7 @@ class OrthancApiClient(HttpClient):
             args['limit'] = limit
 
         response = self.get_json(
-            relative_url = "/changes?" + urlencode(args)
+            endpoint = "/changes?" + urlencode(args)
         )
 
         changes = []

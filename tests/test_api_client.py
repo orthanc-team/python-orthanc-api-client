@@ -635,6 +635,22 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual('1.3.6.1.4.1.5962.1.2.1.20040119072730.12322', studies[0].dicom_id)
         self.assertEqual("e+1", studies[0].main_dicom_tags.get('StudyDescription'))
 
+    def test_jobs(self):
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.zip")
+        study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
+
+        # create an async download job
+        r = self.oa.post(
+            endpoint=f"/studies/{study_id}/archive",
+            json={
+                'Asynchronous': True
+            })
+        job_id = r.json()['ID']
+
+        job = self.oa.jobs.get(orthanc_id=job_id)
+        self.assertEqual(JobType.ARCHIVE, job.info.type)
+        self.assertEqual(1, job.info.content.get('InstancesCount'))
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

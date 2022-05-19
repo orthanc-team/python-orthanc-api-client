@@ -57,7 +57,7 @@ class Instances(Resources):
             query['Remove'] = remove_tags
 
         r = self._api_client.post(
-            relative_url=f"/instances/{orthanc_id}/modify",
+            endpoint=f"/instances/{orthanc_id}/modify",
             json=query)
 
         if r.status_code == 200:
