@@ -19,12 +19,12 @@ class HttpClient:
         self._user = user
         self._pwd = pwd
 
-    def get_abs_url(self, relative_url: str) -> str:
-        return urllib.parse.urljoin(self._root_url, relative_url)
+    def get_abs_url(self, endpoint: str) -> str:
+        return urllib.parse.urljoin(self._root_url, endpoint)
 
-    def get(self, relative_url: str, **kwargs) -> requests.Response:
+    def get(self, endpoint: str, **kwargs) -> requests.Response:
         try:
-            url = self.get_abs_url(relative_url)
+            url = self.get_abs_url(endpoint)
             response = self._http_session.get(url, **kwargs)
         except requests.RequestException as request_exception:
             self._translate_exception(request_exception, url=url)
@@ -32,15 +32,15 @@ class HttpClient:
         self._raise_on_errors(response, url = url)
         return response
 
-    def get_json(self, relative_url: str, **kwargs) -> Any:
-        return self.get(relative_url, **kwargs).json()
+    def get_json(self, endpoint: str, **kwargs) -> Any:
+        return self.get(endpoint, **kwargs).json()
 
-    def get_binary(self, relative_url: str, **kwargs) -> Any:
-        return self.get(relative_url, **kwargs).content
+    def get_binary(self, endpoint: str, **kwargs) -> Any:
+        return self.get(endpoint, **kwargs).content
 
-    def post(self, relative_url: str, **kwargs) -> requests.Response:
+    def post(self, endpoint: str, **kwargs) -> requests.Response:
         try:
-            url = self.get_abs_url(relative_url)
+            url = self.get_abs_url(endpoint)
             response = self._http_session.post(url, **kwargs)
         except requests.RequestException as request_exception:
             self._translate_exception(request_exception, url=url)
@@ -48,9 +48,9 @@ class HttpClient:
         self._raise_on_errors(response, url=url)
         return response
 
-    def put(self, relative_url: str, **kwargs) -> requests.Response:
+    def put(self, endpoint: str, **kwargs) -> requests.Response:
         try:
-            url = self.get_abs_url(relative_url)
+            url = self.get_abs_url(endpoint)
             response = self._http_session.put(url, **kwargs)
         except requests.RequestException as request_exception:
             self._translate_exception(request_exception, url=url)
@@ -58,9 +58,9 @@ class HttpClient:
         self._raise_on_errors(response, url=url)
         return response
 
-    def delete(self, relative_url: str, **kwargs) -> requests.Response:
+    def delete(self, endpoint: str, **kwargs) -> requests.Response:
         try:
-            url = self.get_abs_url(relative_url)
+            url = self.get_abs_url(endpoint)
             response = self._http_session.delete(url, **kwargs)
         except requests.RequestException as request_exception:
             self._translate_exception(request_exception, url=url)

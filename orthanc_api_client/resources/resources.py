@@ -71,7 +71,7 @@ class Resources:
             headers['If-Match'] = match_revision
 
         self._api_client.put(
-            relative_url=f"/{self._url_segment}/{orthanc_id}/attachments/{attachment_name}",
+            endpoint=f"/{self._url_segment}/{orthanc_id}/attachments/{attachment_name}",
             data=content,
             headers=headers
         )
@@ -89,7 +89,7 @@ class Resources:
         headers = {}
 
         response = self._api_client.get(
-            relative_url=f"/{self._url_segment}/{orthanc_id}/attachments/{attachment_name}/data",
+            endpoint=f"/{self._url_segment}/{orthanc_id}/attachments/{attachment_name}/data",
             headers=headers
         )
 
@@ -113,7 +113,7 @@ class Resources:
             headers['If-Match'] = match_revision
 
         self._api_client.put(
-            relative_url=f"/{self._url_segment}/{orthanc_id}/metadata/{metadata_name}",
+            endpoint=f"/{self._url_segment}/{orthanc_id}/metadata/{metadata_name}",
             data=content,
             headers=headers
         )
@@ -134,7 +134,7 @@ class Resources:
 
         try:
             response = self._api_client.get(
-                relative_url=f"/{self._url_segment}/{orthanc_id}/metadata/{metadata_name}",
+                endpoint=f"/{self._url_segment}/{orthanc_id}/metadata/{metadata_name}",
                 headers=headers
             )
         except ResourceNotFound:
@@ -166,7 +166,7 @@ class Resources:
             query['Keep'] = keep_tags
 
         r = self._api_client.post(
-            relative_url=f"/{self._url_segment}/{orthanc_id}/anonymize",
+            endpoint=f"/{self._url_segment}/{orthanc_id}/anonymize",
             json=query)
 
         if r.status_code == 200:
@@ -201,7 +201,7 @@ class Resources:
             query['Remove'] = remove_tags
 
         r = self._api_client.post(
-            relative_url=f"/{self._url_segment}/{orthanc_id}/modify",
+            endpoint=f"/{self._url_segment}/{orthanc_id}/modify",
             json=query)
 
         if r.status_code == 200:
@@ -243,7 +243,7 @@ class Resources:
             }
 
             r = self._api_client.post(
-                relative_url=f"/tools/find",
+                endpoint=f"/tools/find",
                 json=payload)
 
             print(f"{current_date} - " + str(len(r.json())))

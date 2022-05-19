@@ -1,3 +1,9 @@
+v 0.5.0
+=======
+
+- BREAKING_CHANGE: renamed `relative_url` arg into `endpoint` for `get, put, post, get_json, ...`
+- added `retry, cancel, pause, ...` to `jobs`
+
 v 0.4.1
 =======
 

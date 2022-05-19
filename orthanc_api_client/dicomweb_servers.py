@@ -26,7 +26,7 @@ class DicomWebServers:
             resources_ids = [resources_ids]
 
         r = self._api_client.post(
-            relative_url=f"{self._url_segment}/{target_server}/stow",
+            endpoint=f"{self._url_segment}/{target_server}/stow",
             json={
                 "Resources": resources_ids,
                 "Synchronous": False

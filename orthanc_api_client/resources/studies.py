@@ -45,7 +45,7 @@ class Studies(Resources):
         }
 
         r = self._api_client.post(
-            relative_url=f"/tools/find",
+            endpoint=f"/tools/find",
             json=payload)
 
         studies = []

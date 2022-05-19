@@ -61,7 +61,7 @@ class DicomModalities:
 
     def find_worklist(self, modality: str, query = {}):
         r = self._api_client.post(
-            relative_url=f"{self._url_segment}/{modality}/find-worklist",
+            endpoint=f"{self._url_segment}/{modality}/find-worklist",
             json=query
         )
 
@@ -84,7 +84,7 @@ class DicomModalities:
             resources_ids = [resources_ids]
 
         r = self._api_client.post(
-            relative_url=f"{self._url_segment}/{modality}/store",
+            endpoint=f"{self._url_segment}/{modality}/store",
             json={
                 "Resources": resources_ids,
                 "Synchronous": synchronous
@@ -195,7 +195,7 @@ class DicomModalities:
             payload['TargetAet'] = to_modality_aet
 
         self._api_client.post(
-            relative_url=f"{self._url_segment}/{from_modality}/move",
+            endpoint=f"{self._url_segment}/{from_modality}/move",
             json=payload)
 
 
@@ -280,14 +280,14 @@ class DicomModalities:
     def _query(self, from_modality, payload) -> typing.List[QueryResult]:
 
         query = self._api_client.post(
-            relative_url=f"{self._url_segment}/{from_modality}/query",
+            endpoint=f"{self._url_segment}/{from_modality}/query",
             json=payload)
 
         query_id = query.json()['ID']
 
         results = []
 
-        answers = self._api_client.get(relative_url = f"queries/{query_id}/answers")
+        answers = self._api_client.get(endpoint = f"queries/{query_id}/answers")
 
         for answer_id in answers.json():
             result = QueryResult()

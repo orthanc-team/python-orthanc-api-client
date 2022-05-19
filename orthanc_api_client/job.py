@@ -3,8 +3,16 @@ from .tags import SimplifiedTags
 
 class JobType(StrEnum):
 
-    # TODO: complete enum
     DICOM_WEB_STOW_CLIENT = 'DicomWebStowClient'
+    DICOM_MOVE_SCU = 'DicomMoveScu'
+    DICOM_MODALITY_STORE = 'DicomModalityStore'
+    MEDIA = 'Media'
+    ARCHIVE = 'Archive'
+    MERGE_STUDY = 'MergeStudy'
+    SPLIT_STUDY = 'SplitStudy'
+    ORTHANC_PEER_STORE = 'OrthancPeerStore'
+    RESOURCE_MODIFICATION = 'ResourceModification'
+    STORAGE_COMMITMENT_SCP = 'StorageCommitmentScp'
 
 
 class JobStatus(StrEnum):
@@ -16,6 +24,7 @@ class JobStatus(StrEnum):
     PAUSED = 'Paused'
     RETRY = 'Retry'
 
+
 class JobInfo:
 
     def __init__(self, json_job: object):
@@ -23,6 +32,7 @@ class JobInfo:
         self.status = json_job.get('State')
         self.type = json_job.get('Type')
         self.content = json_job.get('Content')
+
 
 class Job:
 
