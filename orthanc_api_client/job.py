@@ -13,6 +13,8 @@ class JobType(StrEnum):
     ORTHANC_PEER_STORE = 'OrthancPeerStore'
     RESOURCE_MODIFICATION = 'ResourceModification'
     STORAGE_COMMITMENT_SCP = 'StorageCommitmentScp'
+    PUSH_TRANSFER = "PushTransfer"
+    PULL_TRANSFER = "PullTransfer"
 
 
 class JobStatus(StrEnum):
