@@ -641,7 +641,7 @@ class TestApiClient(unittest.TestCase):
 
         # create an async download job
         r = self.oa.post(
-            endpoint=f"/studies/{study_id}/archive",
+            endpoint=f"studies/{study_id}/archive",
             json={
                 'Asynchronous': True
             })
