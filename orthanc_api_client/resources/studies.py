@@ -4,7 +4,7 @@ from .resources import Resources
 from ..tags import Tags
 from ..exceptions import *
 from ..study import StudyInfo, Study
-from typing import List, Any
+from typing import List, Any, Union
 
 
 class Studies(Resources):
@@ -88,3 +88,17 @@ class Studies(Resources):
         returns tags from a "random" instance in which you should safely get the study/patient tags
         """
         return self._api_client.instances.get_tags(self.get_first_instance_id(orthanc_id=orthanc_id))
+
+    def merge(self, target_study_id: str, source_series_id: Union[List[str], str], keep_source: bool):
+
+        if isinstance(source_series_id, str):
+            source_series_id = [source_series_id]
+
+        return self._api_client.post(
+            endpoint=f"/studies/{target_study_id}/merge",
+            json={
+                "Resources": source_series_id,
+                "KeepSource": keep_source
+            }
+        )
+

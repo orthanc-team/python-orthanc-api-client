@@ -652,6 +652,26 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual(1, job.info.content.get('InstancesCount'))
 
 
+    def test_merge_study(self):
+        self.oa.delete_all_content()
+
+        dicom1 = generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '1', 'PatientID': '1', 'PatientName': 'A'})
+        self.oa.upload(dicom1)
+        dicom2 = generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '2', 'PatientID': '2', 'PatientName': 'B', 'SeriesInstanceUID': '2.2'})
+        self.oa.upload(dicom2)
+        study_id = self.oa.studies.lookup('1')
+        series_id = self.oa.series.lookup('2.2')
+
+        r = self.oa.studies.merge(
+            target_study_id=study_id,
+            source_series_id=series_id,
+            keep_source=False
+        )
+
+        self.assertEqual(1, len(self.oa.studies.get_all_ids()))
+        self.assertEqual(2, len(self.oa.series.get_all_ids()))
+
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     unittest.main()
