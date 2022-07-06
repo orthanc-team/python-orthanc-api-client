@@ -1,3 +1,8 @@
+v 0.5.3
+=======
+
+- added `timeout` argument to `is_alive()`
+
 v 0.5.2
 =======
 

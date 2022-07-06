@@ -55,7 +55,7 @@ class OrthancApiClient(HttpClient):
     def wait_started(self, timeout: float = None) -> bool:
         return wait_until(self.is_alive, timeout)
 
-    def is_alive(self) -> bool:
+    def is_alive(self, timeout = 1) -> bool:
         """Checks if the orthanc server can be reached.
         
         Returns
@@ -64,7 +64,7 @@ class OrthancApiClient(HttpClient):
         """
         try:
             # if we get an answer to a basic request, it means the server is alive
-            self.get('system', timeout = 0.1)
+            self.get('system', timeout=timeout)
             return True
         except Exception as e:
             return False
