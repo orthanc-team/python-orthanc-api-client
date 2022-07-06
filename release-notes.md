@@ -1,22 +1,7 @@
 v 0.5.5
 =======
 
-- fix relative url
-
-v 0.5.4
-=======
-
-- fix relative url
-
-v 0.5.3
-=======
-
-- added `timeout` argument to `is_alive()`
-
-v 0.5.2
-=======
-
-- fixed relative url in `studies.merge`
+- fix relative url of various methods
 
 v 0.5.1
 =======
