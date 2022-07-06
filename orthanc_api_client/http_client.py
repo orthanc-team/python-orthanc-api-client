@@ -28,8 +28,8 @@ class HttpClient:
             response = self._http_session.get(url, **kwargs)
         except requests.RequestException as request_exception:
             self._translate_exception(request_exception, url=url)
-        
-        self._raise_on_errors(response, url = url)
+
+        self._raise_on_errors(response, url=url)
         return response
 
     def get_json(self, endpoint: str, **kwargs) -> Any:
@@ -44,7 +44,7 @@ class HttpClient:
             response = self._http_session.post(url, **kwargs)
         except requests.RequestException as request_exception:
             self._translate_exception(request_exception, url=url)
-        
+
         self._raise_on_errors(response, url=url)
         return response
 
@@ -54,7 +54,7 @@ class HttpClient:
             response = self._http_session.put(url, **kwargs)
         except requests.RequestException as request_exception:
             self._translate_exception(request_exception, url=url)
-        
+
         self._raise_on_errors(response, url=url)
         return response
 
@@ -64,9 +64,18 @@ class HttpClient:
             response = self._http_session.delete(url, **kwargs)
         except requests.RequestException as request_exception:
             self._translate_exception(request_exception, url=url)
-        
-        self._raise_on_errors(response, url = url)
+
+        self._raise_on_errors(response, url=url)
         return response
+
+    def close(self):
+        self._http_session.close()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
+    def __del__(self):
+        self.close()
 
     def _raise_on_errors(self, response, url):
         if response.status_code == 200:
@@ -75,9 +84,11 @@ class HttpClient:
         if response.status_code == 401:
             raise api_exceptions.NotAuthorized(response.status_code, url=url)
         elif response.status_code == 404:
-            raise api_exceptions.ResourceNotFound(response.status_code, url=url)
+            raise api_exceptions.ResourceNotFound(
+                response.status_code, url=url)
         else:
-            raise api_exceptions.HttpError(response.status_code, url=url, request_response=response)
+            raise api_exceptions.HttpError(
+                response.status_code, url=url, request_response=response)
 
     def _translate_exception(self, request_exception, url):
         if isinstance(request_exception, requests.ConnectionError):
