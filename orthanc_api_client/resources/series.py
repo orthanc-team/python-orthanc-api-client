@@ -16,11 +16,11 @@ class Series(Resources):
         return self.get_instances_ids(orthanc_id=orthanc_id)[0]
 
     def get_parent_study_id(self, orthanc_id: str) -> str:
-        series = self._api_client.get_json(f"/{self._url_segment}/{orthanc_id}")
+        series = self._api_client.get_json(f"{self._url_segment}/{orthanc_id}")
         return series['ParentStudy']
 
     def get_ordered_instances_ids(self, orthanc_id: str) -> List[str]:
-        ordered_slices = self._api_client.get_json(f"/{self._url_segment}/{orthanc_id}/ordered-slices")
+        ordered_slices = self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/ordered-slices")
         return [ss[0] for ss in ordered_slices.get('SlicesShort')]
 
     def get_middle_instance_id(self, orthanc_id: str) -> str:
@@ -29,7 +29,7 @@ class Series(Resources):
 
     def get_preview_url(self, orthanc_id: str) -> str:
         middle_instance_id = self.get_middle_instance_id(orthanc_id=orthanc_id)
-        return f"/{self._url_segment}/{middle_instance_id}/preview"
+        return f"{self._url_segment}/{middle_instance_id}/preview"
 
     def anonymize(self, orthanc_id: str, replace_tags={}, keep_tags=[], delete_original=True, force=False) -> str:
         return self._anonymize(

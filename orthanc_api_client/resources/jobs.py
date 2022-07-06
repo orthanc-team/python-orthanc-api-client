@@ -15,7 +15,7 @@ class Jobs(Resources):
 
     def _post_job_action(self, orthanc_id: str, action: str):
         self._api_client.post(
-            endpoint=f"/{self._url_segment}/{orthanc_id}/{action}",
+            endpoint=f"{self._url_segment}/{orthanc_id}/{action}",
             data="")
 
     def retry(self, orthanc_id: str):

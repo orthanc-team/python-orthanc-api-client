@@ -10,10 +10,10 @@ class Instances(Resources):
         super().__init__(api_client=api_client, url_segment='instances')
 
     def get_file(self, orthanc_id: str) -> bytes:
-        return self._api_client.get_binary(f"/{self._url_segment}/{orthanc_id}/file")
+        return self._api_client.get_binary(f"{self._url_segment}/{orthanc_id}/file")
 
     def get_parent_series_id(self, orthanc_id: str) -> str:
-        instance = self._api_client.get_json(f"/{self._url_segment}/{orthanc_id}")
+        instance = self._api_client.get_json(f"{self._url_segment}/{orthanc_id}")
         return instance['ParentSeries']
 
     def get_parent_study_id(self, orthanc_id: str) -> str:
@@ -22,7 +22,7 @@ class Instances(Resources):
         )
 
     def get_tags(self, orthanc_id: str) -> Tags:
-        json_tags = self._api_client.get_json(f"/{self._url_segment}/{orthanc_id}/tags")
+        json_tags = self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/tags")
         return Tags(json_tags)
 
     def modify_bulk(self, orthanc_ids: List[str] = [], replace_tags: Any = {}, remove_tags: List[str] = [], delete_original: bool = True, force: bool = False) -> List[str]:
