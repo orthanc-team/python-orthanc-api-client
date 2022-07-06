@@ -1,3 +1,8 @@
+v 0.5.2
+=======
+
+- fixed relative url in `studies.merge`
+
 v 0.5.1
 =======
 
