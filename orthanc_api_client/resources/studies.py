@@ -95,7 +95,7 @@ class Studies(Resources):
             source_series_id = [source_series_id]
 
         return self._api_client.post(
-            endpoint=f"/studies/{target_study_id}/merge",
+            endpoint=f"{self._url_segment}/{target_study_id}/merge",
             json={
                 "Resources": source_series_id,
                 "KeepSource": keep_source
