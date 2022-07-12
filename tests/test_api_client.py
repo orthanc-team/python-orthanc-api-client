@@ -258,6 +258,37 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual(1, len(worklists))
         self.assertEqual('1.2.3.4', worklists[0]['StudyInstanceUID'])
 
+    def test_transfers_send_study(self):
+        self.oa.delete_all_content()
+        self.ob.delete_all_content()
+
+        dicom = generate_test_dicom_file(width=33, height=33, tags={'StudyInstanceUID': '1.2.3'})
+        instances_ids = self.oa.upload(dicom)
+        study_id = self.oa.studies.lookup('1.2.3')
+
+        job = self.oa.transfers.send('orthanc-b', resources_ids=study_id, resource_type=ResourceType.STUDY, compress=False)
+
+        self.assertEqual(JobType.PUSH_TRANSFER, job.info.type)
+        wait_until(job.is_complete, 5)
+
+        study_id = self.ob.studies.lookup('1.2.3')
+        self.assertIsNotNone(study_id)
+
+    def test_transfers_send_instances(self):
+        self.oa.delete_all_content()
+        self.ob.delete_all_content()
+
+        dicom = generate_test_dicom_file(width=33, height=33, tags={'StudyInstanceUID': '1.2.3'})
+        instances_ids = self.oa.upload(dicom)
+
+        job = self.oa.transfers.send('orthanc-b', resources_ids=instances_ids, resource_type=ResourceType.INSTANCE, compress=True)
+
+        self.assertEqual(JobType.PUSH_TRANSFER, job.info.type)
+        wait_until(job.is_complete, 5)
+
+        study_id = self.ob.studies.lookup('1.2.3')
+        self.assertIsNotNone(study_id)
+
 
     def test_attachments(self):
         self.oa.delete_all_content()

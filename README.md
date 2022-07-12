@@ -14,7 +14,7 @@ pip3 install orthanc-api-client
 Examples:
 
 ```python
-from orthanc_api_client import OrthancApiClient
+from orthanc_api_client import OrthancApiClient, ResourceType
 import datetime
 
 orthanc_a = OrthancApiClient('http://localhost:8042', user='orthanc', pwd='orthanc')
@@ -96,6 +96,13 @@ orthanc_a.modalities.retrieve_study(
     dicom_id=remote_studies[0].dicom_id
 )
 
+# send using transfer plugin
+orthanc_a.transfers.send(
+    target_peer='orthanc-b',
+    resources_ids=[study_id],
+    resource_type=ResourceType.STUDY,
+    compress=True
+)
 ```
 
 ## helpers methods

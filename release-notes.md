@@ -1,3 +1,8 @@
+v 0.5.6
+=======
+
+- added `client.transfers.send`
+
 v 0.5.5
 =======
 

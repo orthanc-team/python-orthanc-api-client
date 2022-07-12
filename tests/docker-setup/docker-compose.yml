@@ -14,7 +14,10 @@ services:
         {"orthanc-a": ["ORTHANCA", "orthanc-a", 4242], "orthanc-b": ["ORTHANCB", "orthanc-b", 4242], "orthanc-c": ["ORTHANCC", "orthanc-c", 4242]}
       ORTHANC__DICOM_WEB__SERVERS: |
         {"orthanc-b": ["http://orthanc-b:8042/dicom-web/", "test", "test"]}
+      ORTHANC__ORTHANC_PEERS: |
+        {"orthanc-b": ["http://orthanc-b:8042/", "test", "test"]}
 
+      TRANSFERS_PLUGIN_ENABLED: "true"
       ORTHANC__CHECK_REVISIONS: "true"
 
   orthanc-b:
@@ -33,6 +36,7 @@ services:
       ORTHANC__DICOM_WEB__SERVERS: |
         {"orthanc-a": ["http://orthanc-a:8042/dicom-web/", "test", "test"]}
 
+      TRANSFERS_PLUGIN_ENABLED: "true"
       ORTHANC__CHECK_REVISIONS: "false"
 
   orthanc-c:
@@ -49,3 +53,5 @@ services:
         {"orthanc-a": ["ORTHANCA", "orthanc-a", 4242], "orthanc-b": ["ORTHANCB", "orthanc-b", 4242], "orthanc-c": ["ORTHANCC", "orthanc-c", 4242]}
       ORTHANC__DICOM_WEB__SERVERS: |
         {"orthanc-a": ["http://orthanc-a:8042/dicom-web/", "test", "test"]}
+
+      TRANSFERS_PLUGIN_ENABLED: "true"
