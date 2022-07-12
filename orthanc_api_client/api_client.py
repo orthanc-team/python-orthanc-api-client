@@ -13,6 +13,7 @@ from .exceptions import *
 from .dicomweb_servers import DicomWebServers
 from .modalities import DicomModalities
 from .change import Change, ChangeType, ResourceType
+from .transfers import Transfers
 
 
 logger = logging.getLogger('api-client')
@@ -51,6 +52,7 @@ class OrthancApiClient(HttpClient):
         self.dicomweb_servers = DicomWebServers(api_client=self)
         self.modalities = DicomModalities(api_client=self)
         self.jobs = Jobs(api_client=self)
+        self.transfers = Transfers(api_client=self)
 
     def wait_started(self, timeout: float = None) -> bool:
         return wait_until(self.is_alive, timeout)
