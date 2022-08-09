@@ -1,3 +1,8 @@
+v 0.5.7
+=======
+
+- added `client.upload_file_dicom_web`
+
 v 0.5.6
 =======
 
