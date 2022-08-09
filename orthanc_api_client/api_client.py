@@ -4,6 +4,7 @@ import typing
 import datetime
 from typing import List
 from urllib.parse import urlunsplit, urlencode
+from urllib3.filepost import encode_multipart_formdata, choose_boundary
 
 from .http_client import HttpClient
 from .resources import Resources, Instances, Series, Studies, Jobs
@@ -155,6 +156,36 @@ class OrthancApiClient(HttpClient):
                 instances_ids.extend(self.upload_folder(full_path, ignore_errors=ignore_errors, skip_extensions=skip_extensions))
         
         return instances_ids
+
+    def upload_file_dicom_web(self, path, ignore_errors: bool = False):
+        """Uploads a file to Orthanc through its DicomWeb API (only DICOM files, no zip files)
+
+        Parameters
+        ----------
+        ignore_errors: if True: does not raise exceptions
+        """
+        logger.info(f"uploading {path} through DicomWeb STOW-RS")
+
+        def encode_multipart_related(fields, boundary=None):
+            if boundary is None:
+                boundary = choose_boundary()
+
+            body, _ = encode_multipart_formdata(fields, boundary)
+            content_type = str('multipart/related; type=application/dicom; boundary=%s' % boundary)
+
+            return body, content_type
+
+        with open(path, 'rb') as f:
+            raw_file = f.read()
+
+        files = {'file': ('dicomfile', raw_file, 'application/dicom')}
+        body, content_type = encode_multipart_related(fields=files)
+        r = self.post(endpoint="/dicom-web/studies",
+                      data=body,
+                      headers = {
+                          'Accept':'application/json',
+                          'Content-Type': content_type
+                      })
 
     def lookup(self, needle: str, filter: str = None) -> List[str]:
         """searches the Orthanc DB for the 'needle'

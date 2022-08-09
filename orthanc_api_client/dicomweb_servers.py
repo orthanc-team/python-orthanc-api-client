@@ -19,7 +19,7 @@ class DicomWebServers:
 
         Returns
         -------
-        Nothing, will raise if failing 
+        The job that has been created
         """
 
         if isinstance(resources_ids, str):
