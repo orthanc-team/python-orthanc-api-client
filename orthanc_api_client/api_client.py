@@ -4,12 +4,11 @@ import typing
 import datetime
 from typing import List
 from urllib.parse import urlunsplit, urlencode
-from urllib3.filepost import encode_multipart_formdata, choose_boundary
 
 from .http_client import HttpClient
 from .resources import Resources, Instances, Series, Studies, Jobs
 
-from .helpers import wait_until
+from .helpers import wait_until, encode_multipart_related
 from .exceptions import *
 from .dicomweb_servers import DicomWebServers
 from .modalities import DicomModalities
@@ -157,28 +156,23 @@ class OrthancApiClient(HttpClient):
         
         return instances_ids
 
-    def upload_file_dicom_web(self, path, ignore_errors: bool = False):
+    def upload_files_dicom_web(self, paths: List[str], ignore_errors: bool = False) -> any:
         """Uploads a file to Orthanc through its DicomWeb API (only DICOM files, no zip files)
 
         Parameters
         ----------
         ignore_errors: if True: does not raise exceptions
         """
-        logger.info(f"uploading {path} through DicomWeb STOW-RS")
+        logger.info(f"uploading {len(paths)} files through DicomWeb STOW-RS")
 
-        def encode_multipart_related(fields, boundary=None):
-            if boundary is None:
-                boundary = choose_boundary()
+        files = {}
+        counter = 1
+        for path in paths:
+            with open(path, 'rb') as f:
+                raw_file = f.read()
+                files[f'file{counter}'] = (str(path), raw_file, 'application/dicom')
+                counter += 1
 
-            body, _ = encode_multipart_formdata(fields, boundary)
-            content_type = str('multipart/related; type=application/dicom; boundary=%s' % boundary)
-
-            return body, content_type
-
-        with open(path, 'rb') as f:
-            raw_file = f.read()
-
-        files = {'file': ('dicomfile', raw_file, 'application/dicom')}
         body, content_type = encode_multipart_related(fields=files)
         r = self.post(endpoint="/dicom-web/studies",
                       data=body,
@@ -186,6 +180,7 @@ class OrthancApiClient(HttpClient):
                           'Accept':'application/json',
                           'Content-Type': content_type
                       })
+        return r.json()
 
     def lookup(self, needle: str, filter: str = None) -> List[str]:
         """searches the Orthanc DB for the 'needle'

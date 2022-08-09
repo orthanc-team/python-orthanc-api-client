@@ -8,6 +8,7 @@ from .helpers_internal import write_dataset_to_bytes
 from pydicom.dataset import Dataset, FileDataset
 from pydicom.uid import ExplicitVRLittleEndian
 import pydicom._storage_sopclass_uids
+from urllib3.filepost import encode_multipart_formdata, choose_boundary
 
 
 def wait_until(somepredicate, timeout, period=0.1, *args, **kwargs) -> bool:
@@ -118,3 +119,13 @@ def generate_test_dicom_file(
     ds.PixelData = bytes(buffer)
 
     return write_dataset_to_bytes(ds)
+
+
+def encode_multipart_related(fields, boundary=None):
+    if boundary is None:
+        boundary = choose_boundary()
+
+    body, _ = encode_multipart_formdata(fields, boundary)
+    content_type = str('multipart/related; type=application/dicom; boundary=%s' % boundary)
+
+    return body, content_type

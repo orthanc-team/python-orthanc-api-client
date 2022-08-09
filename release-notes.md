@@ -1,3 +1,11 @@
+v 0.5.8
+=======
+
+- **BREAKING CHANGE:** renamed `client.upload_file_dicom_web` into `client.upload_files_dicom_web`
+  and added support for multiple files
+- any HTTP status between 200 and 300 is now considered as a success and won't
+  raise exceptions anymore
+
 v 0.5.7
 =======
 
