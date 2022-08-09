@@ -113,23 +113,15 @@ class TestApiClient(unittest.TestCase):
         self.oa.instances.delete(orthanc_ids=instances_ids)
         self.assertEqual(0, len(self.oa.studies.get_all_ids()))
 
-    def test_upload_folder(self):
-        self.oa.delete_all_content()
-        instances_ids = self.oa.upload_folder("/mnt/", skip_extensions=['.zip'])
-
-        self.assertLessEqual(1, len(instances_ids))
-        self.oa.instances.delete(orthanc_ids=instances_ids)
-        self.assertEqual(0, len(self.oa.studies.get_all_ids()))
-
     def test_upload_folder_ignore_errors(self):
         instances_ids = self.oa.upload_folder(here, skip_extensions=['.zip'], ignore_errors=True)  # here contains __init__.py which is invalid
 
         self.assertLessEqual(1, len(instances_ids))
 
-    def test_upload_dicom_web(self):
+    def test_upload_file_dicom_web(self):
         self.oa.delete_all_content()
 
-        self.oa.upload_file_dicom_web(here / "stimuli/CT_small.dcm")
+        self.oa.upload_files_dicom_web([here / "stimuli/CT_small.dcm"])
 
         self.assertEqual(1, len(self.oa.studies.get_all_ids()))
 

@@ -78,7 +78,7 @@ class HttpClient:
         self.close()
 
     def _raise_on_errors(self, response, url):
-        if response.status_code == 200:
+        if response.status_code >= 200 and response.status_code < 300:
             return
 
         if response.status_code == 401:
