@@ -1,5 +1,5 @@
 from strenum import StrEnum
-from .tags import SimplifiedTags
+from .helpers import wait_until
 
 class JobType(StrEnum):
 
@@ -67,6 +67,9 @@ class Job:
         self.refresh()
 
         return self._info.status in [JobStatus.SUCCESS, JobStatus.FAILURE]
+
+    def wait_completed(self, timeout: float = None, polling_interval: float = 1) -> bool:
+        return wait_until(self.is_complete, timeout=timeout, polling_interval=polling_interval)
 
     def _load_info(self):
         json_job = self._api_client.jobs.get_json(self.orthanc_id)

@@ -1,3 +1,8 @@
+v 0.6.1
+=======
+
+- added `job.wait_completed()'
+
 v 0.6.0
 =======
 
