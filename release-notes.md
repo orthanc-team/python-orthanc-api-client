@@ -1,3 +1,8 @@
+v 0.6.0
+=======
+
+- added `client.peers.send()'
+
 v 0.5.8
 =======
 
