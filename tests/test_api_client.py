@@ -308,7 +308,7 @@ class TestApiClient(unittest.TestCase):
         job = self.oa.transfers.send('orthanc-b', resources_ids=instances_ids, resource_type=ResourceType.INSTANCE, compress=True)
 
         self.assertEqual(JobType.PUSH_TRANSFER, job.info.type)
-        wait_until(job.is_complete, 5)
+        job.wait_completed(timeout=5)
 
         study_id = self.ob.studies.lookup('1.2.3')
         self.assertIsNotNone(study_id)

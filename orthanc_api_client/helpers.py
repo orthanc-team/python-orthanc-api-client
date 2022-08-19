@@ -11,21 +11,21 @@ import pydicom._storage_sopclass_uids
 from urllib3.filepost import encode_multipart_formdata, choose_boundary
 
 
-def wait_until(somepredicate, timeout, period=0.1, *args, **kwargs) -> bool:
+def wait_until(some_predicate, timeout, polling_interval=0.1, *args, **kwargs) -> bool:
   
-  if timeout is None:
-    while True:
-        if somepredicate(*args, **kwargs): 
-            return True
-        time.sleep(period)
-    return False      
-  else:
-    mustend = time.time() + timeout
-    while time.time() < mustend:
-        if somepredicate(*args, **kwargs):
-            return True
-        time.sleep(period)
-    return False
+    if timeout is None:
+        while True:
+            if some_predicate(*args, **kwargs):
+                return True
+            time.sleep(polling_interval)
+        return False
+    else:
+        end_time = time.time() + timeout
+        while time.time() < end_time:
+            if some_predicate(*args, **kwargs):
+                return True
+            time.sleep(polling_interval)
+        return False
 
 
 def get_random_dicom_date(date_from: datetime.date, date_to: datetime.date = datetime.date.today()) -> str:
