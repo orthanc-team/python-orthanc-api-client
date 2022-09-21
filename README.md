@@ -96,6 +96,19 @@ orthanc_a.modalities.retrieve_study(
     dicom_id=remote_studies[0].dicom_id
 )
 
+# send to a remote modality
+orthanc_a.modalities.send(
+    modality='orthanc-b',
+    resources_ids=[study_id],
+    synchronous=True
+)
+
+# send to a remote peer (synchronous)
+orthanc_a.peers.send(
+    target_peer='orthanc-b',
+    resources_ids=[study_id]
+)
+
 # send using transfer plugin
 orthanc_a.transfers.send(
     target_peer='orthanc-b',
@@ -103,6 +116,7 @@ orthanc_a.transfers.send(
     resource_type=ResourceType.STUDY,
     compress=True
 )
+
 ```
 
 ## helpers methods

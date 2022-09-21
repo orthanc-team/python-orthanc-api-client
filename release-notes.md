@@ -1,3 +1,10 @@
+v 0.7.0
+=======
+
+- **BREAKING CHANGE:** renamed the `modality` argument of `client.modalities.send()` and 
+  `client.modalities.store()` into `target_modality` to be more consistent with `send()` methods.
+
+
 v 0.6.1
 =======
 
