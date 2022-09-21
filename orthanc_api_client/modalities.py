@@ -68,11 +68,11 @@ class DicomModalities:
         if r.status_code == 200:
             return r.json()
 
-    def store(self, modality: str, resources_ids: Union[List[str], str], synchronous: bool = True):
+    def store(self, target_modality: str, resources_ids: Union[List[str], str], synchronous: bool = True):
         """alias for send"""
-        return self.send(modality=modality, resources_ids=resources_ids, synchronous=synchronous)
+        return self.send(target_modality=target_modality, resources_ids=resources_ids, synchronous=synchronous)
 
-    def send(self, modality: str, resources_ids: Union[List[str], str], synchronous: bool = True):
+    def send(self, target_modality: str, resources_ids: Union[List[str], str], synchronous: bool = True):
         """sends a list of resources to a remote DICOM modality
 
         Returns
@@ -84,7 +84,7 @@ class DicomModalities:
             resources_ids = [resources_ids]
 
         r = self._api_client.post(
-            endpoint=f"{self._url_segment}/{modality}/store",
+            endpoint=f"{self._url_segment}/{target_modality}/store",
             json={
                 "Resources": resources_ids,
                 "Synchronous": synchronous
