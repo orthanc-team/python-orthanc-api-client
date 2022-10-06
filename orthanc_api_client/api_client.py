@@ -92,7 +92,7 @@ class OrthancApiClient(HttpClient):
         the instance id of the uploaded file or None when uploading a zip file
         """
         try:
-            response = self.post('/instances', data=buffer)
+            response = self.post('instances', data=buffer)
             if isinstance(response.json(), list):
                 return [x['ID'] for x in response.json()]
             else:
@@ -176,7 +176,7 @@ class OrthancApiClient(HttpClient):
                 counter += 1
 
         body, content_type = encode_multipart_related(fields=files)
-        r = self.post(endpoint="/dicom-web/studies",
+        r = self.post(endpoint="dicom-web/studies",
                       data=body,
                       headers = {
                           'Accept':'application/json',

@@ -1,3 +1,8 @@
+v 0.7.1
+=======
+
+- fixed absolute url in `upload` methods.
+
 v 0.7.0
 =======
 
