@@ -32,6 +32,7 @@ instances_ids = orthanc_a.upload_file('/home/o/files/a.dcm')
 instances_ids = orthanc_a.upload_file('/home/o/files/a.zip')
 with open('/home/o/files/a.dcm', 'rb') as f:
     instances_ids = orthanc_a.upload(f.read())
+orthanc_a.upload_files_dicom_web(['/home/o/files/a.dcm'])
     
 # list all resources ids
 all_patients_ids = orthanc_a.patients.get_all_ids()
