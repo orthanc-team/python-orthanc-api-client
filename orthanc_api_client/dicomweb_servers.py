@@ -12,7 +12,7 @@ class DicomWebServers:
 
     def stow_rs(self, target_server: str, resources_ids: Union[List[str], str], synchronous: bool = True):
         """alias for send"""
-        return self.send(target_server=target_server, resources_ids=resources_ids, synchronous=synchronous)
+        return self.send_asynchronous(target_server=target_server, resources_ids=resources_ids, synchronous=synchronous)
 
     def send_asynchronous(self, target_server: str, resources_ids: Union[List[str], str]) -> Job:
         """sends a list of resources to a remote DicomWeb server
