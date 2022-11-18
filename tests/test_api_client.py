@@ -180,7 +180,7 @@ class TestApiClient(unittest.TestCase):
         middle_instance_id = self.oa.series.get_middle_instance_id(orthanc_id=series_id)
         self.assertEqual(instance_id, middle_instance_id)
 
-    def test_stow_rs(self):
+    def test_send_asynchronous(self):
         self.oa.delete_all_content()
         self.ob.delete_all_content()
 
