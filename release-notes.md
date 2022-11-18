@@ -1,3 +1,9 @@
+
+v 0.8.0
+=======
+
+- **BREAKING CHANGE:** removed the `stow_rs` method from the `DicomWebServers` class
+
 v 0.7.1
 =======
 
