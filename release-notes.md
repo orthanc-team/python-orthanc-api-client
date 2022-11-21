@@ -1,4 +1,9 @@
 
+v 0.8.1
+=======
+
+- made HttpClient available for lib users
+
 v 0.8.0
 =======
 
