@@ -4,6 +4,7 @@ from .resources import Resources
 from ..tags import Tags
 from ..exceptions import *
 from ..study import StudyInfo, Study
+from ..helpers import to_dicom_date
 from typing import List, Any, Union
 
 
@@ -23,8 +24,16 @@ class Studies(Resources):
 
         return instances_ids
 
+    def get_series_ids(self, orthanc_id: str) -> List[str]:
+        study_info = self._api_client.get_json(f"{self._url_segment}/{orthanc_id}")
+        return study_info["Series"]
+
     def get_first_instance_id(self, orthanc_id: str) -> str:
         return self.get_instances_ids(orthanc_id=orthanc_id)[0]
+
+    def get_parent_patient_id(self, orthanc_id: str) -> str:
+        study_info = self._api_client.get_json(f"{self._url_segment}/{orthanc_id}")
+        return study_info['ParentPatient']
 
     def lookup(self, dicom_id: str) -> str:
         """
@@ -102,3 +111,39 @@ class Studies(Resources):
             }
         )
 
+    def attach_pdf(self, study_id, pdf_path, series_description, datetime = None):
+        """
+        Creates a new instance with the PDF embedded.  This instance is a part of a new series attached to an existing study
+
+        Returns:
+            the instance_orthanc_id of the created instance
+        """
+        series_tags = {}
+        series_tags["SeriesDescription"] = series_description
+        if datetime is not None:
+            series_tags["SeriesDate"] = to_dicom_date(datetime)
+            series_tags["SeriesTime"] = to_dicom_date(datetime)
+
+        return self._api_client.create_pdf(pdf_path, series_tags, parent_id = study_id)
+
+    def get_pdf_instances(self, study_id, max_instance_count_in_series_to_analyze = 2):
+        """
+        Returns the instanceIds of the instances containing PDF
+        Args:
+            study_id: The id of the study to search in
+            max_instance_count_in_series_to_analyze: skip series containing too many instances (they are very unlikely to contain pdf reports).  set it to 0 to disable the check.
+
+        Returns: an array of instance orthancId
+        """
+
+        pdf_ids = []
+        series_list = self.get_series_ids(study_id)
+
+        for series_id in series_list:
+            instances_ids = self._api_client.series.get_instances_ids(series_id)
+            if max_instance_count_in_series_to_analyze > 0 and len(instances_ids) <= max_instance_count_in_series_to_analyze:
+                for instance_id in instances_ids:
+                    if self._api_client.instances.is_pdf(instance_id):
+                        pdf_ids.append(instance_id)
+
+        return pdf_ids

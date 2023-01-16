@@ -21,6 +21,11 @@ class Instances(Resources):
             orthanc_id=self.get_parent_series_id(orthanc_id)
         )
 
+    def get_parent_patient_id(self, orthanc_id: str) -> str:
+        return self._api_client.series.get_parent_patient_id(
+            orthanc_id=self.get_parent_series_id(orthanc_id)
+        )
+
     def get_tags(self, orthanc_id: str) -> Tags:
         json_tags = self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/tags")
         return Tags(json_tags)
@@ -75,3 +80,32 @@ class Instances(Resources):
         """
         return self._lookup(filter='Instance', dicom_id=dicom_id)
 
+    def is_pdf(self, instance_id):
+        """
+        checks if the instance contains a pdf
+        Args:
+            instance_id: The id of the instance to check
+
+        Returns: True if the instance contain a pdf, False ortherwise
+        """
+        tags = self.get_tags(instance_id)
+        MIME_type = tags.get('MIMETypeOfEncapsulatedDocument')
+        return MIME_type == 'application/pdf'
+
+    def download_pdf(self, instance_id, path):
+        """
+        downloads the pdf from the instance (if the instance does contain a PDF !)
+        Args:
+            instance_id: The id of the instance
+            path: the path where to save the PDF file
+
+        Returns:
+            the path where the PDF has been saved (same as input argument)
+        """
+
+        response = self._api_client.get(
+            endpoint = f"instances/{instance_id}/pdf")
+        with open(path, 'wb') as f:
+            f.write(response.content)
+
+        return path
