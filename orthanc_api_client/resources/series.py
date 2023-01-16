@@ -19,6 +19,11 @@ class Series(Resources):
         series = self._api_client.get_json(f"{self._url_segment}/{orthanc_id}")
         return series['ParentStudy']
 
+    def get_parent_patient_id(self, orthanc_id: str) -> str:
+        return self._api_client.studies.get_parent_patient_id(
+            self.get_parent_study_id(orthanc_id)
+        )
+
     def get_ordered_instances_ids(self, orthanc_id: str) -> List[str]:
         ordered_slices = self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/ordered-slices")
         return [ss[0] for ss in ordered_slices.get('SlicesShort')]

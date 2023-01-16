@@ -1,3 +1,4 @@
+import base64
 import os
 import logging
 import typing
@@ -255,3 +256,114 @@ class OrthancApiClient(HttpClient):
         last_sequence_id = response['Last']
 
         return changes, last_sequence_id, done
+
+
+    def create_pdf(self, pdf_path, dicom_tags, parent_id = None):
+        """
+        Creates an instance with an embedded pdf file.  If not parent_id is specified, this instance is part of a new study.
+
+        dicom_tags = {
+            'PatientID': '1234',
+            'PatientName': 'Toto',
+            'AccessionNumber': '1234',
+            'PatientSex' : 'M',
+            'PatientBirthDate' : '20000101',
+            'StudyDescription': 'test'
+            }
+        )
+        If you do not provide any value for 'SOPClassUID', the 'Encapsulated PDF Storage' will be used ('1.2.840.10008.5.1.4.1.1.104.1')
+
+        Returns:
+            the instance_orthanc_id of the created instance
+        """
+        if 'SOPClassUID' not in dicom_tags:
+            dicom_tags['SOPClassUID'] = '1.2.840.10008.5.1.4.1.1.104.1'
+
+        return self._create_instance_from_data_path(data_path = pdf_path,
+                                                content_type = 'application/pdf',
+                                                dicom_tags = dicom_tags,
+                                                parent_id = parent_id)
+
+    def _create_instance_from_data_path(self, data_path, content_type, dicom_tags, parent_id = None):
+        """
+        Creates an instance with embedded data.  If not parent_id is specified, this instance is part of a new study.
+
+        Returns:
+            the instance_orthanc_id of the created instance
+        """
+        with open(data_path, 'rb') as f:
+            content = f.read()
+
+        return self._create_instance_from_data(content, content_type, dicom_tags, parent_id)
+
+    def _create_instance_from_data(self, content, content_type, dicom_tags, parent_id = None):
+
+        request_data = {
+            'Tags': dicom_tags,
+            'Content': "data:{content_type};base64,{data}".format(content_type = content_type, data = base64.b64encode(content).decode('utf-8'))
+        }
+
+        if parent_id is not None:
+            request_data['Parent'] = parent_id
+
+        response = self.post(
+            endpoint = 'tools/create-dicom',
+            json = request_data
+        )
+        return response.json()['ID']
+
+
+    def create_instance_from_png(self, image_path, dicom_tags, parent_id = None):
+        """
+        Creates an instance with an embedded image.  If not parent_id is specified, this instance is part of a new study.
+
+        Note: it is recommended to provide at least all these tags:
+        dicom_tags = {
+            'PatientID': '1234',
+            'PatientName': 'Toto',
+            'AccessionNumber': '1234',
+            'PatientSex' : 'M',
+            'PatientBirthDate' : '20000101',
+            'StudyDescription': 'test',
+            'Modality': 'MR'}
+        )
+        If you do not provide any value for 'SOPClassUID', the 'CR Image Storage' will be used ('1.2.840.10008.5.1.4.1.1.1')
+
+        Returns:
+            the instance_orthanc_id of the created instance
+        """
+        if 'SOPClassUID' not in dicom_tags:
+            dicom_tags['SOPClassUID'] = '1.2.840.10008.5.1.4.1.1.1'
+
+        return self._create_instance_from_data_path(data_path = image_path,
+                                                content_type = 'image/png',
+                                                dicom_tags = dicom_tags,
+                                                parent_id = parent_id)
+
+    def create_instance_from_jpeg(self, image_path, dicom_tags, parent_id = None):
+        """
+        Creates an instance with an embedded image.  If not parent_id is specified, this instance is part of a new study.
+
+        Note: it is recommended to provide at least all these tags:
+        dicom_tags = {
+            'PatientID': '1234',
+            'PatientName': 'Toto',
+            'AccessionNumber': '1234',
+            'PatientSex' : 'M',
+            'PatientBirthDate' : '20000101',
+            'StudyDescription': 'test',
+            'Modality': 'MR'}
+        )
+        If you do not provide any value for 'SOPClassUID', the 'CR Image Storage' will be used ('1.2.840.10008.5.1.4.1.1.1')
+
+        Returns:
+            the instance_orthanc_id of the created instance
+        """
+
+        if 'SOPClassUID' not in dicom_tags:
+            dicom_tags['SOPClassUID'] = '1.2.840.10008.5.1.4.1.1.1'
+
+        return self._create_instance_from_data_path(data_path = image_path,
+                                                content_type = 'image/jpeg',
+                                                dicom_tags = dicom_tags,
+                                                parent_id = parent_id)

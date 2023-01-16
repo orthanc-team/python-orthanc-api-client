@@ -8,6 +8,7 @@ from orthanc_api_client.helpers import to_dicom_date, wait_until
 import orthanc_api_client.exceptions as api_exceptions
 import pathlib
 import asyncio
+import tempfile
 
 import os
 
@@ -19,8 +20,8 @@ class TestApiClient(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        subprocess.run(["docker-compose", "down", "-v"], cwd=here/"docker-setup")
-        subprocess.run(["docker-compose", "up", "--build", "-d"], cwd=here/"docker-setup")
+        subprocess.run(["docker", "compose", "down", "-v"], cwd=here/"docker-setup")
+        subprocess.run(["docker", "compose", "up", "--build", "-d"], cwd=here/"docker-setup")
 
         cls.oa = OrthancApiClient('http://localhost:10042', user='test', pwd='test')
         cls.oa.wait_started()
@@ -33,7 +34,7 @@ class TestApiClient(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        subprocess.run(["docker-compose", "down", "-v"], cwd=here/"docker-setup")
+        subprocess.run(["docker", "compose", "down", "-v"], cwd=here/"docker-setup")
 
     def test_is_alive(self):
         self.assertTrue(self.oa.is_alive())
@@ -107,7 +108,7 @@ class TestApiClient(unittest.TestCase):
 
     def test_upload_folder(self):
         self.oa.delete_all_content()
-        instances_ids = self.oa.upload_folder(here / "stimuli", skip_extensions=['.zip'])
+        instances_ids = self.oa.upload_folder(here / "stimuli", skip_extensions=['.zip', '.pdf', '.png'])
 
         self.assertLessEqual(1, len(instances_ids))
         self.oa.instances.delete(orthanc_ids=instances_ids)
@@ -477,8 +478,6 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual(self.oa.studies.get_tags(study_id)['PatientName'], self.oa.studies.get_tags(anon_study_id)['PatientName'])
         self.assertNotEqual('ANON', self.oa.studies.get_tags(anon_study_id)['PatientName'])
 
-        instances_ids = self.oa.upload_folder(here / "stimuli", skip_extensions=['.zip'])
-
     def test_modify_series_instance_by_instance(self):
         self.oa.delete_all_content()
 
@@ -725,6 +724,88 @@ class TestApiClient(unittest.TestCase):
 
         self.assertEqual(1, len(self.oa.studies.get_all_ids()))
         self.assertEqual(2, len(self.oa.series.get_all_ids()))
+
+    def test_get_pdf_instances(self):
+        self.oa.delete_all_content()
+
+        # upload an instance with a PDF file
+        instances_ids = self.oa.upload_file(here / "stimuli/OT000000")
+        study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
+
+        self.assertEqual(instances_ids, self.oa.studies.get_pdf_instances(study_id))
+
+    def test_create_pdf(self):
+        self.oa.delete_all_content()
+
+        # create a pdf
+        instance_id = self.oa.create_pdf(here / "stimuli/sample.pdf", {'PatientID' : '1234', 'PatientName' : 'TOTO'})
+
+        self.assertIsNotNone(instance_id)
+
+        study_id = self.oa.instances.get_parent_study_id(instance_id)
+        tags = self.oa.studies.get_tags(study_id)
+
+        self.assertEqual('1234', tags['PatientID'])
+        self.assertEqual('TOTO', tags['PatientName'])
+        self.assertTrue(self.oa.instances.is_pdf(instance_id))
+        self.assertEqual([instance_id], self.oa.studies.get_pdf_instances(study_id))
+
+    def test_attachPdf(self):
+        self.oa.delete_all_content()
+        #upload a study
+        original_pdf_path = here / "stimuli/sample.pdf"
+        instances_id = self.oa.upload_folder(here / 'stimuli/MR/Brain/1')
+        original_study_id = self.oa.instances.get_parent_study_id(instances_id[0])
+
+        original_study = self.oa.studies.get(original_study_id)
+
+        # attach a pdf to the study
+        now = datetime.datetime.now()
+        pdf_instance_id = self.oa.studies.attach_pdf(
+            pdf_path = original_pdf_path,
+            study_id = original_study_id,
+            series_description = 'Protocole PDF',
+            datetime = now
+        )
+
+        self.assertIsNotNone(pdf_instance_id)
+        self.assertEqual(original_study_id, self.oa.instances.get_parent_study_id(pdf_instance_id)) # make sure the pdf is part of the study
+        pdf_tags = self.oa.instances.get_tags(pdf_instance_id)
+
+        self.assertEqual(original_study.patient_main_dicom_tags.get('PatientID'), pdf_tags['PatientID'])
+        self.assertEqual(original_study.patient_main_dicom_tags.get('PatientName'), pdf_tags['PatientName'])
+        self.assertEqual(original_study.main_dicom_tags.get('StudyInstanceUID'), pdf_tags['StudyInstanceUID'])
+        self.assertEqual('Protocole PDF', pdf_tags['SeriesDescription'])
+        self.assertEqual(to_dicom_date(now), pdf_tags['SeriesDate'])
+        self.assertEqual(to_dicom_date(now), pdf_tags['SeriesTime'])
+        self.assertEqual([pdf_instance_id], self.oa.studies.get_pdf_instances(original_study_id))
+
+        # download the pdf and compare with the original file
+        with tempfile.NamedTemporaryFile(delete = False) as f:
+            self.oa.instances.download_pdf(pdf_instance_id, f.name)
+
+            pdf_content_after_download = open(f.name, 'rb').read()
+            pdf_content_original = open(original_pdf_path, 'rb').read()
+        self.assertEqual(pdf_content_original, pdf_content_after_download)
+
+        f.delete = True
+        f.close()
+
+    def test_create_png(self):
+        self.oa.delete_all_content()
+
+        # create an instance from a png
+        instance_id = self.oa.create_instance_from_png(here / "stimuli/orthanc-logo.png", {'PatientID' : '1234', 'PatientName' : 'ORTHANC-TEAM'})
+        instance_tags = self.oa.instances.get_tags(instance_id)
+
+        self.assertIsNotNone(instance_id)
+        study = self.oa.studies.get(self.oa.instances.get_parent_study_id(instance_id))
+
+        self.assertEqual('1234', study.patient_main_dicom_tags.get('PatientID'))
+        self.assertEqual('ORTHANC-TEAM', study.patient_main_dicom_tags.get('PatientName'))
+        self.assertEqual('146', instance_tags['Columns'])
+        self.assertEqual('135', instance_tags['Rows'])
+        self.assertEqual(to_dicom_date(datetime.date.today()), instance_tags['StudyDate'])
 
 
 if __name__ == '__main__':
