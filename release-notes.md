@@ -1,3 +1,7 @@
+v 0.8.2
+=======
+
+- added pdf (and png/jpg) import tools
 
 v 0.8.1
 =======
