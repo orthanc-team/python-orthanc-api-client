@@ -9,7 +9,7 @@ import orthanc_api_client.exceptions as api_exceptions
 import pathlib
 import asyncio
 import tempfile
-
+import shutil
 import os
 
 here = pathlib.Path(__file__).parent.resolve()
@@ -734,6 +734,32 @@ class TestApiClient(unittest.TestCase):
 
         self.assertEqual(instances_ids, self.oa.studies.get_pdf_instances(study_id))
 
+    def test_is_pdf_instance(self):
+        self.oa.delete_all_content()
+        # upload an instance with a PDF file
+        instances_ids = self.oa.upload_file(here / "stimuli/OT000000")
+        self.assertTrue(self.oa.instances.is_pdf(instances_ids[0]))
+
+        # test it return false with a non PDF file
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        self.assertFalse(self.oa.instances.is_pdf(instances_ids[0]))
+
+    def test_downloadPdf(self):
+        self.oa.delete_all_content()
+
+        # upload an instance with a PDF file
+        instances_ids = self.oa.upload_file(here / "stimuli/OT000000")
+
+        path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.tmp'))
+        if os.path.exists(path):
+            shutil.rmtree(path)
+        os.makedirs(path)
+        file_path = os.path.join(path, '%s.pdf' % instances_ids[0])
+        pdf_path = self.oa.instances.download_pdf(instances_ids[0], file_path)
+        self.assertTrue(os.path.exists(pdf_path))
+        shutil.rmtree(path)
+        self.assertFalse(os.path.exists(pdf_path))
+
     def test_create_pdf(self):
         self.oa.delete_all_content()
 
@@ -750,7 +776,7 @@ class TestApiClient(unittest.TestCase):
         self.assertTrue(self.oa.instances.is_pdf(instance_id))
         self.assertEqual([instance_id], self.oa.studies.get_pdf_instances(study_id))
 
-    def test_attachPdf(self):
+    def test_attach_pdf(self):
         self.oa.delete_all_content()
         #upload a study
         original_pdf_path = here / "stimuli/sample.pdf"
