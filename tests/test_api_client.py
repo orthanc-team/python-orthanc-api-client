@@ -729,7 +729,7 @@ class TestApiClient(unittest.TestCase):
         self.oa.delete_all_content()
 
         # upload an instance with a PDF file
-        instances_ids = self.oa.upload_file(here / "stimuli/OT000000")
+        instances_ids = self.oa.upload_file(here / "stimuli/encapsulated_pdf_instance.dcm")
         study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
 
         self.assertEqual(instances_ids, self.oa.studies.get_pdf_instances(study_id))
@@ -737,7 +737,7 @@ class TestApiClient(unittest.TestCase):
     def test_is_pdf_instance(self):
         self.oa.delete_all_content()
         # upload an instance with a PDF file
-        instances_ids = self.oa.upload_file(here / "stimuli/OT000000")
+        instances_ids = self.oa.upload_file(here / "stimuli/encapsulated_pdf_instance.dcm")
         self.assertTrue(self.oa.instances.is_pdf(instances_ids[0]))
 
         # test it return false with a non PDF file
@@ -748,7 +748,7 @@ class TestApiClient(unittest.TestCase):
         self.oa.delete_all_content()
 
         # upload an instance with a PDF file
-        instances_ids = self.oa.upload_file(here / "stimuli/OT000000")
+        instances_ids = self.oa.upload_file(here / "stimuli/encapsulated_pdf_instance.dcm")
 
         path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.tmp'))
         if os.path.exists(path):
