@@ -147,3 +147,19 @@ class Studies(Resources):
                         pdf_ids.append(instance_id)
 
         return pdf_ids
+
+    def download_study(self, study_id, path):
+        """
+        downloads all instances from the study to disk
+        Args:
+            study_id: the studyid to download
+            path: the directory path where to store the downloaded files
+
+        Returns:
+            an array of DownloadedInstance
+        """
+        downloaded_instances = []
+        for series_id in self.get_series_ids(study_id):
+            downloaded_instances.extend(self._api_client.series.download_series(series_id, path))
+
+        return downloaded_instances

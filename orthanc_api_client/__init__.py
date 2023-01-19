@@ -5,6 +5,7 @@ from .change import ChangeType, ResourceType
 from .study import Study, StudyInfo
 from .job import Job, JobInfo, JobType, JobStatus
 from .http_client import HttpClient
+from .downloaded_instance import DownloadedInstance
 
 # __all__ = [
 #     'OrthancApiClient'

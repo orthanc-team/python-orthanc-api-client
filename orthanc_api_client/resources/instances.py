@@ -1,8 +1,10 @@
+import os
+import typing
 
 from .resources import Resources
 from ..tags import Tags
 from typing import Union, List, Optional, Any
-
+from ..downloaded_instance import DownloadedInstance
 
 class Instances(Resources):
 
@@ -109,3 +111,36 @@ class Instances(Resources):
             f.write(response.content)
 
         return path
+
+    def download_instance(self, instance_id, path):
+        """
+        downloads the instance DICOM file to disk
+        Args:
+            instance_id: the instance id to download
+            path: the file path where to store the downloaded file
+
+        Returns:
+            a DownloadedInstance object with the instanceId and the path
+        """
+        file_content = self.get_file(instance_id)
+        with open(path, 'wb') as f:
+            f.write(file_content)
+
+        return DownloadedInstance(instance_id, path)
+
+    def download_instances(self, instances_ids: typing.List[str], path: str) -> typing.List[DownloadedInstance]:
+        """
+        downloads the instances DICOM files to disk
+        Args:
+            instances_ids: the instances ids to download
+            path: the folder path where to store the downloaded files
+
+        Returns:
+            a list of DownloadedInstance objects with the instanceId and the path
+        """
+        downloaded_instances = []
+        for instance_id in instances_ids:
+            downloaded_instances.append(self.download(instance_id = instance_id,
+                                                     path = os.path.join(path, instance_id + ".dcm")))
+
+        return downloaded_instances

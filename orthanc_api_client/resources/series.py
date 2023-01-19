@@ -1,8 +1,9 @@
+import os
+
 from .resources import Resources
 from ..tags import Tags
 from typing import List, Any
-from ..exceptions import *
-
+from ..downloaded_instance import DownloadedInstance
 
 class Series(Resources):
 
@@ -80,3 +81,19 @@ class Series(Resources):
         the instance id of the series or None if not found
         """
         return self._lookup(filter='Series', dicom_id=dicom_id)
+
+    def download_series(self, series_id, path):
+        """
+        downloads all instances from the series to disk
+        Args:
+            series_id: the series id to download
+            path: the directory path where to store the downloaded files
+
+        Returns:
+            an array of DownloadedInstance
+        """
+        downloaded_instances = []
+        for instance_id in self.get_instances_ids(series_id):
+            downloaded_instances.append(self._api_client.instances.download_instance(instance_id, os.path.join(path, '{id}.dcm'.format(id = instance_id))))
+
+        return downloaded_instances

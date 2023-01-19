@@ -833,6 +833,36 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual('135', instance_tags['Rows'])
         self.assertEqual(to_dicom_date(datetime.date.today()), instance_tags['StudyDate'])
 
+    def test_download_instance(self):
+        self.oa.delete_all_content()
+
+        # upload an instance
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+
+        with tempfile.NamedTemporaryFile() as f:
+            self.oa.instances.download_instance(instance_id=instances_ids[0], path=f.name)
+            instance_content_after_download = open(f.name, 'rb').read()
+            instance_content_original = open(here / "stimuli/CT_small.dcm", 'rb').read()
+            self.assertEqual(instance_content_after_download, instance_content_original)
+
+    def test_download_series_studies(self):
+        self.oa.delete_all_content()
+
+        # upload all images from a study
+        instances_id = self.oa.upload_folder(here / 'stimuli/MR/Brain/1')
+
+        # download all files of the series
+        series_id = self.oa.instances.get_parent_series_id(instances_id[0])
+        with tempfile.TemporaryDirectory() as tempDir:
+            downloaded_instances = self.oa.series.download_series(series_id=series_id, path=tempDir)
+        self.assertEqual(len(instances_id), len(downloaded_instances))
+
+        # download all files of the study
+        study_id = self.oa.series.get_parent_study_id(series_id)
+        with tempfile.TemporaryDirectory() as tempDir:
+            downloaded_instances = self.oa.studies.download_study(study_id, tempDir)
+        self.assertEqual(len(instances_id), len(downloaded_instances))
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

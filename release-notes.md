@@ -1,3 +1,8 @@
+v 0.8.3
+=======
+
+- added download methods for instances, series, studies
+
 v 0.8.2
 =======
 
