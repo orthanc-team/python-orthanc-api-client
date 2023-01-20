@@ -744,7 +744,7 @@ class TestApiClient(unittest.TestCase):
         instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
         self.assertFalse(self.oa.instances.is_pdf(instances_ids[0]))
 
-    def test_downloadPdf(self):
+    def test_download_pdf(self):
         self.oa.delete_all_content()
 
         # upload an instance with a PDF file
@@ -786,12 +786,11 @@ class TestApiClient(unittest.TestCase):
         original_study = self.oa.studies.get(original_study_id)
 
         # attach a pdf to the study
-        now = datetime.datetime.now()
         pdf_instance_id = self.oa.studies.attach_pdf(
             pdf_path = original_pdf_path,
             study_id = original_study_id,
             series_description = 'Protocole PDF',
-            datetime = now
+            datetime = datetime.datetime(year=2023, month=1, day=20, hour=12, minute=32, second=43)
         )
 
         self.assertIsNotNone(pdf_instance_id)
@@ -802,8 +801,8 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual(original_study.patient_main_dicom_tags.get('PatientName'), pdf_tags['PatientName'])
         self.assertEqual(original_study.main_dicom_tags.get('StudyInstanceUID'), pdf_tags['StudyInstanceUID'])
         self.assertEqual('Protocole PDF', pdf_tags['SeriesDescription'])
-        self.assertEqual(to_dicom_date(now), pdf_tags['SeriesDate'])
-        self.assertEqual(to_dicom_date(now), pdf_tags['SeriesTime'])
+        self.assertEqual('20230120', pdf_tags['SeriesDate'])
+        self.assertEqual('123243', pdf_tags['SeriesTime'])
         self.assertEqual([pdf_instance_id], self.oa.studies.get_pdf_instances(original_study_id))
 
         # download the pdf and compare with the original file
@@ -854,13 +853,13 @@ class TestApiClient(unittest.TestCase):
         # download all files of the series
         series_id = self.oa.instances.get_parent_series_id(instances_id[0])
         with tempfile.TemporaryDirectory() as tempDir:
-            downloaded_instances = self.oa.series.download_series(series_id=series_id, path=tempDir)
+            downloaded_instances = self.oa.series.download_instances(series_id=series_id, path=tempDir)
         self.assertEqual(len(instances_id), len(downloaded_instances))
 
         # download all files of the study
         study_id = self.oa.series.get_parent_study_id(series_id)
         with tempfile.TemporaryDirectory() as tempDir:
-            downloaded_instances = self.oa.studies.download_study(study_id, tempDir)
+            downloaded_instances = self.oa.studies.download_instances(study_id, tempDir)
         self.assertEqual(len(instances_id), len(downloaded_instances))
 
 

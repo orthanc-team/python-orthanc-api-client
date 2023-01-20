@@ -15,18 +15,13 @@ class Instances(Resources):
         return self._api_client.get_binary(f"{self._url_segment}/{orthanc_id}/file")
 
     def get_parent_series_id(self, orthanc_id: str) -> str:
-        instance = self._api_client.get_json(f"{self._url_segment}/{orthanc_id}")
-        return instance['ParentSeries']
+        return self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/series")['ID']
 
     def get_parent_study_id(self, orthanc_id: str) -> str:
-        return self._api_client.series.get_parent_study_id(
-            orthanc_id=self.get_parent_series_id(orthanc_id)
-        )
+        return self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/study")['ID']
 
     def get_parent_patient_id(self, orthanc_id: str) -> str:
-        return self._api_client.series.get_parent_patient_id(
-            orthanc_id=self.get_parent_series_id(orthanc_id)
-        )
+        return self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/patient")['ID']
 
     def get_tags(self, orthanc_id: str) -> Tags:
         json_tags = self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/tags")
@@ -82,7 +77,7 @@ class Instances(Resources):
         """
         return self._lookup(filter='Instance', dicom_id=dicom_id)
 
-    def is_pdf(self, instance_id):
+    def is_pdf(self, instance_id: str):
         """
         checks if the instance contains a pdf
         Args:
@@ -91,10 +86,10 @@ class Instances(Resources):
         Returns: True if the instance contain a pdf, False ortherwise
         """
         tags = self.get_tags(instance_id)
-        MIME_type = tags.get('MIMETypeOfEncapsulatedDocument')
-        return MIME_type == 'application/pdf'
+        mime_type = tags.get('MIMETypeOfEncapsulatedDocument')
+        return mime_type == 'application/pdf'
 
-    def download_pdf(self, instance_id, path):
+    def download_pdf(self, instance_id: str, path: str):
         """
         downloads the pdf from the instance (if the instance does contain a PDF !)
         Args:
@@ -112,7 +107,7 @@ class Instances(Resources):
 
         return path
 
-    def download_instance(self, instance_id, path):
+    def download_instance(self, instance_id: str, path: str) -> DownloadedInstance:
         """
         downloads the instance DICOM file to disk
         Args:
@@ -140,7 +135,7 @@ class Instances(Resources):
         """
         downloaded_instances = []
         for instance_id in instances_ids:
-            downloaded_instances.append(self.download(instance_id = instance_id,
-                                                     path = os.path.join(path, instance_id + ".dcm")))
+            downloaded_instances.append(self.download_instance(instance_id = instance_id,
+                                                               path = os.path.join(path, instance_id + ".dcm")))
 
         return downloaded_instances

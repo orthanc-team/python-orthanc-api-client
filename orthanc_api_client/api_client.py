@@ -258,7 +258,7 @@ class OrthancApiClient(HttpClient):
         return changes, last_sequence_id, done
 
 
-    def create_pdf(self, pdf_path, dicom_tags, parent_id = None):
+    def create_pdf(self, pdf_path: str, dicom_tags: object, parent_id: str = None):
         """
         Creates an instance with an embedded pdf file.  If not parent_id is specified, this instance is part of a new study.
 
@@ -280,11 +280,11 @@ class OrthancApiClient(HttpClient):
             dicom_tags['SOPClassUID'] = '1.2.840.10008.5.1.4.1.1.104.1'
 
         return self._create_instance_from_data_path(data_path = pdf_path,
-                                                content_type = 'application/pdf',
-                                                dicom_tags = dicom_tags,
-                                                parent_id = parent_id)
+                                                    content_type = 'application/pdf',
+                                                    dicom_tags = dicom_tags,
+                                                    parent_id = parent_id)
 
-    def _create_instance_from_data_path(self, data_path, content_type, dicom_tags, parent_id = None):
+    def _create_instance_from_data_path(self, data_path: str, content_type: str, dicom_tags: object, parent_id: str = None):
         """
         Creates an instance with embedded data.  If not parent_id is specified, this instance is part of a new study.
 
@@ -296,7 +296,7 @@ class OrthancApiClient(HttpClient):
 
         return self._create_instance_from_data(content, content_type, dicom_tags, parent_id)
 
-    def _create_instance_from_data(self, content, content_type, dicom_tags, parent_id = None):
+    def _create_instance_from_data(self, content: bytes, content_type: str, dicom_tags: object, parent_id: str = None):
 
         request_data = {
             'Tags': dicom_tags,
@@ -313,7 +313,7 @@ class OrthancApiClient(HttpClient):
         return response.json()['ID']
 
 
-    def create_instance_from_png(self, image_path, dicom_tags, parent_id = None):
+    def create_instance_from_png(self, image_path: str, dicom_tags: object, parent_id: str = None):
         """
         Creates an instance with an embedded image.  If not parent_id is specified, this instance is part of a new study.
 
@@ -336,11 +336,11 @@ class OrthancApiClient(HttpClient):
             dicom_tags['SOPClassUID'] = '1.2.840.10008.5.1.4.1.1.1'
 
         return self._create_instance_from_data_path(data_path = image_path,
-                                                content_type = 'image/png',
-                                                dicom_tags = dicom_tags,
-                                                parent_id = parent_id)
+                                                    content_type = 'image/png',
+                                                    dicom_tags = dicom_tags,
+                                                    parent_id = parent_id)
 
-    def create_instance_from_jpeg(self, image_path, dicom_tags, parent_id = None):
+    def create_instance_from_jpeg(self, image_path: str, dicom_tags: object, parent_id: str = None):
         """
         Creates an instance with an embedded image.  If not parent_id is specified, this instance is part of a new study.
 
@@ -364,6 +364,6 @@ class OrthancApiClient(HttpClient):
             dicom_tags['SOPClassUID'] = '1.2.840.10008.5.1.4.1.1.1'
 
         return self._create_instance_from_data_path(data_path = image_path,
-                                                content_type = 'image/jpeg',
-                                                dicom_tags = dicom_tags,
-                                                parent_id = parent_id)
+                                                    content_type = 'image/jpeg',
+                                                    dicom_tags = dicom_tags,
+                                                    parent_id = parent_id)

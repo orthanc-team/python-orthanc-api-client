@@ -1,3 +1,5 @@
+- **BREAKING CHANGE:** renamed `download_study` and `download_series` into `download_instances`
+
 v 0.8.3
 =======
 

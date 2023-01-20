@@ -1,6 +1,6 @@
 import time
 import re
-
+import typing
 import pydicom
 import datetime
 import random
@@ -34,9 +34,11 @@ def get_random_dicom_date(date_from: datetime.date, date_to: datetime.date = dat
     return '{0:4}{1:02}{2:02}'.format(rand_date.year, rand_date.month, rand_date.day)
 
 
-def to_dicom_date(date: datetime.date) -> str:
+def to_dicom_date(date: typing.Union[datetime.date, datetime.datetime]) -> str:
     return '{0:4}{1:02}{2:02}'.format(date.year, date.month, date.day)
 
+def to_dicom_time(dt: datetime.datetime) -> str:
+    return '{0:2}{1:02}{2:02}'.format(dt.hour, dt.minute, dt.second)
 
 def from_dicom_date(dicom_date: str) -> datetime.date:
     if dicom_date is None or len(dicom_date) == 0:

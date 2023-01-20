@@ -17,13 +17,10 @@ class Series(Resources):
         return self.get_instances_ids(orthanc_id=orthanc_id)[0]
 
     def get_parent_study_id(self, orthanc_id: str) -> str:
-        series = self._api_client.get_json(f"{self._url_segment}/{orthanc_id}")
-        return series['ParentStudy']
+        return self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/study")['ID']
 
     def get_parent_patient_id(self, orthanc_id: str) -> str:
-        return self._api_client.studies.get_parent_patient_id(
-            self.get_parent_study_id(orthanc_id)
-        )
+        return self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/patient")['ID']
 
     def get_ordered_instances_ids(self, orthanc_id: str) -> List[str]:
         ordered_slices = self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/ordered-slices")
@@ -82,7 +79,7 @@ class Series(Resources):
         """
         return self._lookup(filter='Series', dicom_id=dicom_id)
 
-    def download_series(self, series_id, path):
+    def download_instances(self, series_id, path) -> List[DownloadedInstance]:
         """
         downloads all instances from the series to disk
         Args:
@@ -92,8 +89,4 @@ class Series(Resources):
         Returns:
             an array of DownloadedInstance
         """
-        downloaded_instances = []
-        for instance_id in self.get_instances_ids(series_id):
-            downloaded_instances.append(self._api_client.instances.download_instance(instance_id, os.path.join(path, '{id}.dcm'.format(id = instance_id))))
-
-        return downloaded_instances
+        return self._api_client.instances.download_instances(self.get_instances_ids(series_id), path)

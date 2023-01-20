@@ -1,11 +1,12 @@
-import typing
+import datetime
+from typing import List, Any, Union
 
 from .resources import Resources
 from ..tags import Tags
 from ..exceptions import *
 from ..study import StudyInfo, Study
-from ..helpers import to_dicom_date
-from typing import List, Any, Union
+from ..helpers import to_dicom_date, to_dicom_time
+from ..downloaded_instance import DownloadedInstance
 
 
 class Studies(Resources):
@@ -32,8 +33,7 @@ class Studies(Resources):
         return self.get_instances_ids(orthanc_id=orthanc_id)[0]
 
     def get_parent_patient_id(self, orthanc_id: str) -> str:
-        study_info = self._api_client.get_json(f"{self._url_segment}/{orthanc_id}")
-        return study_info['ParentPatient']
+        return self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/patient")['ID']
 
     def lookup(self, dicom_id: str) -> str:
         """
@@ -45,7 +45,7 @@ class Studies(Resources):
         """
         return self._lookup(filter='Study', dicom_id=dicom_id)
 
-    def find(self, query: object, case_sensitive: bool = True) -> typing.List[Study]:
+    def find(self, query: object, case_sensitive: bool = True) -> List[Study]:
         payload = {
             "Level": "Study",
             "Query": query,
@@ -111,7 +111,7 @@ class Studies(Resources):
             }
         )
 
-    def attach_pdf(self, study_id, pdf_path, series_description, datetime = None):
+    def attach_pdf(self, study_id: str, pdf_path: str, series_description: str, datetime: datetime.datetime = None) -> str:
         """
         Creates a new instance with the PDF embedded.  This instance is a part of a new series attached to an existing study
 
@@ -122,11 +122,11 @@ class Studies(Resources):
         series_tags["SeriesDescription"] = series_description
         if datetime is not None:
             series_tags["SeriesDate"] = to_dicom_date(datetime)
-            series_tags["SeriesTime"] = to_dicom_date(datetime)
+            series_tags["SeriesTime"] = to_dicom_time(datetime)
 
         return self._api_client.create_pdf(pdf_path, series_tags, parent_id = study_id)
 
-    def get_pdf_instances(self, study_id, max_instance_count_in_series_to_analyze = 2):
+    def get_pdf_instances(self, study_id: str, max_instance_count_in_series_to_analyze: int = 2) -> List[str]:
         """
         Returns the instanceIds of the instances containing PDF
         Args:
@@ -148,7 +148,7 @@ class Studies(Resources):
 
         return pdf_ids
 
-    def download_study(self, study_id, path):
+    def download_instances(self, study_id: str, path: str) -> List['DownloadedInstance']:
         """
         downloads all instances from the study to disk
         Args:
@@ -158,8 +158,4 @@ class Studies(Resources):
         Returns:
             an array of DownloadedInstance
         """
-        downloaded_instances = []
-        for series_id in self.get_series_ids(study_id):
-            downloaded_instances.extend(self._api_client.series.download_series(series_id, path))
-
-        return downloaded_instances
+        return self._api_client.instances.download_instances(self.get_instances_ids(study_id), path)
