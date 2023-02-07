@@ -5,11 +5,16 @@ from .resources import Resources
 from ..tags import Tags
 from typing import Union, List, Optional, Any
 from ..downloaded_instance import DownloadedInstance
+from ..instance import InstanceInfo, Instance
+
 
 class Instances(Resources):
 
     def __init__(self, api_client: 'OrthancApiClient'):
         super().__init__(api_client=api_client, url_segment='instances')
+
+    def get(self, orthanc_id: str) -> Instance:
+        return Instance(api_client=self._api_client, orthanc_id=orthanc_id)
 
     def get_file(self, orthanc_id: str) -> bytes:
         return self._api_client.get_binary(f"{self._url_segment}/{orthanc_id}/file")

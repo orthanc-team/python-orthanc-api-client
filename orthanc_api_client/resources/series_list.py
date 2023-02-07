@@ -4,11 +4,16 @@ from .resources import Resources
 from ..tags import Tags
 from typing import List, Any
 from ..downloaded_instance import DownloadedInstance
+from ..series import SeriesInfo, Series
 
-class Series(Resources):
+
+class SeriesList(Resources):
 
     def __init__(self, api_client: 'OrthancApiClient'):
         super().__init__(api_client=api_client, url_segment='series')
+
+    def get(self, orthanc_id: str) -> Series:
+        return Series(api_client=self._api_client, orthanc_id=orthanc_id)
 
     def get_instances_ids(self, orthanc_id: str) -> List[str]:
         return self._api_client.get_json(f"{self._url_segment}/{orthanc_id}")["Instances"]
@@ -28,7 +33,7 @@ class Series(Resources):
 
     def get_middle_instance_id(self, orthanc_id: str) -> str:
         ordered_instances_ids = self.get_ordered_instances_ids(orthanc_id=orthanc_id)
-        return ordered_instances_ids[int(len(ordered_instances_ids)/2)]
+        return ordered_instances_ids[int(len(ordered_instances_ids) / 2)]
 
     def get_preview_url(self, orthanc_id: str) -> str:
         middle_instance_id = self.get_middle_instance_id(orthanc_id=orthanc_id)

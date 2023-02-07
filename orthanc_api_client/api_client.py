@@ -7,7 +7,7 @@ from typing import List
 from urllib.parse import urlunsplit, urlencode
 
 from .http_client import HttpClient
-from .resources import Resources, Instances, Series, Studies, Jobs
+from .resources import Resources, Instances, SeriesList, Studies, Jobs
 
 from .helpers import wait_until, encode_multipart_related
 from .exceptions import *
@@ -49,7 +49,7 @@ class OrthancApiClient(HttpClient):
 
         self.patients = Resources(api_client=self, url_segment='patients')
         self.studies = Studies(api_client=self)
-        self.series = Series(api_client=self)
+        self.series = SeriesList(api_client=self)
         self.instances = Instances(api_client=self)
         self.dicomweb_servers = DicomWebServers(api_client=self)
         self.modalities = DicomModalities(api_client=self)

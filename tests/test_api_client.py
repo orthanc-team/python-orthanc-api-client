@@ -93,6 +93,39 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual('1.3.6.1.4.1.5962.1.2.1.20040119072730.12322', study.dicom_id)
         self.assertEqual('8a8cf898-ca27c490-d0c7058c-929d0581-2bbf104d', study.orthanc_id)
 
+    def test_series(self):
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        series_id = self.oa.instances.get_parent_series_id(instances_ids[0])
+
+        series = self.oa.series.get(series_id)
+        self.assertEqual("CT", series.main_dicom_tags.get('Modality'))
+        self.assertEqual('1.3.6.1.4.1.5962.1.3.1.1.20040119072730.12322', series.dicom_id)
+        self.assertEqual('93034833-163e42c3-bc9a428b-194620cf-2c5799e5', series.orthanc_id)
+
+        study = series.study
+        self.assertEqual("1CT1", study.patient_main_dicom_tags.get('PatientID'))
+        self.assertEqual("e+1", study.main_dicom_tags.get('StudyDescription'))
+        self.assertEqual('1.3.6.1.4.1.5962.1.2.1.20040119072730.12322', study.dicom_id)
+        self.assertEqual('8a8cf898-ca27c490-d0c7058c-929d0581-2bbf104d', study.orthanc_id)
+
+    def test_instance(self):
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        instance = self.oa.instances.get(instances_ids[0])
+
+        self.assertEqual("113008", instance.tags.get('ContentTime'))
+        self.assertEqual("1.3.6.1.4.1.5962.1.2.1.20040119072730.12322", instance.tags.get('StudyInstanceUID'))
+        self.assertEqual('1.3.6.1.4.1.5962.1.1.1.1.1.20040119072730.12322', instance.dicom_id)
+        self.assertEqual('f689ddd2-662f8fe1-8b18180d-ec2a2cee-937917af', instance.orthanc_id)
+
+        series = instance.series
+        self.assertEqual("CT", series.main_dicom_tags.get('Modality'))
+        self.assertEqual('1.3.6.1.4.1.5962.1.3.1.1.20040119072730.12322', series.dicom_id)
+        self.assertEqual('93034833-163e42c3-bc9a428b-194620cf-2c5799e5', series.orthanc_id)
+
+        instance = series.instances[0]
+        self.assertEqual("113008", instance.tags.get('ContentTime'))
+
+
     def test_upload_invalid_file(self):
         with self.assertRaises(api_exceptions.BadFileFormat):
             self.oa.upload_file(here / "__init__.py")   # __init__.py is not a valid DICOM file :-)
