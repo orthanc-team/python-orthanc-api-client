@@ -14,7 +14,7 @@ pip3 install orthanc-api-client
 Examples:
 
 ```python
-from orthanc_api_client import OrthancApiClient, ResourceType
+from orthanc_api_client import OrthancApiClient, ResourceType, InstancesSet
 import datetime
 
 orthanc_a = OrthancApiClient('http://localhost:8042', user='orthanc', pwd='orthanc')
@@ -117,6 +117,28 @@ orthanc_a.transfers.send(
     resource_type=ResourceType.STUDY,
     compress=True
 )
+
+# work with a snapshot of a study
+instances_set = InstancesSet.from_study(orthanc_a, study_id=study_id)
+modified_set = instances_set.modify(
+        replace_tags={
+            'InstitutionName' : 'MY'
+        },
+        keep_tags=['SOPInstanceUID', 'SeriesInstanceUID', 'StudyInstanceUID'],
+        force=True,
+        keep_source=True # we are not changing orthanc IDs -> don't delete source since it is the same as destination
+    )
+
+# send instance_set
+orthanc_a.transfers.send(  
+    target_peer='orthanc-b',
+    resources_ids=modified_set.instances_ids,
+    resource_type=ResourceType.STUDY,
+    compress=True
+)
+
+# delete after send
+modified_set.delete()
 
 ```
 

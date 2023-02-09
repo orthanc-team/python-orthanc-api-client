@@ -1,5 +1,5 @@
 from .tags import SimplifiedTags
-import typing
+from typing import List, Optional
 
 
 class InstanceInfo:
@@ -13,12 +13,13 @@ class InstanceInfo:
 
 class Instance:
 
-    def __init__(self, api_client, orthanc_id):
+
+    def __init__(self, api_client: 'OrthancApiClient', orthanc_id: str):
         self._api_client = api_client
         self.orthanc_id = orthanc_id
-        self._info = None
-        self._series = None
-        self._tags = None
+        self._info: Optional[InstanceInfo] = None
+        self._series: Optional['Series'] = None
+        self._tags: Optional[SimplifiedTags] = None
 
     @staticmethod
     def from_json(api_client, json_instance: object):
@@ -45,16 +46,6 @@ class Instance:
         if self._series is None:
             self._series = self._api_client.series.get(orthanc_id=self.info.series_orthanc_id)
         return self._series
-
-    @property
-    def instances(self) -> typing.List['Instance']:  # lazy creation of instances objects
-        if self._instances is None:
-            self._instances = []
-            for id in self.info.instances_orthanc_ids:
-                instance = self._api_client.instances.get(orthanc_id=self.orthanc_id)
-                self._instances.append(instance)
-
-        return self._instances
 
     @property
     def tags(self):  # lazy loading of tags ....

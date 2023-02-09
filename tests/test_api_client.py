@@ -3,7 +3,7 @@ import unittest
 import subprocess
 import logging
 import datetime
-from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType, Study, Job, JobStatus, JobType
+from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType, Study, Job, JobStatus, JobType, InstancesSet
 from orthanc_api_client.helpers import to_dicom_date, wait_until
 import orthanc_api_client.exceptions as api_exceptions
 import pathlib
@@ -895,6 +895,52 @@ class TestApiClient(unittest.TestCase):
             downloaded_instances = self.oa.studies.download_instances(study_id, tempDir)
         self.assertEqual(len(instances_id), len(downloaded_instances))
 
+
+    def test_instances_set(self):
+        self.oa.delete_all_content()
+
+        # upload a partial study
+        instances_id = self.oa.upload_folder(here / 'stimuli/MR/Brain/1')
+        study_id = self.oa.instances.get_parent_study_id(instances_id[0])
+
+        instances_set = InstancesSet.from_study(api_client=self.oa, study_id=study_id)
+
+        self.assertEqual(1, len(instances_set.series_ids))
+        self.assertEqual(2, len(instances_set.instances_ids))
+        self.assertEqual(2, len(instances_set.get_instances_ids(series_id=instances_set.series_ids[0])))
+
+        # upload the second part of the study
+        instances_id = self.oa.upload_folder(here / 'stimuli/MR/Brain/2')
+        self.assertEqual(3, len(self.oa.studies.get_instances_ids(orthanc_id=study_id)))
+
+        # modify the instance set only
+        modified_set = instances_set.modify(
+            replace_tags={
+                'InstitutionName' : 'MY',
+                'PatientName': 'TOTO',
+                'PatientID': 'TEST',
+                'OtherPatientIDs': 'TEST2'
+            },
+            keep_tags=['SOPInstanceUID', 'SeriesInstanceUID', 'StudyInstanceUID'],
+            force=True,
+            keep_source=False  # we are changing the PatientID -> Orthanc IDs will change
+        )
+
+        # this should not modify the total number of instances in Orthanc
+        self.assertEqual(3, len(self.oa.instances.get_all_ids()))
+
+        # the modified set shall have the same structure as the source
+        self.assertEqual(1, len(modified_set.series_ids))
+        self.assertEqual(2, len(modified_set.instances_ids))
+        self.assertEqual(2, len(modified_set.get_instances_ids(series_id=modified_set.series_ids[0])))
+
+        # check that changes have been applied
+        self.assertEqual("TEST2", self.oa.studies.get(modified_set.study_id).patient_main_dicom_tags.get('OtherPatientIDs'))
+
+        # delete only the modified set
+        modified_set.delete()
+
+        self.assertEqual(1, len(self.oa.instances.get_all_ids()))
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

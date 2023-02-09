@@ -2,7 +2,7 @@ import datetime
 
 import requests
 import logging
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from ..exceptions import *
 from ..helpers import to_dicom_date
 
@@ -29,10 +29,13 @@ class Resources:
     def get_json(self, orthanc_id: str):
         return self._api_client.get_json(f"{self._url_segment}/{orthanc_id}")
 
+    def get_json_statistics(self, orthanc_id: str):
+        return self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/statistics")
+
     def get_all_ids(self) -> List[str]:
         return self._api_client.get_json(f"{self._url_segment}/")
 
-    def delete(self, orthanc_id: str = None, orthanc_ids: List[str] = None, ignore_errors: bool = False):
+    def delete(self, orthanc_id: Optional[str] = None, orthanc_ids: Optional[List[str]] = None, ignore_errors: bool = False):
 
         if orthanc_ids:
             for oi in orthanc_ids:
@@ -56,7 +59,7 @@ class Resources:
         
         return deleted_ids
 
-    def set_attachment(self, orthanc_id, attachment_name, content=None, path=None, content_type=None, match_revision=None):
+    def set_attachment(self, orthanc_id: str, attachment_name: str, content: Optional[str] = None, path: Optional[str] = None, content_type: Optional[str] = None, match_revision: Optional[str] = None):
         
         if content is None and path is not None:
             with open(path, 'rb') as f:
@@ -76,7 +79,7 @@ class Resources:
             headers=headers
         )
 
-    def get_attachment(self, orthanc_id, attachment_name) -> bytes:
+    def get_attachment(self, orthanc_id: str, attachment_name: str) -> bytes:
 
         content, revision = self.get_attachment_with_revision(
             orthanc_id=orthanc_id,
@@ -84,7 +87,7 @@ class Resources:
         )
         return content
 
-    def get_attachment_with_revision(self, orthanc_id, attachment_name) -> Tuple[bytes, str]:
+    def get_attachment_with_revision(self, orthanc_id: str, attachment_name: str) -> Tuple[bytes, str]:
 
         headers = {}
 
@@ -95,13 +98,13 @@ class Resources:
 
         return response.content, response.headers.get('etag')
 
-    def download_attachment(self, orthanc_id, attachment_name, path):
+    def download_attachment(self, orthanc_id: str, attachment_name: str, path: str):
         content = self.get_attachment(orthanc_id, attachment_name)
 
         with open(path, 'wb') as f:
             f.write(content)
 
-    def set_metadata(self, orthanc_id, metadata_name, content=None, path=None, match_revision=None):
+    def set_metadata(self, orthanc_id: str, metadata_name: str, content: Optional[str] = None, path: Optional[str] = None, match_revision: Optional[str] = None):
         
         if content is None and path is not None:
             with open(path, 'rb') as f:
@@ -118,7 +121,7 @@ class Resources:
             headers=headers
         )
 
-    def get_metadata(self, orthanc_id, metadata_name, default_value=None) -> bytes:
+    def get_metadata(self, orthanc_id: str, metadata_name: str, default_value: Optional[str] = None) -> bytes:
 
         content, revision = self.get_metadata_with_revision(
             orthanc_id=orthanc_id,
@@ -128,7 +131,7 @@ class Resources:
 
         return content
 
-    def get_metadata_with_revision(self, orthanc_id, metadata_name, default_value=None) -> Tuple[bytes, str]:
+    def get_metadata_with_revision(self, orthanc_id: str, metadata_name: str, default_value: Optional[str] = None) -> Tuple[bytes, str]:
 
         headers = {}
 
@@ -142,6 +145,8 @@ class Resources:
 
         return response.content, response.headers.get('etag')
 
+    def has_metadata(self, orthanc_id: str, metadata_name: str) -> bool:
+        return self.get_metadata(orthanc_id=orthanc_id, metadata_name=metadata_name, default_value=None) is not None
 
     def _anonymize(self, orthanc_id: str, replace_tags={}, keep_tags=[], delete_original=True, force=False) -> str:
         """

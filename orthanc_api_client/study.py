@@ -1,4 +1,5 @@
 from .tags import SimplifiedTags
+from typing import List, Optional
 
 
 class StudyInfo:
@@ -11,12 +12,23 @@ class StudyInfo:
         self.series_ids = json_study.get('Series')
 
 
+class StudyStatistics:
+
+    def __init__(self, json_study_stats):
+        self.instances_count = int(json_study_stats['CountInstances'])
+        self.series_count = int(json_study_stats['CountSeries'])
+        self.disk_size = int(json_study_stats['DiskSize'])                  # this is the total size used on disk by the study and all its attachments
+        self.uncompressed_size = int(json_study_stats['UncompressedSize'])  # this is the total size of the study and all its attachments once uncompressed
+
+
 class Study:
 
-    def __init__(self, api_client, orthanc_id):
+    def __init__(self, api_client: 'OrthancApiClient', orthanc_id: str):
         self._api_client = api_client
         self.orthanc_id = orthanc_id
-        self._info = None
+        self._info: StudyInfo = None
+        self._statistics: StudyStatistics = None
+        self._series: Optional[List['Series']] = None
 
     @staticmethod
     def from_json(api_client, json_study: object):
@@ -27,7 +39,8 @@ class Study:
     @property
     def info(self):  # lazy loading of main dicom tags ....
         if self._info is None:
-            self._load_info()
+            json_study = self._api_client.studies.get_json(self.orthanc_id)
+            self._info = StudyInfo(json_study)
         return self._info
 
     @property
@@ -42,7 +55,20 @@ class Study:
     def dicom_id(self):
         return self.info.dicom_id
 
-    def _load_info(self):
-        json_study = self._api_client.studies.get_json(self.orthanc_id)
-        self._info = StudyInfo(json_study)
+    @property
+    def statistics(self):  # lazy loading of statistics ....
+        if self._statistics is None:
+            json_study_stats = self._orthancClient.studies.get_json_statistics(self.id)
+            self._statistics = StudyStatistics(json_study_stats)
+        return self._statistics
+
+    @property
+    def series(self):  # lazy creation of series objects
+        if self._series is None:
+            self._series = []
+            for id in self.info.series_ids:
+                s = self._api_client.series.get(id)
+                self._series.append(s)
+
+        return self._series
 
