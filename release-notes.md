@@ -1,9 +1,13 @@
+v 0.9.1
+=======
+
+- introduced `InstancesSet` class
+
 v 0.9.0
 =======
 
 - **BREAKING CHANGE:** renamed `download_study` and `download_series` into `download_instances`
 - introduced `Series`, `SeriesInfo`, `Instance` and `InstanceInfo` classes
-- introduced `InstancesSet` class
 
 v 0.8.3
 =======
