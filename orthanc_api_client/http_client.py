@@ -86,6 +86,11 @@ class HttpClient:
         elif response.status_code == 404:
             raise api_exceptions.ResourceNotFound(
                 response.status_code, url=url)
+        elif response.status_code == 409:
+            raise api_exceptions.Conflict(
+                msg=response.json()['Message'] if response.json() and 'Message' in response.json() else None,
+                url=url
+            )
         else:
             raise api_exceptions.HttpError(
                 response.status_code, url=url, request_response=response)
@@ -95,5 +100,5 @@ class HttpClient:
             raise api_exceptions.ConnectionError(url=url)
         elif isinstance(request_exception, requests.Timeout):
             raise api_exceptions.TimeoutError(url=url)
-        elif isinstance(request_exception, requests.SSLError):
+        elif isinstance(request_exception, requests.exceptions.SSLError):
             raise api_exceptions.SSLError(url=url)

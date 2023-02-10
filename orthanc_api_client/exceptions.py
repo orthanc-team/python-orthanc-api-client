@@ -39,6 +39,7 @@ class ResourceNotFound(HttpError):
     def __init__(self, msg = "Resource not found.  The resource you're trying to access does not exist in Orthanc.", url = None):
         super().__init__(http_status_code = 404, msg = msg, url = url)
 
+
 class NotAuthorized(HttpError):
     def __init__(self, http_status_code, msg = "Not authorized.  Make sure to provide login/pwd.", url = None):
         super().__init__(http_status_code = http_status_code, msg = msg, url = url)
@@ -48,3 +49,8 @@ class BadFileFormat(HttpError):
     """ Bad file format while uploading a DICOM file"""
     def __init__(self, http_error, msg = "Bad file format"):
         super().__init__(http_status_code = http_error.http_status_code, msg = msg, url = http_error.url)
+
+
+class Conflict(HttpError):
+    def __init__(self, msg = "Conflict", url = None):
+        super().__init__(http_status_code = 409, msg = msg, url = url)

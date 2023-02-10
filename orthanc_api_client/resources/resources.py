@@ -70,7 +70,7 @@ class Resources:
         if content_type:
             headers['Content-Type'] = content_type
 
-        if match_revision:
+        if match_revision is not None:
             headers['If-Match'] = match_revision
 
         self._api_client.put(
@@ -104,15 +104,17 @@ class Resources:
         with open(path, 'wb') as f:
             f.write(content)
 
-    def set_metadata(self, orthanc_id: str, metadata_name: str, content: Optional[str] = None, path: Optional[str] = None, match_revision: Optional[str] = None):
-        
+    def set_binary_metadata(self, orthanc_id: str, metadata_name: str, content: Optional[bytes] = None, path: Optional[str] = None, match_revision: Optional[str] = None):
+        # sets the metadata only if the current revision matches `match_revision`
+        # returns the new revision
+
         if content is None and path is not None:
             with open(path, 'rb') as f:
                 content = f.read()
 
         headers = {}
 
-        if match_revision:
+        if match_revision is not None:
             headers['If-Match'] = match_revision
 
         self._api_client.put(
@@ -121,7 +123,21 @@ class Resources:
             headers=headers
         )
 
-    def get_metadata(self, orthanc_id: str, metadata_name: str, default_value: Optional[str] = None) -> bytes:
+    def set_string_metadata(self, orthanc_id: str, metadata_name: str, content: Optional[str] = None, path: Optional[str] = None, match_revision: Optional[str] = None):
+        
+        if content is None and path is not None:
+            with open(path, 'rt') as f:
+                content = f.read()
+
+        self.set_binary_metadata(
+            orthanc_id=orthanc_id,
+            metadata_name=metadata_name,
+            content=content.encode('utf-8'),
+            match_revision=match_revision
+        )
+
+
+    def get_binary_metadata(self, orthanc_id: str, metadata_name: str, default_value: Optional[str] = None) -> bytes:
 
         content, revision = self.get_metadata_with_revision(
             orthanc_id=orthanc_id,
@@ -131,7 +147,17 @@ class Resources:
 
         return content
 
-    def get_metadata_with_revision(self, orthanc_id: str, metadata_name: str, default_value: Optional[str] = None) -> Tuple[bytes, str]:
+    def get_string_metadata(self, orthanc_id: str, metadata_name: str, default_value: Optional[str] = None) -> str:
+
+        content, revision = self.get_binary_metadata_with_revision(
+            orthanc_id=orthanc_id,
+            metadata_name=metadata_name,
+            default_value=default_value.encode('utf-8') if default_value else None
+        )
+
+        return content.decode('utf-8') if content else None
+
+    def get_binary_metadata_with_revision(self, orthanc_id: str, metadata_name: str, default_value: Optional[bytes] = None) -> Tuple[bytes, str]:
 
         headers = {}
 
@@ -144,6 +170,16 @@ class Resources:
             return default_value, None
 
         return response.content, response.headers.get('etag')
+
+    def get_string_metadata_with_revision(self, orthanc_id: str, metadata_name: str, default_value: Optional[str] = None) -> Tuple[str, str]:
+
+        content, revision = self.get_binary_metadata_with_revision(
+            orthanc_id=orthanc_id,
+            metadata_name=metadata_name,
+            default_value=default_value.encode('utf-8') if default_value else None
+        )
+
+        return content.decode('utf-8'), revision
 
     def has_metadata(self, orthanc_id: str, metadata_name: str) -> bool:
         return self.get_metadata(orthanc_id=orthanc_id, metadata_name=metadata_name, default_value=None) is not None

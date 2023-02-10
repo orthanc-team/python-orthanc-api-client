@@ -425,54 +425,52 @@ class TestApiClient(unittest.TestCase):
         instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
 
         # try to read a metadata that does not exist
-        value = self.oa.instances.get_metadata(
+        value = self.oa.instances.get_string_metadata(
             instances_ids[0],
-            metadata_name=1024,
+            metadata_name='1024',
             default_value=None
         )
         self.assertEqual(None, value)
 
         content = b'123456789'
-        self.oa.instances.set_metadata(
+        revision = self.oa.instances.set_binary_metadata(
             orthanc_id=instances_ids[0],
-            metadata_name=1025,
+            metadata_name='1025',
             content=content
             )
 
         # get current revision
-        content_readback, revision = self.oa.instances.get_metadata_with_revision(
+        content_readback, revision = self.oa.instances.get_string_metadata_with_revision(
             orthanc_id=instances_ids[0],
-            metadata_name=1025
+            metadata_name='1025'
         )
 
-        self.assertEqual(content, content_readback)
-
-        updated_content = b'abcdefg'
+        self.assertEqual(content, content_readback.encode('utf-8'))
 
         # update if match current revision
-        self.oa.instances.set_metadata(
+        self.oa.instances.set_string_metadata(
             orthanc_id=instances_ids[0],
-            metadata_name=1025,
-            content=updated_content,
+            metadata_name='1025',
+            content='abcdefg2',
             match_revision=revision
             )
 
-        # tye to update if match another revision -> fails
-        with self.assertRaises(api_exceptions.HttpError):
-            self.oa.instances.set_metadata(
+        # try to update if match another revision -> fails
+        with self.assertRaises(api_exceptions.Conflict):
+            self.oa.instances.set_string_metadata(
                 orthanc_id=instances_ids[0],
                 metadata_name=1025,
-                content=updated_content,
+                content='abd4',
                 match_revision='"1-bad-checksum"'
                 )
 
         # get current revision
-        content_readback, revision = self.oa.instances.get_metadata_with_revision(
+        content_readback, revision = self.oa.instances.get_string_metadata_with_revision(
             orthanc_id=instances_ids[0],
             metadata_name=1025
         )
 
-        self.assertEqual(updated_content, content_readback)
+        self.assertEqual('abcdefg2', content_readback)
 
 
     def test_changes(self):
@@ -941,6 +939,30 @@ class TestApiClient(unittest.TestCase):
         modified_set.delete()
 
         self.assertEqual(1, len(self.oa.instances.get_all_ids()))
+
+    def test_instances_set_filter_apply(self):
+        self.oa.delete_all_content()
+
+        # upload a 2 series study
+        instances_id = self.oa.upload_folder(here / 'stimuli/MR/Brain')
+        study_id = self.oa.instances.get_parent_study_id(instances_id[0])
+
+        instances_set = InstancesSet.from_study(api_client=self.oa, study_id=study_id)
+
+        self.assertEqual(3, len(instances_set.instances_ids))
+        # filter 'sT2W/FLAIR'
+        instances_set.filter_instances(filter=lambda api, i: 'sT2W/FLAIR' == api.instances.get(i).series.main_dicom_tags.get('SeriesDescription'))
+
+        self.assertEqual(1, len(instances_set.instances_ids))
+
+        # apply a metadata to the filtered list of instances
+        instances_set.process_instances(processor=lambda api, i: api.instances.set_string_metadata(i, '1024', 'filtered'))
+
+        # now filter based on metadata
+        instances_set2 = InstancesSet.from_study(api_client=self.oa, study_id=study_id)
+        instances_set2.filter_instances(filter=lambda api, i: 'filtered' == api.instances.get_string_metadata(i, '1024', None))
+        self.assertEqual(1, len(instances_set2.instances_ids))
+        self.assertEqual(instances_set.instances_ids, instances_set2.instances_ids)
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

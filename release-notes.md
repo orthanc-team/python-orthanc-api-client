@@ -1,3 +1,10 @@
+v 0.10.0
+========
+
+- **BREAKING CHANGE:** renamed `set_metadata` into `set_string_metadata` & `set_binary_metadata`
+- **BREAKING CHANGE:** renamed `get_metadata` into `get_string_metadata` & `get_binary_metadata`
+- added `InstancesSet.filter_instances()` & `InstancesSet.process_instances()` 
+
 v 0.9.1
 =======
 

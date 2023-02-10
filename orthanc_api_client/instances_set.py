@@ -1,6 +1,7 @@
 from typing import Optional, List
 from .study import Study
 from .series import Series
+from .instance import Instance
 from .job import Job
 
 # This class contains a set of Instances that represents the status of a study at a given time.
@@ -62,6 +63,17 @@ class InstancesSet:
 
         return instances_set
 
+    @staticmethod
+    def from_instance(api_client, instance_id: Optional[str] = None, instance: Optional[Instance] = None) -> 'InstancesSet':
+        instances_set = InstancesSet(api_client=api_client)
+        if not instance:
+            instance = api_client.instances.get(instance_id)
+
+        instances_set.study_id = instance.series.study.orthanc_id
+        instances_set._by_series[instance.series.orthanc_id] = [instance.orthanc_id]
+        instances_set._all_instances_ids.append(instance.orthanc_id)
+
+        return instances_set
 
     def delete(self):
         self._api_client.post(
@@ -127,3 +139,30 @@ class InstancesSet:
             return modified_set
 
         return None  # TODO: raise exception ???
+
+    # keep only the instances that satisfy the filter
+    # prototype: filter(api_client, instance_id)
+    def filter_instances(self, filter):
+        series_to_delete = []
+
+        for series_id, instances_ids in self._by_series.items():
+            instances_to_delete = []
+            for instance_id in instances_ids:
+                if not filter(self._api_client, instance_id):
+                    instances_to_delete.append(instance_id)
+
+            for i in instances_to_delete:
+                self._by_series[series_id].remove(i)
+                self._all_instances_ids.remove(i)
+
+            if len(self._by_series[series_id]) == 0:
+                series_to_delete.append(series_id)
+
+        for s in series_to_delete:
+            del self._by_series[s]
+
+    # apply a method on all instances
+    # prototype: processor(api_client, instance_id)
+    def process_instances(self, processor):
+        for instance_id in self._all_instances_ids:
+            processor(self._api_client, instance_id)

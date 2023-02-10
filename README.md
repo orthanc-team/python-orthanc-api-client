@@ -57,7 +57,7 @@ study_description = study.main_dicom_tags.get('StudyDescription')
 dicom_id = study.dicom_id
 
 # access metadata
-orthanc_a.instances.set_metadata(orthanc_id=all_instances_ids[0], 
+orthanc_a.instances.set_string_metadata(orthanc_id=all_instances_ids[0], 
                                  metadata_name=1024, 
                                  content='my-value')
 
