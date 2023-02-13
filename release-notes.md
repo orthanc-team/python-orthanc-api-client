@@ -1,4 +1,7 @@
-- InstancesSet.filter_instances() now returns the list of excluded instances IDs
+v 0.10.1
+========
+
+- InstancesSet.filter_instances() now returns and instance set with the excluded instances
 
 v 0.10.0
 ========

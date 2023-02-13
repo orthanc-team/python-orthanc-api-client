@@ -951,9 +951,10 @@ class TestApiClient(unittest.TestCase):
 
         self.assertEqual(3, len(instances_set.instances_ids))
         # filter 'sT2W/FLAIR'
-        instances_set.filter_instances(filter=lambda api, i: 'sT2W/FLAIR' == api.instances.get(i).series.main_dicom_tags.get('SeriesDescription'))
+        filtered_set = instances_set.filter_instances(filter=lambda api, i: 'sT2W/FLAIR' == api.instances.get(i).series.main_dicom_tags.get('SeriesDescription'))
 
         self.assertEqual(1, len(instances_set.instances_ids))
+        self.assertEqual(2, len(filtered_set.instances_ids))
 
         # apply a metadata to the filtered list of instances
         instances_set.process_instances(processor=lambda api, i: api.instances.set_string_metadata(i, '1024', 'filtered'))
