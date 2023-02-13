@@ -2,6 +2,7 @@ import typing
 from typing import List, Union
 from .tags import SimplifiedTags
 from .study import Study
+from .job import Job
 
 from .exceptions import *
 
@@ -72,6 +73,26 @@ class DicomModalities:
         """alias for send"""
         return self.send(target_modality=target_modality, resources_ids=resources_ids, synchronous=synchronous)
 
+    def send_async(self, target_modality: str, resources_ids: Union[List[str], str]) -> Job:
+        """sends a list of resources to a remote DICOM modality
+
+        Returns
+        -------
+        the created job
+        """
+
+        if isinstance(resources_ids, str):
+            resources_ids = [resources_ids]
+
+        r = self._api_client.post(
+            endpoint=f"{self._url_segment}/{target_modality}/store",
+            json={
+                "Resources": resources_ids,
+                "Synchronous": True
+            })
+
+        return Job(api_client=self._api_client, orthanc_id=r.json()['ID'])
+
     def send(self, target_modality: str, resources_ids: Union[List[str], str], synchronous: bool = True):
         """sends a list of resources to a remote DICOM modality
 
@@ -83,14 +104,13 @@ class DicomModalities:
         if isinstance(resources_ids, str):
             resources_ids = [resources_ids]
 
-        r = self._api_client.post(
+        self._api_client.post(
             endpoint=f"{self._url_segment}/{target_modality}/store",
             json={
                 "Resources": resources_ids,
                 "Synchronous": synchronous
             })
 
-        return None
 
     def retrieve_study(self, from_modality: str, dicom_id: str) -> str:
         """

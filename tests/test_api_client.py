@@ -225,7 +225,7 @@ class TestApiClient(unittest.TestCase):
 
         study_id = self.oa.studies.lookup('1.2.3')
 
-        job = self.oa.dicomweb_servers.send_asynchronous('orthanc-b', study_id)
+        job = self.oa.dicomweb_servers.send_async('orthanc-b', study_id)
         self.assertEqual(JobType.DICOM_WEB_STOW_CLIENT, job.info.type)
         wait_until(job.is_complete, 5)
         self.assertEqual(JobStatus.SUCCESS, job.refresh().info.status)
@@ -340,7 +340,7 @@ class TestApiClient(unittest.TestCase):
         instances_ids = self.oa.upload(dicom)
         study_id = self.oa.studies.lookup('1.2.3')
 
-        job = self.oa.transfers.send('orthanc-b', resources_ids=study_id, resource_type=ResourceType.STUDY, compress=False)
+        job = self.oa.transfers.send_async('orthanc-b', resources_ids=study_id, resource_type=ResourceType.STUDY, compress=False)
 
         self.assertEqual(JobType.PUSH_TRANSFER, job.info.type)
         wait_until(job.is_complete, 5)
@@ -355,7 +355,7 @@ class TestApiClient(unittest.TestCase):
         dicom = generate_test_dicom_file(width=33, height=33, tags={'StudyInstanceUID': '1.2.3'})
         instances_ids = self.oa.upload(dicom)
 
-        job = self.oa.transfers.send('orthanc-b', resources_ids=instances_ids, resource_type=ResourceType.INSTANCE, compress=True)
+        job = self.oa.transfers.send_async('orthanc-b', resources_ids=instances_ids, resource_type=ResourceType.INSTANCE, compress=True)
 
         self.assertEqual(JobType.PUSH_TRANSFER, job.info.type)
         job.wait_completed(timeout=5)

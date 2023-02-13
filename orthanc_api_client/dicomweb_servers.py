@@ -10,7 +10,7 @@ class DicomWebServers:
         self._api_client = api_client
         self._url_segment = 'dicom-web/servers'
 
-    def send_asynchronous(self, target_server: str, resources_ids: Union[List[str], str]) -> Job:
+    def send_async(self, target_server: str, resources_ids: Union[List[str], str]) -> Job:
         """sends a list of resources to a remote DicomWeb server
 
         Returns

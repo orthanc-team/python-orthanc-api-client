@@ -1,3 +1,11 @@
+v 0.11.0
+========
+
+- **BREAKING CHANGE:** renamed `dicomweb_servers.send_asynchronous` into `dicomweb_servers.send_async`
+- for every target (`peers, transfers, modalities, dicomweb_server`) we now have both:
+  - `send()` that is synchronous
+  - and `send_async()` that is asynchronous and returns the job that has been created
+
 v 0.10.2
 ========
 

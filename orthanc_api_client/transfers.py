@@ -11,7 +11,7 @@ class Transfers:
         self._api_client = api_client
         self._url_segment = 'transfers'
 
-    def send(self, target_peer: str, resources_ids: Union[List[str], str], resource_type: ResourceType, compress: bool = True) -> Job:
+    def send_async(self, target_peer: str, resources_ids: Union[List[str], str], resource_type: ResourceType, compress: bool = True) -> Job:
 
         if isinstance(resources_ids, str):
             resources_ids = [resources_ids]
@@ -32,3 +32,14 @@ class Transfers:
             })
 
         return Job(api_client=self._api_client, orthanc_id=r.json()['ID'])
+
+
+    def send(self, target_peer: str, resources_ids: Union[List[str], str], resource_type: ResourceType, compress: bool = True, polling_interval: float = 0.2):
+
+        job = self.send_async(
+            target_peer=target_peer,
+            resources_ids=resources_ids,
+            resource_type=resource_type,
+            compress=compress
+        )
+        job.wait_completed(polling_interval=polling_interval)
