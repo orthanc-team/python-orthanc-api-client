@@ -142,7 +142,8 @@ class InstancesSet:
 
     # keep only the instances that satisfy the filter
     # prototype: filter(api_client, instance_id)
-    def filter_instances(self, filter):
+    # this method returns the list of removed instances IDs
+    def filter_instances(self, filter) -> List[str]:
         series_to_delete = []
 
         for series_id, instances_ids in self._by_series.items():
@@ -160,6 +161,8 @@ class InstancesSet:
 
         for s in series_to_delete:
             del self._by_series[s]
+
+        return instances_to_delete
 
     # apply a method on all instances
     # prototype: processor(api_client, instance_id)
