@@ -1,3 +1,8 @@
+v 0.10.2
+========
+
+- added synchronous `dicomweb_servers.send()`
+
 v 0.10.1
 ========
 
