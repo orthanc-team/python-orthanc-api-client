@@ -1,3 +1,7 @@
+v 0.11.1
+========
+
+- added `InstancesSet.id`
 - `InstancesSet.api_client` is now public
 
 v 0.11.0

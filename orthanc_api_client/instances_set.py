@@ -3,6 +3,7 @@ from .study import Study
 from .series import Series
 from .instance import Instance
 from .job import Job
+import uuid
 
 # This class contains a set of Instances that represents the status of a study at a given time.
 # Its main use is to avoid this kind of situation:
@@ -15,11 +16,17 @@ from .job import Job
 
 class InstancesSet:
 
-    def __init__(self, api_client: 'OrthancApiClient'):
+    def __init__(self, api_client: 'OrthancApiClient', id: str = None):
         self.api_client = api_client
+        if id is None:
+            id = uuid.uuid4().hex.upper()[:8]
+        self.id = id
         self._all_instances_ids = []
         self._by_series = {}
         self.study_id = None
+
+    def __str__(self):
+        return f"{self.id} - {len(self.series_ids)} series / {len(self.instances_ids)} instances"
 
     def add_series(self, series_id: str):
         self._add_series(
