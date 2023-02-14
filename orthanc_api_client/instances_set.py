@@ -16,7 +16,7 @@ from .job import Job
 class InstancesSet:
 
     def __init__(self, api_client: 'OrthancApiClient'):
-        self._api_client = api_client
+        self.api_client = api_client
         self._all_instances_ids = []
         self._by_series = {}
         self.study_id = None
@@ -24,7 +24,7 @@ class InstancesSet:
     def add_series(self, series_id: str):
         self._add_series(
             series_id=series_id,
-            instances_ids=self._api_client.series.get_instances_ids(orthanc_id=series_id)
+            instances_ids=self.api_client.series.get_instances_ids(orthanc_id=series_id)
         )
 
     def _add_series(self, series_id: str, instances_ids: List[str]):
@@ -81,7 +81,7 @@ class InstancesSet:
         return instances_set
 
     def delete(self):
-        self._api_client.post(
+        self.api_client.post(
             endpoint=f"tools/bulk-delete",
             json= {
                 "Resources": self.instances_ids
@@ -104,7 +104,7 @@ class InstancesSet:
         if keep_tags is not None and len(keep_tags) > 0:
             query['Keep'] = keep_tags
 
-        r = self._api_client.post(
+        r = self.api_client.post(
             endpoint=f"tools/bulk-modify",
             json=query)
 
@@ -112,7 +112,7 @@ class InstancesSet:
             rjson = r.json()
 
             # create the modified set from the response
-            modified_set = InstancesSet(api_client=self._api_client)
+            modified_set = InstancesSet(api_client=self.api_client)
             modified_instances_ids = []
             modified_series_ids = []
             modified_studies_ids = []
@@ -132,7 +132,7 @@ class InstancesSet:
                 return None  # we had a problem since the number of instances has changed !!!
 
             for s in modified_series_ids:
-                series_all_instances_ids = set(self._api_client.series.get_instances_ids(orthanc_id=s))
+                series_all_instances_ids = set(self.api_client.series.get_instances_ids(orthanc_id=s))
 
                 # the series might contain some instances that do not come from our modification, ignore them !
                 series_instances_ids = list(series_all_instances_ids.intersection(set(modified_instances_ids)))
@@ -150,13 +150,13 @@ class InstancesSet:
     # this method returns the list of removed instances IDs
     def filter_instances(self, filter) -> List[str]:
         series_to_delete = []
-        filtered = InstancesSet(self._api_client)
+        filtered = InstancesSet(self.api_client)
         filtered.study_id = self.study_id
 
         for series_id, instances_ids in self._by_series.items():
             instances_to_delete = []
             for instance_id in instances_ids:
-                if not filter(self._api_client, instance_id):
+                if not filter(self.api_client, instance_id):
                     instances_to_delete.append(instance_id)
 
             for i in instances_to_delete:
@@ -177,4 +177,4 @@ class InstancesSet:
     # prototype: processor(api_client, instance_id)
     def process_instances(self, processor):
         for instance_id in self._all_instances_ids:
-            processor(self._api_client, instance_id)
+            processor(self.api_client, instance_id)
