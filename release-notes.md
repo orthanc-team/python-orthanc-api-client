@@ -1,4 +1,6 @@
-- 
+v 0.11.2
+========
+
 - added `keep_tags` to `Instances.modify`
 
 v 0.11.1
