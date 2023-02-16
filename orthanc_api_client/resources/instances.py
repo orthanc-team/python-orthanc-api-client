@@ -32,7 +32,7 @@ class Instances(Resources):
         json_tags = self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/tags")
         return Tags(json_tags)
 
-    def modify_bulk(self, orthanc_ids: List[str] = [], replace_tags: Any = {}, remove_tags: List[str] = [], delete_original: bool = True, force: bool = False) -> List[str]:
+    def modify_bulk(self, orthanc_ids: List[str] = [], replace_tags: Any = {}, remove_tags: List[str] = [], keep_tags: List[str] = [], delete_original: bool = True, force: bool = False) -> List[str]:
         modified_instances_ids = []
 
         for orthanc_id in orthanc_ids:
@@ -40,6 +40,7 @@ class Instances(Resources):
                 orthanc_id=orthanc_id,
                 replace_tags=replace_tags,
                 remove_tags=remove_tags,
+                keep_tags=keep_tags,
                 force=force
             )
 
@@ -51,7 +52,7 @@ class Instances(Resources):
 
         return modified_instances_ids
 
-    def modify(self, orthanc_id: str, replace_tags: Any = {}, remove_tags: List[str] = [], force: bool = False) -> bytes:
+    def modify(self, orthanc_id: str, replace_tags: Any = {}, remove_tags: List[str] = [], keep_tags: List[str] = [], force: bool = False) -> bytes:
 
         query = {
             "Force": force
@@ -62,6 +63,9 @@ class Instances(Resources):
 
         if remove_tags is not None and len(remove_tags) > 0:
             query['Remove'] = remove_tags
+
+        if keep_tags is not None and len(keep_tags) > 0:
+            query['Keep'] = keep_tags
 
         r = self._api_client.post(
             endpoint=f"instances/{orthanc_id}/modify",

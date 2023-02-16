@@ -1,3 +1,6 @@
+- 
+- added `keep_tags` to `Instances.modify`
+
 v 0.11.1
 ========
 

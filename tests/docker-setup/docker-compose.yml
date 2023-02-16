@@ -19,6 +19,7 @@ services:
 
       TRANSFERS_PLUGIN_ENABLED: "true"
       ORTHANC__CHECK_REVISIONS: "true"
+      ORTHANC__OVERWRITE_INSTANCES: "true"
 
   orthanc-b:
     build: orthanc-b
@@ -38,6 +39,7 @@ services:
 
       TRANSFERS_PLUGIN_ENABLED: "true"
       ORTHANC__CHECK_REVISIONS: "false"
+      ORTHANC__OVERWRITE_INSTANCES: "true"
 
   orthanc-c:
     image: osimis/orthanc:23.2.0
@@ -55,3 +57,4 @@ services:
         {"orthanc-a": ["http://orthanc-a:8042/dicom-web/", "test", "test"]}
 
       TRANSFERS_PLUGIN_ENABLED: "true"
+      ORTHANC__OVERWRITE_INSTANCES: "true"

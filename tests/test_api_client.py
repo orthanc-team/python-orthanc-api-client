@@ -626,6 +626,34 @@ class TestApiClient(unittest.TestCase):
         self.assertFalse('InstitutionName' in modified_tags)
         self.assertEqual('1.2.3.4', modified_tags['StudyInstanceUID'])
 
+    def test_modify_instances(self):
+        self.oa.delete_all_content()
+
+        instance_id = self.oa.upload_file(here / "stimuli/CT_small.dcm")[0]
+
+        original_tags = self.oa.instances.get_tags(instance_id)
+
+        modified = self.oa.instances.modify(
+            orthanc_id=instance_id,
+            remove_tags=['InstitutionName'],
+            replace_tags={
+                'SeriesDate': '20220208'
+            },
+            keep_tags=['StudyInstanceUID', 'SeriesInstanceUID', 'SOPInstanceUID'],
+            force=True
+        )
+        modified_id = self.oa.upload(buffer=modified)[0]
+        self.assertEqual(instance_id, modified_id)
+
+        modified_tags = self.oa.instances.get_tags(modified_id)
+
+        self.assertFalse('InstitutionName' in modified_tags)
+        self.assertEqual('20220208', modified_tags['SeriesDate'])
+        self.assertEqual(original_tags.get('StudyInstanceUID'), modified_tags.get('StudyInstanceUID'))
+        self.assertEqual(original_tags.get('SeriesInstanceUID'), modified_tags.get('SeriesInstanceUID'))
+        self.assertEqual(original_tags.get('SOPInstanceUID'), modified_tags.get('SOPInstanceUID'))
+
+
     def test_asyncio(self):
         self.oa.delete_all_content()
 
