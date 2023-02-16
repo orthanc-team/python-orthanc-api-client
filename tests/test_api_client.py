@@ -488,6 +488,32 @@ class TestApiClient(unittest.TestCase):
 
         self.assertEqual('abcdefg2', content_readback)
 
+    def test_metadata_default_value(self):
+        self.oa.delete_all_content()
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+
+        # try to read a metadata that does not exist
+        value = self.oa.instances.get_string_metadata(
+            instances_ids[0],
+            metadata_name='1024',
+            default_value=None
+        )
+        self.assertEqual(None, value)
+
+        value = self.oa.instances.get_string_metadata(
+            instances_ids[0],
+            metadata_name='1024',
+            default_value=''
+        )
+        self.assertEqual('', value)
+
+        value, revision = self.oa.instances.get_string_metadata_with_revision(
+            instances_ids[0],
+            metadata_name='1024',
+            default_value=''
+        )
+        self.assertEqual('', value)
+
 
     def test_changes(self):
         self.oa.delete_all_content()

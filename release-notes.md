@@ -1,3 +1,7 @@
+v 0.11.3
+========
+- fix metadata default value
+
 v 0.11.2
 ========
 

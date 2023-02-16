@@ -152,10 +152,10 @@ class Resources:
         content, revision = self.get_binary_metadata_with_revision(
             orthanc_id=orthanc_id,
             metadata_name=metadata_name,
-            default_value=default_value.encode('utf-8') if default_value else None
+            default_value=default_value.encode('utf-8') if default_value is not None else None
         )
 
-        return content.decode('utf-8') if content else None
+        return content.decode('utf-8') if content is not None else None
 
     def get_binary_metadata_with_revision(self, orthanc_id: str, metadata_name: str, default_value: Optional[bytes] = None) -> Tuple[bytes, str]:
 
@@ -176,10 +176,10 @@ class Resources:
         content, revision = self.get_binary_metadata_with_revision(
             orthanc_id=orthanc_id,
             metadata_name=metadata_name,
-            default_value=default_value.encode('utf-8') if default_value else None
+            default_value=default_value.encode('utf-8') if default_value is not None else None
         )
 
-        return content.decode('utf-8'), revision
+        return content.decode('utf-8') if content is not None else None, revision
 
     def has_metadata(self, orthanc_id: str, metadata_name: str) -> bool:
         return self.get_metadata(orthanc_id=orthanc_id, metadata_name=metadata_name, default_value=None) is not None
