@@ -157,8 +157,8 @@ class InstancesSet:
     # this method returns the list of removed instances IDs
     def filter_instances(self, filter) -> List[str]:
         series_to_delete = []
-        filtered = InstancesSet(self.api_client)
-        filtered.study_id = self.study_id
+        removed_set = InstancesSet(self.api_client)
+        removed_set.study_id = self.study_id
 
         for series_id, instances_ids in self._by_series.items():
             instances_to_delete = []
@@ -173,12 +173,13 @@ class InstancesSet:
             if len(self._by_series[series_id]) == 0:
                 series_to_delete.append(series_id)
 
-            filtered._add_series(series_id, instances_to_delete)
+            if len(instances_to_delete) > 0:
+                removed_set._add_series(series_id, instances_to_delete)
 
         for s in series_to_delete:
             del self._by_series[s]
 
-        return filtered
+        return removed_set
 
     # apply a method on all instances
     # prototype: processor(api_client, instance_id)

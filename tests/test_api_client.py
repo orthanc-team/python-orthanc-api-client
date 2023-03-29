@@ -1013,18 +1013,20 @@ class TestApiClient(unittest.TestCase):
     def test_instances_set_filter_apply(self):
         self.oa.delete_all_content()
 
-        # upload a 2 series study
+        # upload a 2 series study (2 instances in T1/3D/FFE/C and 1 instance in sT2W/FLAIR)
         instances_id = self.oa.upload_folder(here / 'stimuli/MR/Brain')
         study_id = self.oa.instances.get_parent_study_id(instances_id[0])
 
         instances_set = InstancesSet.from_study(api_client=self.oa, study_id=study_id)
 
         self.assertEqual(3, len(instances_set.instances_ids))
-        # filter 'sT2W/FLAIR'
-        filtered_set = instances_set.filter_instances(filter=lambda api, i: 'sT2W/FLAIR' == api.instances.get(i).series.main_dicom_tags.get('SeriesDescription'))
+        # filter and keep only 'sT2W/FLAIR'
+        filtered_out_set = instances_set.filter_instances(filter=lambda api, i: 'sT2W/FLAIR' == api.instances.get(i).series.main_dicom_tags.get('SeriesDescription'))
 
         self.assertEqual(1, len(instances_set.instances_ids))
-        self.assertEqual(2, len(filtered_set.instances_ids))
+        self.assertEqual(1, len(instances_set.series_ids))
+        self.assertEqual(2, len(filtered_out_set.instances_ids))
+        self.assertEqual(1, len(filtered_out_set.series_ids))
 
         # apply a metadata to the filtered list of instances
         instances_set.process_instances(processor=lambda api, i: api.instances.set_string_metadata(i, '1024', 'filtered'))
@@ -1033,6 +1035,7 @@ class TestApiClient(unittest.TestCase):
         instances_set2 = InstancesSet.from_study(api_client=self.oa, study_id=study_id)
         instances_set2.filter_instances(filter=lambda api, i: 'filtered' == api.instances.get_string_metadata(i, '1024', None))
         self.assertEqual(1, len(instances_set2.instances_ids))
+        self.assertEqual(1, len(instances_set2.series_ids))
         self.assertEqual(instances_set.instances_ids, instances_set2.instances_ids)
 
 if __name__ == '__main__':

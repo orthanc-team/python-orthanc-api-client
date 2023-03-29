@@ -1,3 +1,7 @@
+v 0.11.4
+========
+- fix `InstancesSet.filter_instances`
+
 v 0.11.3
 ========
 - fix metadata default value
