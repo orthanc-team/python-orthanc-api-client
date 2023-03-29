@@ -3,6 +3,7 @@ from typing import List, Union
 from .tags import SimplifiedTags
 from .study import Study
 from .job import Job
+from .exceptions import ResourceNotFound
 
 from .exceptions import *
 
@@ -316,3 +317,24 @@ class DicomModalities:
             results.append(result)
 
         return results
+
+    def delete(self, modality: str):
+        query = self._api_client.delete(
+            endpoint=f"{self._url_segment}/{modality}")
+
+    def configure(self, modality: str, configuration: dict):
+
+        query = self._api_client.put(
+            endpoint=f"{self._url_segment}/{modality}",
+            json=configuration
+        )
+
+    def get_configuration(self, modality: str) -> dict:
+        all_modalities = self._api_client.get_json(
+            endpoint=f"{self._url_segment}?expand"
+        )
+
+        if modality in all_modalities:
+            return all_modalities[modality]
+        else:
+            raise ResourceNotFound(msg=f"The modality {modality} was not found")

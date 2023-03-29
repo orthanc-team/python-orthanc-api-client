@@ -1,3 +1,5 @@
+- added `Modalities.configure`, `Modalities.delete` and `Modalities.get_configuration`
+
 v 0.11.4
 ========
 - fix `InstancesSet.filter_instances`
