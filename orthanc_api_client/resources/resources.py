@@ -7,7 +7,7 @@ from ..exceptions import *
 from ..helpers import to_dicom_date
 
 
-logger = logging.getLogger('api-client')
+logger = logging.getLogger(__name__)
 
 
 class Resources:

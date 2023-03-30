@@ -18,7 +18,7 @@ from .transfers import Transfers
 from .peers import Peers
 
 
-logger = logging.getLogger('api-client')
+logger = logging.getLogger(__name__)
 
     
 
