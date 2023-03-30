@@ -1,3 +1,5 @@
+v 0.11.5
+========
 - added `Modalities.configure`, `Modalities.delete` and `Modalities.get_configuration`
 
 v 0.11.4
