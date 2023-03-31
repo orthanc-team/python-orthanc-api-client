@@ -55,7 +55,7 @@ class Series:
     @property
     def statistics(self):  # lazy loading of statistics ....
         if self._statistics is None:
-            json_series_stats = self._orthancClient.series.get_json_statistics(self.id)
+            json_series_stats = self._api_client.series.get_json_statistics(self.id)
             self._statistics = SeriesStatistics(json_series_stats)
         return self._statistics
 

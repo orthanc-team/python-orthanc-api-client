@@ -58,7 +58,7 @@ class Study:
     @property
     def statistics(self):  # lazy loading of statistics ....
         if self._statistics is None:
-            json_study_stats = self._orthancClient.studies.get_json_statistics(self.id)
+            json_study_stats = self._api_client.studies.get_json_statistics(self.id)
             self._statistics = StudyStatistics(json_study_stats)
         return self._statistics
 
