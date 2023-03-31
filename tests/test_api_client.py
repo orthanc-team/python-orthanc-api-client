@@ -92,6 +92,7 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual("e+1", study.main_dicom_tags.get('StudyDescription'))
         self.assertEqual('1.3.6.1.4.1.5962.1.2.1.20040119072730.12322', study.dicom_id)
         self.assertEqual('8a8cf898-ca27c490-d0c7058c-929d0581-2bbf104d', study.orthanc_id)
+        self.assertEqual(1, study.statistics.instances_count)
 
     def test_series(self):
         instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
@@ -101,6 +102,7 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual("CT", series.main_dicom_tags.get('Modality'))
         self.assertEqual('1.3.6.1.4.1.5962.1.3.1.1.20040119072730.12322', series.dicom_id)
         self.assertEqual('93034833-163e42c3-bc9a428b-194620cf-2c5799e5', series.orthanc_id)
+        self.assertEqual(1, series.statistics.instances_count)
 
         study = series.study
         self.assertEqual("1CT1", study.patient_main_dicom_tags.get('PatientID'))

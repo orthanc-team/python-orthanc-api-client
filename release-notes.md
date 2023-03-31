@@ -1,3 +1,6 @@
+v 0.11.7
+========
+
 - fix `Series.statistics` and `Study.statistics`
 - uniformized logger names to `__name__`
 
