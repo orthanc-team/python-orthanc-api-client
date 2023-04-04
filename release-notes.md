@@ -1,3 +1,5 @@
+- more detailed HttpError
+
 v 0.11.7
 ========
 

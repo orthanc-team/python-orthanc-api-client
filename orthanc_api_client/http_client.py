@@ -1,6 +1,7 @@
 from typing import Any
 import requests
 import urllib.parse
+import json
 
 from orthanc_api_client import exceptions as api_exceptions
 
@@ -92,8 +93,26 @@ class HttpClient:
                 url=url
             )
         else:
+            error_messages = []
+            error_message = None
+            # try to get details from the payload
+            if len(response.content) > 0:
+                try:
+                    payload = json.loads(response.content)
+                    if 'Message' in payload:
+                        error_messages.append(payload['Message'])
+                    if 'Details' in payload and len(payload['Details']) > 0:
+                        error_messages.append(payload['Details'])
+                except:
+                    pass
+
+            if len(error_messages) > 0:
+                error_message = " - ".join(error_messages)
             raise api_exceptions.HttpError(
-                response.status_code, url=url, request_response=response)
+                http_status_code=response.status_code,
+                msg=error_message,
+                url=url,
+                request_response=response)
 
     def _translate_exception(self, request_exception, url):
         if isinstance(request_exception, requests.ConnectionError):
