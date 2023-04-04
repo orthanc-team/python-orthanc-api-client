@@ -1,3 +1,7 @@
+v 0.11.8
+========
+
+- `InstancesSet` ids are reproducible (based on a hash of their initial content)
 - more detailed HttpError
 
 v 0.11.7

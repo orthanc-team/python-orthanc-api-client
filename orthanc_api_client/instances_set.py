@@ -3,7 +3,8 @@ from .study import Study
 from .series import Series
 from .instance import Instance
 from .job import Job
-import uuid
+import hashlib
+import base64
 
 # This class contains a set of Instances that represents the status of a study at a given time.
 # Its main use is to avoid this kind of situation:
@@ -18,9 +19,8 @@ class InstancesSet:
 
     def __init__(self, api_client: 'OrthancApiClient', id: str = None):
         self.api_client = api_client
-        if id is None:
-            id = uuid.uuid4().hex.upper()[:8]
-        self.id = id
+        self._id = id
+        self._computed_id = None
         self._all_instances_ids = []
         self._by_series = {}
         self.study_id = None
@@ -37,6 +37,13 @@ class InstancesSet:
     def _add_series(self, series_id: str, instances_ids: List[str]):
         self._by_series[series_id] = instances_ids
         self._all_instances_ids.extend(instances_ids)
+        self._computed_id = None  # invalidate the computed id
+
+    @property
+    def id(self) -> str:
+        if not self._computed_id:
+            self._computed_id = base64.b16encode(hashlib.sha1(",".join(self._all_instances_ids).encode('utf-8')).digest())[:10].decode('utf-8')
+        return self._computed_id
 
     @property
     def instances_ids(self) -> List[str]:
@@ -154,8 +161,8 @@ class InstancesSet:
 
     # keep only the instances that satisfy the filter
     # prototype: filter(api_client, instance_id)
-    # this method returns the list of removed instances IDs
-    def filter_instances(self, filter) -> List[str]:
+    # this method returns an InstanceSet containing the removed instances and series
+    def filter_instances(self, filter) -> 'InstancesSet':
         series_to_delete = []
         removed_set = InstancesSet(self.api_client)
         removed_set.study_id = self.study_id
