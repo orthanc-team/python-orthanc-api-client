@@ -1,4 +1,4 @@
-v 0.12.1
+v 0.12.2
 ========
 
 - `Modalities.send` and `Modalities.store`:

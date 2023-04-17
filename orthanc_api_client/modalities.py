@@ -117,7 +117,6 @@ class DicomModalities:
         self._api_client.post(
             endpoint=f"{self._url_segment}/{target_modality}/store",
             json=payload)
-            json=payload)
 
     def retrieve_study(self, from_modality: str, dicom_id: str) -> str:
         """
