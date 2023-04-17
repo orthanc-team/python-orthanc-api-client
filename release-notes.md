@@ -1,3 +1,10 @@
+v 0.12.0
+========
+
+- `Modalities.send`:
+  - **BREAKING CHANGE:** removed `Synchronous` argument: it is always synchronous
+  - added an optional `Timeout` argument
+
 v 0.11.8
 ========
 

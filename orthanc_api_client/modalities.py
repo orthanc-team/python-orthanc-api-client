@@ -1,5 +1,5 @@
 import typing
-from typing import List, Union
+from typing import List, Union, Optional
 from .tags import SimplifiedTags
 from .study import Study
 from .job import Job
@@ -94,8 +94,9 @@ class DicomModalities:
 
         return Job(api_client=self._api_client, orthanc_id=r.json()['ID'])
 
-    def send(self, target_modality: str, resources_ids: Union[List[str], str], synchronous: bool = True):
+    def send(self, target_modality: str, resources_ids: Union[List[str], str], timeout: Optional[int] = None):
         """sends a list of resources to a remote DICOM modality
+        The transfer is synchronous
 
         Returns
         -------
@@ -105,13 +106,17 @@ class DicomModalities:
         if isinstance(resources_ids, str):
             resources_ids = [resources_ids]
 
+        payload = {
+            "Synchronous": True,
+            "Resources": resources_ids,
+        }
+
+        if timeout is not None:
+            payload["Timeout"] = timeout
+
         self._api_client.post(
             endpoint=f"{self._url_segment}/{target_modality}/store",
-            json={
-                "Resources": resources_ids,
-                "Synchronous": synchronous
-            })
-
+            json=payload)
 
     def retrieve_study(self, from_modality: str, dicom_id: str) -> str:
         """
