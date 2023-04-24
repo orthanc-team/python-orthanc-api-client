@@ -1040,6 +1040,70 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual(1, len(instances_set2.series_ids))
         self.assertEqual(instances_set.instances_ids, instances_set2.instances_ids)
 
+    def test_add_get_label(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
+
+        # no labels at beginning
+        labels = self.oa.studies.get_labels(study_id)
+        self.assertEqual(len(labels), 0)
+
+        # the label has been applied
+        my_label = "MYLABEL"
+        self.oa.studies.add_label(study_id, my_label)
+        read_labels = self.oa.studies.get_labels(study_id)
+        self.assertEqual(len(read_labels), 1)
+        self.assertEqual(read_labels[0], my_label)
+
+    def test_delete_label(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
+
+        # no labels at beginning
+        labels = self.oa.studies.get_labels(study_id)
+        self.assertEqual(len(labels), 0)
+
+        # the labels have been applied
+        my_label_1 = "MYLABEL1"
+        my_label_2 = "MYLABEL2"
+        self.oa.studies.add_labels(study_id, [my_label_1, my_label_2])
+        read_labels = self.oa.studies.get_labels(study_id)
+        self.assertEqual(len(read_labels), 2)
+
+        # only label 1 is deleted
+        self.oa.studies.delete_label(study_id, my_label_1)
+        read_labels = self.oa.studies.get_labels(study_id)
+        self.assertEqual(len(read_labels), 1)
+        self.assertEqual(read_labels[0], my_label_2)
+
+        # labels list has been deleted
+        self.oa.studies.delete_labels(study_id, [my_label_2])
+        read_labels = self.oa.studies.get_labels(study_id)
+        self.assertEqual(len(read_labels), 0)
+
+    def test_find_study_with_label(self):
+        #TODO
+        return None
+        # self.oa.delete_all_content()
+        #
+        # instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        # study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
+        #
+        # studies = self.oa.studies.find(
+        #     query={
+        #         'PatientID': '1C*',
+        #         'StudyDescription': ''
+        #     }
+        # )
+        #
+        # self.assertEqual(1, len(studies))
+        # self.assertEqual('1.3.6.1.4.1.5962.1.2.1.20040119072730.12322', studies[0].dicom_id)
+        # self.assertEqual("e+1", studies[0].main_dicom_tags.get('StudyDescription'))
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     unittest.main()

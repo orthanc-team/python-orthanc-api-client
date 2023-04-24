@@ -305,3 +305,56 @@ class Resources:
         if len(resource_ids) > 1:
             raise TooManyResourcesFound()
         return None
+
+    def get_labels(self, orthanc_id: str) -> List[str]:
+        """
+        Gets all the labels of this resource
+
+        Returns:
+            A list containing oll the labels of this resource
+        """
+        return self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/labels")
+
+    def add_label(self, orthanc_id: str, label: str):
+        """
+        Add the label to the resource
+
+        Args:
+            orthanc_id: resource to add the label to
+            label: the label to add to the resource
+        """
+
+        self._api_client.put(f"{self._url_segment}/{orthanc_id}/labels/{label}")
+
+    def add_labels(self, orthanc_id: str, labels: List[str]):
+        """
+        Add the labels to the resource
+
+        Args:
+            orthanc_id: resource to add the labels to
+            labels: the list of labels to add to the resource
+        """
+        for label in labels:
+            self.add_label(orthanc_id, label)
+
+    def delete_label(self, orthanc_id: str, label: str):
+        """
+        Delete the label from the resource
+
+        Args:
+            orthanc_id: resource to remove the label from
+            label: the label to remove from the resource
+        """
+
+        self._api_client.delete(f"{self._url_segment}/{orthanc_id}/labels/{label}")
+
+    def delete_labels(self, orthanc_id: str, labels: List[str]):
+        """
+        Delete the labels from the resource
+
+        Args:
+            orthanc_id: resource to remove the labels from
+            labels: the labels to remove from the resource
+        """
+        for label in labels:
+            self.delete_label(orthanc_id, label)

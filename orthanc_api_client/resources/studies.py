@@ -45,6 +45,7 @@ class Studies(Resources):
         """
         return self._lookup(filter='Study', dicom_id=dicom_id)
 
+    #TODO: add labels here
     def find(self, query: object, case_sensitive: bool = True) -> List[Study]:
         payload = {
             "Level": "Study",
