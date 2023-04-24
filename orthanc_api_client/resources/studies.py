@@ -46,12 +46,21 @@ class Studies(Resources):
         return self._lookup(filter='Study', dicom_id=dicom_id)
 
     #TODO: add labels here
-    def find(self, query: object, case_sensitive: bool = True) -> List[Study]:
+    def find(self, query: object, case_sensitive: bool = True, labels: [str] = [], labels_constraint: str = "Any") -> List[Study]:
+        """
+        find a study in Orthanc based on the query and the labels
+
+        args:
+            labels: the list of the labels to filter to
+            labels_constraint: "Any" (=default value), "All", "None"
+        """
         payload = {
             "Level": "Study",
             "Query": query,
             "Expand": True,
-            "CaseSensitive": case_sensitive
+            "CaseSensitive": case_sensitive,
+            "Labels": labels,
+            "LabelsConstraint": labels_constraint
         }
 
         r = self._api_client.post(

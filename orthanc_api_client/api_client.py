@@ -367,3 +367,9 @@ class OrthancApiClient(HttpClient):
                                                     content_type = 'image/jpeg',
                                                     dicom_tags = dicom_tags,
                                                     parent_id = parent_id)
+
+    def get_labels(self):
+        """
+        List all the labels that are associated with any resource of the Orthanc database
+        """
+        return self.get_json(endpoint = "/tools/labels")

@@ -1086,23 +1086,79 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual(len(read_labels), 0)
 
     def test_find_study_with_label(self):
-        #TODO
-        return None
-        # self.oa.delete_all_content()
-        #
-        # instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
-        # study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
-        #
-        # studies = self.oa.studies.find(
-        #     query={
-        #         'PatientID': '1C*',
-        #         'StudyDescription': ''
-        #     }
-        # )
-        #
-        # self.assertEqual(1, len(studies))
-        # self.assertEqual('1.3.6.1.4.1.5962.1.2.1.20040119072730.12322', studies[0].dicom_id)
-        # self.assertEqual("e+1", studies[0].main_dicom_tags.get('StudyDescription'))
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
+
+        my_label = "MYLABEL"
+        self.oa.studies.add_label(study_id, my_label)
+
+        # study with the label is found
+        studies = self.oa.studies.find(
+            query={},
+            labels=[my_label]
+        )
+        self.assertEqual(1, len(studies))
+
+        # study with another label is not found
+        studies = self.oa.studies.find(
+            query={},
+            labels=["NOTMYLABEL"]
+        )
+        self.assertEqual(0, len(studies))
+
+        # study with another label is found if constraint to 'None'
+        studies = self.oa.studies.find(
+            query={},
+            labels=["NOTMYLABEL"],
+            labels_constraint="None"
+        )
+        self.assertEqual(1, len(studies))
+
+        # study with 2 labels is found
+        my_label2 = "MYLABEL2"
+        self.oa.studies.add_label(study_id, my_label2)
+        studies = self.oa.studies.find(
+            query={},
+            labels=[my_label, my_label2],
+            labels_constraint="All"
+        )
+        self.assertEqual(1, len(studies))
+
+        # study with 1 label is found (constraint = 'Any')
+        self.oa.studies.delete_label(study_id, my_label2)
+        studies = self.oa.studies.find(
+            query={},
+            labels=[my_label, my_label2],
+            labels_constraint="Any"
+        )
+        self.assertEqual(1, len(studies))
+
+    def test_get_labels(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_folder(here / 'stimuli/MR/Brain/1')
+
+        my_label1 = "MYLABEL1"
+        my_label2 = "MYLABEL2"
+        self.oa.instances.add_label(instances_ids[0], my_label1)
+        self.oa.instances.add_label(instances_ids[1], my_label2)
+
+        # 2 labels are retrieved
+        read_labels = self.oa.get_labels()
+
+        self.assertEqual(2, len(read_labels))
+        self.assertIn(my_label1, read_labels)
+        self.assertIn(my_label2, read_labels)
+
+        # only one label is still there
+        self.oa.instances.delete_label(instances_ids[0], my_label1)
+
+        read_labels = self.oa.get_labels()
+
+        self.assertEqual(1, len(read_labels))
+        self.assertIn(my_label2, read_labels)
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
