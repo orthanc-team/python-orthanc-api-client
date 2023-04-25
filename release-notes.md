@@ -1,3 +1,10 @@
+v 0.13.0
+========
+
+- added labels features on `resources` (add, get, delete)
+- added labels in `tools/find`
+
+
 v 0.12.2
 ========
 

@@ -3,7 +3,7 @@ import unittest
 import subprocess
 import logging
 import datetime
-from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType, Study, Job, JobStatus, JobType, InstancesSet
+from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType, Study, Job, JobStatus, JobType, InstancesSet, LabelsConstraint
 from orthanc_api_client.helpers import to_dicom_date, wait_until
 import orthanc_api_client.exceptions as api_exceptions
 import pathlib
@@ -1112,7 +1112,7 @@ class TestApiClient(unittest.TestCase):
         studies = self.oa.studies.find(
             query={},
             labels=["NOTMYLABEL"],
-            labels_constraint="None"
+            labels_constraint=LabelsConstraint.NONE
         )
         self.assertEqual(1, len(studies))
 
@@ -1122,7 +1122,7 @@ class TestApiClient(unittest.TestCase):
         studies = self.oa.studies.find(
             query={},
             labels=[my_label, my_label2],
-            labels_constraint="All"
+            labels_constraint=LabelsConstraint.ALL
         )
         self.assertEqual(1, len(studies))
 
@@ -1131,7 +1131,7 @@ class TestApiClient(unittest.TestCase):
         studies = self.oa.studies.find(
             query={},
             labels=[my_label, my_label2],
-            labels_constraint="Any"
+            labels_constraint=LabelsConstraint.ANY
         )
         self.assertEqual(1, len(studies))
 
@@ -1146,7 +1146,7 @@ class TestApiClient(unittest.TestCase):
         self.oa.instances.add_label(instances_ids[1], my_label2)
 
         # 2 labels are retrieved
-        read_labels = self.oa.get_labels()
+        read_labels = self.oa.get_all_labels()
 
         self.assertEqual(2, len(read_labels))
         self.assertIn(my_label1, read_labels)
@@ -1155,7 +1155,7 @@ class TestApiClient(unittest.TestCase):
         # only one label is still there
         self.oa.instances.delete_label(instances_ids[0], my_label1)
 
-        read_labels = self.oa.get_labels()
+        read_labels = self.oa.get_all_labels()
 
         self.assertEqual(1, len(read_labels))
         self.assertIn(my_label2, read_labels)

@@ -7,7 +7,7 @@ from ..exceptions import *
 from ..study import StudyInfo, Study
 from ..helpers import to_dicom_date, to_dicom_time
 from ..downloaded_instance import DownloadedInstance
-
+from ..labels_constraint import LabelsConstraint
 
 class Studies(Resources):
 
@@ -45,8 +45,7 @@ class Studies(Resources):
         """
         return self._lookup(filter='Study', dicom_id=dicom_id)
 
-    #TODO: add labels here
-    def find(self, query: object, case_sensitive: bool = True, labels: [str] = [], labels_constraint: str = "Any") -> List[Study]:
+    def find(self, query: object, case_sensitive: bool = True, labels: [str] = [], labels_constraint: LabelsConstraint = LabelsConstraint.ANY) -> List[Study]:
         """
         find a study in Orthanc based on the query and the labels
 

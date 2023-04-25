@@ -368,7 +368,7 @@ class OrthancApiClient(HttpClient):
                                                     dicom_tags = dicom_tags,
                                                     parent_id = parent_id)
 
-    def get_labels(self):
+    def get_all_labels(self):
         """
         List all the labels that are associated with any resource of the Orthanc database
         """
