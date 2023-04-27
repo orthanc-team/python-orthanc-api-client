@@ -1,4 +1,4 @@
-v 0.13.0
+v 0.13.1
 ========
 
 - added labels features on `resources` (add, get, delete)
