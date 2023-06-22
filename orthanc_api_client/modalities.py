@@ -70,7 +70,7 @@ class DicomModalities:
         if r.status_code == 200:
             return r.json()
 
-    def store(self, target_modality: str, resources_ids: Union[List[str], str], timeout: Optional[int] = None):
+    def store(self, target_modality: str, resources_ids: Union[List[str], str], timeout: Optional[float] = None):
         """alias for send"""
         return self.send(target_modality=target_modality, resources_ids=resources_ids, timeout=timeout)
 
@@ -94,7 +94,7 @@ class DicomModalities:
 
         return Job(api_client=self._api_client, orthanc_id=r.json()['ID'])
 
-    def send(self, target_modality: str, resources_ids: Union[List[str], str], timeout: Optional[int] = None):
+    def send(self, target_modality: str, resources_ids: Union[List[str], str], timeout: Optional[float] = None):
         """sends a list of resources to a remote DICOM modality
         The transfer is synchronous
 
@@ -112,7 +112,7 @@ class DicomModalities:
         }
 
         if timeout is not None:
-            payload["Timeout"] = timeout
+            payload["Timeout"] = int(timeout+0.5)
 
         self._api_client.post(
             endpoint=f"{self._url_segment}/{target_modality}/store",

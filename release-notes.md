@@ -1,9 +1,15 @@
+
+- `Modalities.send` and `Modalities.store`:
+  - `timeout` is now a float argument (more pythonic) 
+
+
 v 0.13.1
 ========
 
-- added labels features on `resources` (add, get, delete)
-- added labels in `tools/find`
-
+- added `get_labels`, `add_label`, `add_labels`, `delete_label`, `delete_labels`
+  at all resources levels
+- added `OrthancApiClient.get_all_labels` to return all labels in Orthanc
+- added `labels` and `label_constraint` arguments to `studies.find`
 
 v 0.12.2
 ========

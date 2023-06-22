@@ -162,6 +162,7 @@ class InstancesSet:
     # keep only the instances that satisfy the filter
     # prototype: filter(api_client, instance_id)
     # this method returns an InstanceSet containing the removed instances and series
+    # example: filter_out_sets = s.filter_instances(filter=lambda api, id: api.instances.get(id).tags.get('SeriesDescription') == "keep this description")
     def filter_instances(self, filter) -> 'InstancesSet':
         series_to_delete = []
         removed_set = InstancesSet(self.api_client)
