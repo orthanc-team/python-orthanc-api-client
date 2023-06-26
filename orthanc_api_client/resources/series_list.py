@@ -48,11 +48,12 @@ class SeriesList(Resources):
             force=force
         )
 
-    def modify(self, orthanc_id: str, replace_tags={}, remove_tags=[], delete_original=True, force=False) -> str:
+    def modify(self, orthanc_id: str, replace_tags: Any = {}, remove_tags: List[str] = [], keep_tags: List[str] = [], delete_original=True, force=False) -> str:
         return self._modify(
             orthanc_id=orthanc_id,
             replace_tags=replace_tags,
             remove_tags=remove_tags,
+            keep_tags=keep_tags,
             delete_original=delete_original,
             force=force
         )

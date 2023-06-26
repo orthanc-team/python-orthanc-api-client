@@ -1,6 +1,9 @@
+v 0.13.2
+========
 
 - `Modalities.send` and `Modalities.store`:
   - `timeout` is now a float argument (more pythonic) 
+- added `keep_tags` argument to `modify()`
 
 
 v 0.13.1

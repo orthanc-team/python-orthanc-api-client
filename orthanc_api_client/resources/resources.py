@@ -2,7 +2,7 @@ import datetime
 
 import requests
 import logging
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Any
 from ..exceptions import *
 from ..helpers import to_dicom_date
 
@@ -191,7 +191,7 @@ class Resources:
         Args:
             orthanc_id: the instance id to anonymize
             replace_tags: a dico with OrthancTagsId <-> values of the tags you want to force
-            keep_tags: a list of the tags you want to keep the original values
+            keep_tags: a list of tags you want to keep unmodified
             delete_original: True to delete the original study (the one that has not been anonymized)
             force: some tags like "PatientID" requires this flag set to True to confirm that you understand the risks
         Returns:
@@ -219,14 +219,15 @@ class Resources:
 
         return None  # TODO: raise exception ???
 
-    def _modify(self, orthanc_id: str, replace_tags={}, remove_tags=[], delete_original=True, force=False) -> str:
+    def _modify(self, orthanc_id: str, replace_tags: Any = {}, remove_tags: List[str] = [], keep_tags: List[str] = [], delete_original=True, force=False) -> str:
         """
         modifies the study/series and possibly deletes the original resource (the one that has not be anonymized)
 
         Args:
             orthanc_id: the instance id to anonymize
             replace_tags: a dico with OrthancTagsId <-> values of the tags you want to force
-            remove_tags: a list of the tags you want to remove from the original values
+            remove_tags: a list of tags you want to remove
+            keep_tags: a list of tags you want to keep unmodified
             delete_original: True to delete the original study (the one that has not been anonymized)
             force: some tags like "PatientID" requires this flag set to True to confirm that you understand the risks
         Returns:
@@ -240,6 +241,8 @@ class Resources:
             query['Replace'] = replace_tags
         if remove_tags is not None and len(remove_tags) > 0:
             query['Remove'] = remove_tags
+        if keep_tags is not None and len(keep_tags) > 0:
+            query['Keep'] = keep_tags
 
         r = self._api_client.post(
             endpoint=f"{self._url_segment}/{orthanc_id}/modify",

@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Any
 from .study import Study
 from .series import Series
 from .instance import Instance
@@ -102,7 +102,7 @@ class InstancesSet:
             })
 
     # returns a new InstancesSet with the modified resources
-    def modify(self, replace_tags={}, remove_tags=[], keep_tags=[], keep_source=True, force=False) -> Optional['InstancesSet']:
+    def modify(self, replace_tags: Any = {}, remove_tags: List[str] = [], keep_tags: List[str] = [], keep_source=True, force=False) -> Optional['InstancesSet']:
 
         query = {
             "Force": force,

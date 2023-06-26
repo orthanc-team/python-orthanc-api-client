@@ -636,9 +636,6 @@ class TestApiClient(unittest.TestCase):
         instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
         study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
 
-        original_tags = self.oa.studies.get_tags(study_id)
-
-        # default anonymize
         modified_study_id = self.oa.studies.modify(
             orthanc_id=study_id,
             remove_tags=['InstitutionName'],
@@ -653,6 +650,33 @@ class TestApiClient(unittest.TestCase):
 
         self.assertFalse('InstitutionName' in modified_tags)
         self.assertEqual('1.2.3.4', modified_tags['StudyInstanceUID'])
+
+    def test_modify_study_keep_tags(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
+
+        original_instance_tags = self.oa.instances.get_tags(instances_ids[0])
+
+        modified_study_id = self.oa.studies.modify(
+            orthanc_id=study_id,
+            replace_tags={
+                'PatientID': '1234',
+                'OtherPatientIDs': '5678'
+            },
+            keep_tags=['StudyInstanceUID', 'SeriesInstanceUID', 'SOPInstanceUID'],
+            delete_original=False,
+            force=True
+        )
+
+        modified_instance_tags = self.oa.instances.get_tags(self.oa.studies.get_instances_ids(modified_study_id)[0])
+
+        self.assertEqual(original_instance_tags['StudyInstanceUID'], modified_instance_tags['StudyInstanceUID'])
+        self.assertEqual(original_instance_tags['SeriesInstanceUID'], modified_instance_tags['SeriesInstanceUID'])
+        self.assertEqual(original_instance_tags['SOPInstanceUID'], modified_instance_tags['SOPInstanceUID'])
+        self.assertEqual('1234', modified_instance_tags['PatientID'])
+        self.assertEqual('5678', modified_instance_tags['OtherPatientIDs'])
 
     def test_modify_instances(self):
         self.oa.delete_all_content()
