@@ -1,5 +1,5 @@
 import datetime
-from typing import List, Any, Union
+from typing import List, Any, Union, Set
 
 from .resources import Resources
 from ..tags import Tags
@@ -31,6 +31,16 @@ class Studies(Resources):
 
     def get_first_instance_id(self, orthanc_id: str) -> str:
         return self.get_instances_ids(orthanc_id=orthanc_id)[0]
+
+    def get_first_instance_tags(self, orthanc_id: str) -> Tags:
+        return self._api_client.instances.get_tags(self.get_first_instance_id(orthanc_id))
+
+    """gets the list of modalities from all series"""
+    def get_modalities(self, orthanc_id: str) -> Set[str]:
+        modalities = set()
+        for series_id in self.get_series_ids(orthanc_id):
+            modalities.add(self._api_client.series.get(series_id).main_dicom_tags.get('Modality'))
+        return modalities
 
     def get_parent_patient_id(self, orthanc_id: str) -> str:
         return self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/patient")['ID']

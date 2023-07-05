@@ -1,3 +1,8 @@
+v 0.13.3
+========
+
+- added `Studies.get_modalities` and `Studies.get_first_instance_tags()`
+
 v 0.13.2
 ========
 

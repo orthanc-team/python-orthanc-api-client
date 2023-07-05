@@ -83,6 +83,13 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual("1CT1", tags['PatientID'])
         self.assertEqual("e+1", tags['StudyDescription'])
 
+        instance_tags = self.oa.studies.get_first_instance_tags(study_id)
+        self.assertEqual("19970430", instance_tags['ContentDate'])
+
+        modalities = self.oa.studies.get_modalities(study_id)
+        self.assertEqual(["CT"], list(modalities))
+
+
     def test_study(self):
         instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
         study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
