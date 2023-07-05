@@ -10,6 +10,7 @@ class StudyInfo:
         self.orthanc_id = json_study.get('ID')
         self.dicom_id = self.main_dicom_tags.get('StudyInstanceUID')
         self.series_ids = json_study.get('Series')
+        self.patient_orthanc_id = json_study.get('ParentPatient')
 
 
 class StudyStatistics:

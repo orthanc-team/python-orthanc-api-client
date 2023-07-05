@@ -361,3 +361,12 @@ class Resources:
         """
         for label in labels:
             self.delete_label(orthanc_id, label)
+
+    def exists(self, orthanc_id: str) -> bool:
+        try:
+            self._api_client.get(
+                endpoint=f"{self._url_segment}/{orthanc_id}"
+            )
+            return True
+        except ResourceNotFound:
+            return False

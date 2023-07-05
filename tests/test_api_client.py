@@ -56,6 +56,7 @@ class TestApiClient(unittest.TestCase):
 
         self.assertEqual('f689ddd2-662f8fe1-8b18180d-ec2a2cee-937917af', instances_ids[0])
         self.assertEqual(1, len(self.oa.studies.get_all_ids()))
+        self.assertTrue(self.oa.instances.exists(instances_ids[0]))
 
         self.oa.instances.delete(orthanc_id=instances_ids[0])
         self.assertEqual(0, len(self.oa.studies.get_all_ids()))
@@ -261,6 +262,10 @@ class TestApiClient(unittest.TestCase):
     def test_modalities_send(self):
         self.oa.delete_all_content()
         self.ob.delete_all_content()
+
+        self.assertEqual(3, len(self.oa.modalities.get_all_ids()))
+        self.assertIn("orthanc-a", self.oa.modalities.get_all_ids())
+        self.assertEqual("orthanc-a", self.oa.modalities.get_id_from_aet("ORTHANCA"))
 
         dicom = generate_test_dicom_file(width=33, height=33, tags={'StudyInstanceUID': '1.2.3'})
         instances_ids = self.oa.upload(dicom)

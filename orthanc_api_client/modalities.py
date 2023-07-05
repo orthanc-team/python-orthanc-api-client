@@ -343,3 +343,19 @@ class DicomModalities:
             return all_modalities[modality]
         else:
             raise ResourceNotFound(msg=f"The modality {modality} was not found")
+
+    def get_all_ids(self) -> List[str]:
+        return self._api_client.get_json(
+            endpoint=f"{self._url_segment}"
+        )
+
+    def get_id_from_aet(self, aet: str) -> str:
+        all_modalities = self._api_client.get_json(
+            endpoint=f"{self._url_segment}?expand"
+        )
+
+        for (alias, values) in all_modalities.items():
+            if values["AET"] == aet:
+                return alias
+        else:
+            raise ResourceNotFound(msg=f"No modality found with AET '{aet}'")
