@@ -33,7 +33,7 @@ class OrthancApiClient(HttpClient):
         orthanc_root_url: base orthanc url: ex= 'http://localhost:8042'
         user: an orthanc user name (for basic Auth)
         pwd: the password for the orthanc user (for basic Auth)
-        api_token: a token obtained from inside an Orthanc python plugin through OrthancPluginGenerateRestApiAuthorizationToken
+        api_token: a token obtained from inside an Orthanc python plugin through orthanc.GenerateRestApiAuthorizationToken
                    format: 'Bearer 3d03892c-fe...' or '3d03892c-fe...'
         """
         headers = None
