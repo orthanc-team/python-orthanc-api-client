@@ -102,6 +102,19 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual('8a8cf898-ca27c490-d0c7058c-929d0581-2bbf104d', study.orthanc_id)
         self.assertEqual(1, study.statistics.instances_count)
 
+
+        with tempfile.NamedTemporaryFile() as file:
+            self.assertTrue(os.path.getsize(file.name) == 0)
+            self.oa.studies.download_archive(study_id, file.name)
+            self.assertTrue(os.path.exists(file.name))
+            self.assertTrue(os.path.getsize(file.name) > 0)
+
+        with tempfile.NamedTemporaryFile() as file:
+            self.assertTrue(os.path.getsize(file.name) == 0)
+            self.oa.studies.download_media(study_id, file.name)
+            self.assertTrue(os.path.exists(file.name))
+            self.assertTrue(os.path.getsize(file.name) > 0)
+
     def test_series(self):
         instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
         series_id = self.oa.instances.get_parent_series_id(instances_ids[0])
@@ -1014,6 +1027,18 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual(1, len(instances_set.series_ids))
         self.assertEqual(2, len(instances_set.instances_ids))
         self.assertEqual(2, len(instances_set.get_instances_ids(series_id=instances_set.series_ids[0])))
+
+        with tempfile.NamedTemporaryFile() as file:
+            self.assertTrue(os.path.getsize(file.name) == 0)
+            instances_set.download_archive(file.name)
+            self.assertTrue(os.path.exists(file.name))
+            self.assertTrue(os.path.getsize(file.name) > 0)
+
+        with tempfile.NamedTemporaryFile() as file:
+            self.assertTrue(os.path.getsize(file.name) == 0)
+            instances_set.download_media(file.name)
+            self.assertTrue(os.path.exists(file.name))
+            self.assertTrue(os.path.getsize(file.name) > 0)
 
         # upload the second part of the study
         instances_id = self.oa.upload_folder(here / 'stimuli/MR/Brain/2')

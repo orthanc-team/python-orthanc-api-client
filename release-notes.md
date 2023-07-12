@@ -1,9 +1,15 @@
+v 0.13.5
+========
+
+- added `Resources.download_media()` and `Resources.download_archive()` 
+- added `InstancesSet.download_media()` and `InstancesSet.download_archive()` 
+
 v 0.13.4
 ========
 
 - added `Modalities.get_all_ids()`
 - added `Modalities.get_id_from_aet()`
-- added `Study.patient_orthanc_id`
+- added `Study.info.patient_orthanc_id`
 - added `Resources.exists()`
 
 v 0.13.3

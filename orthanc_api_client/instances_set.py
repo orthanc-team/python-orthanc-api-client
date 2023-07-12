@@ -194,3 +194,25 @@ class InstancesSet:
     def process_instances(self, processor):
         for instance_id in self._all_instances_ids:
             processor(self.api_client, instance_id)
+
+    def download_archive(self, path: str):
+        response = self.api_client.post(
+            endpoint="tools/create-archive",
+            json={
+                "Synchronous": True,
+                "Resources": self.instances_ids
+            }
+        )
+        with open(path, 'wb') as f:
+            f.write(response.content)
+
+    def download_media(self, path: str):
+        response = self.api_client.post(
+            endpoint="tools/create-media",
+            json={
+                "Synchronous": True,
+                "Resources": self.instances_ids
+            }
+        )
+        with open(path, 'wb') as f:
+            f.write(response.content)

@@ -370,3 +370,13 @@ class Resources:
             return True
         except ResourceNotFound:
             return False
+
+    def download_archive(self, orthanc_id: str, path: str):
+        file_content = self._api_client.get_binary(f"{self._url_segment}/{orthanc_id}/archive")
+        with open(path, 'wb') as f:
+            f.write(file_content)
+
+    def download_media(self, orthanc_id: str, path: str):
+        file_content = self._api_client.get_binary(f"{self._url_segment}/{orthanc_id}/media")
+        with open(path, 'wb') as f:
+            f.write(file_content)
