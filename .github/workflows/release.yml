@@ -12,6 +12,14 @@ on:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
+
+    # from https://docs.pypi.org/trusted-publishers/using-a-publisher/
+    # Specifying a GitHub environment is optional, but strongly encouraged
+    environment: release
+    permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
+
     steps:
     - name: Checkout
       uses: actions/checkout@v3
