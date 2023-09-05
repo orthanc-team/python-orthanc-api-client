@@ -3,7 +3,7 @@ import os
 import logging
 import typing
 import datetime
-from typing import List
+from typing import List, Optional, Dict
 from urllib.parse import urlunsplit, urlencode
 
 from .http_client import HttpClient
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 class OrthancApiClient(HttpClient):
 
-    def __init__(self, orthanc_root_url: str, user: str = None, pwd: str = None, api_token: str = None) -> None:
+    def __init__(self, orthanc_root_url: str, user: Optional[str] = None, pwd: Optional[str] = None, api_token: Optional[str] = None, headers: Optional[Dict[str, str]] = None ) -> None:
         """Creates an HttpClient
 
         Parameters
@@ -35,16 +35,17 @@ class OrthancApiClient(HttpClient):
         pwd: the password for the orthanc user (for basic Auth)
         api_token: a token obtained from inside an Orthanc python plugin through orthanc.GenerateRestApiAuthorizationToken
                    format: 'Bearer 3d03892c-fe...' or '3d03892c-fe...'
+        headers: HTTP headers that will be included in each requests
         """
-        headers = None
         if api_token:
+            if headers is None:
+                headers = {}
             if api_token.startswith('Bearer '):
                 header_value = api_token
             else:
                 header_value = f'Bearer {api_token}'
-            headers = {
-                'authorization': header_value
-            }
+            headers['authorization'] = header_value
+
         super().__init__(root_url=orthanc_root_url, user=user, pwd=pwd, headers=headers)
 
         self.patients = Resources(api_client=self, url_segment='patients')

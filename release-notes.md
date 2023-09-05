@@ -1,3 +1,8 @@
+v 0.13.6
+========
+
+- added `headers` arg to the `OrthancApiClient` constructor
+
 v 0.13.5
 ========
 
