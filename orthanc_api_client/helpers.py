@@ -54,11 +54,7 @@ def from_orthanc_datetime(orthanc_datetime: str) -> datetime.datetime:
     if orthanc_datetime is None or len(orthanc_datetime) == 0:
         return None
 
-    m = re.match('(?P<year>[0-9]{4})(?P<month>[0-9]{2})(?P<day>[0-9]{2})T(?P<hour>[0-2][0-9])(?P<minute>[0-5][0-9])(?P<second>[0-5][0-9])', orthanc_datetime)
-    if m is None:
-        raise ValueError("Not a valid Orthanc datetime (expected: YYYYMMDDThhmmss): '{0}'".format(orthanc_datetime))
-
-    return datetime.datetime(int(m.group('year')), int(m.group('month')), int(m.group('day')), int(m.group('hour')), int(m.group('minute')), int(m.group('second')))
+    return datetime.datetime.strptime(orthanc_datetime, "%Y%m%dT%H%M%S")
 
 def generate_test_dicom_file(
         width: int = 128,
