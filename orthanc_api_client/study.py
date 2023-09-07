@@ -1,6 +1,7 @@
 from .tags import SimplifiedTags
 from typing import List, Optional
-
+import datetime
+from .helpers import from_orthanc_datetime
 
 class StudyInfo:
 
@@ -11,6 +12,7 @@ class StudyInfo:
         self.dicom_id = self.main_dicom_tags.get('StudyInstanceUID')
         self.series_ids = json_study.get('Series')
         self.patient_orthanc_id = json_study.get('ParentPatient')
+        self.last_update = json_study.get('LastUpdate')
 
 
 class StudyStatistics:
@@ -73,3 +75,6 @@ class Study:
 
         return self._series
 
+    @property
+    def last_update(self):
+        return from_orthanc_datetime(self.info.last_update)

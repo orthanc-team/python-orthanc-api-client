@@ -101,6 +101,7 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual('1.3.6.1.4.1.5962.1.2.1.20040119072730.12322', study.dicom_id)
         self.assertEqual('8a8cf898-ca27c490-d0c7058c-929d0581-2bbf104d', study.orthanc_id)
         self.assertEqual(1, study.statistics.instances_count)
+        self.assertEqual(datetime.date.today(), study.last_update.date())
 
 
         with tempfile.NamedTemporaryFile() as file:
