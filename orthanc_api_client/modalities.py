@@ -74,7 +74,7 @@ class DicomModalities:
         """alias for send"""
         return self.send(target_modality=target_modality, resources_ids=resources_ids, timeout=timeout)
 
-    def send_async(self, target_modality: str, resources_ids: Union[List[str], str]) -> Job:
+    def send_async(self, target_modality: str, resources_ids: Union[List[str], str], local_aet: str = None) -> Job:
         """sends a list of resources to a remote DICOM modality
 
         Returns
@@ -85,16 +85,21 @@ class DicomModalities:
         if isinstance(resources_ids, str):
             resources_ids = [resources_ids]
 
+        payload = {
+            "Resources": resources_ids,
+            "Synchronous": True
+        }
+        if local_aet is not None:
+            payload.update({"LocalAet": local_aet})
+
         r = self._api_client.post(
             endpoint=f"{self._url_segment}/{target_modality}/store",
-            json={
-                "Resources": resources_ids,
-                "Synchronous": True
-            })
+            json=payload
+        )
 
         return Job(api_client=self._api_client, orthanc_id=r.json()['ID'])
 
-    def send(self, target_modality: str, resources_ids: Union[List[str], str], timeout: Optional[float] = None):
+    def send(self, target_modality: str, resources_ids: Union[List[str], str], timeout: Optional[float] = None, local_aet: str = None):
         """sends a list of resources to a remote DICOM modality
         The transfer is synchronous
 
@@ -108,11 +113,14 @@ class DicomModalities:
 
         payload = {
             "Synchronous": True,
-            "Resources": resources_ids,
+            "Resources": resources_ids
         }
 
         if timeout is not None:
             payload["Timeout"] = int(timeout+0.5)
+
+        if local_aet is not None:
+            payload.update({"LocalAet": local_aet})
 
         self._api_client.post(
             endpoint=f"{self._url_segment}/{target_modality}/store",
