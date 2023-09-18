@@ -1,3 +1,8 @@
+v 0.13.8
+========
+
+- added `local_aet` arg for `DicomModalities.send` and `DicomModalities.send_async`
+
 v 0.13.7
 ========
 
