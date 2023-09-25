@@ -47,6 +47,13 @@ class TestApiClient(unittest.TestCase):
         r = o.get('system')
         self.assertEqual(200, r.status_code)
 
+    def test_auth_headers(self):
+        # first retrieve the token through a special route implemented by a plugin (not safe ! don't run this experiment at home !)
+        auth_token = self.ob.get_binary('api-token').decode('utf-8')
+
+        o = OrthancApiClient('http://localhost:8043', headers={"header-key": "header-value"})
+        r = o.get('system')
+        self.assertEqual(200, r.status_code)
 
     def test_upload_valid_dicom_and_delete(self):
         self.oa.delete_all_content()
@@ -292,6 +299,31 @@ class TestApiClient(unittest.TestCase):
 
         study_id = self.ob.studies.lookup('1.2.3')
         self.assertIsNotNone(study_id)
+
+    def test_modalities_send_asynchronous(self):
+        self.oa.delete_all_content()
+        self.ob.delete_all_content()
+
+        self.assertEqual(3, len(self.oa.modalities.get_all_ids()))
+        self.assertIn("orthanc-a", self.oa.modalities.get_all_ids())
+        self.assertEqual("orthanc-a", self.oa.modalities.get_id_from_aet("ORTHANCA"))
+
+        dicom = generate_test_dicom_file(width=33, height=33, tags={'StudyInstanceUID': '1.2.3'})
+        instances_ids = self.oa.upload(dicom)
+        dicom = generate_test_dicom_file(width=33, height=33, tags={'StudyInstanceUID': '1.2.3'})
+        instances_ids.extend(self.oa.upload(dicom))
+
+        study_id = self.oa.studies.lookup('1.2.3')
+
+        job = self.oa.modalities.send_async('orthanc-b', study_id)
+
+        self.assertEqual(JobType.DICOM_MODALITY_STORE, job.info.type)
+        wait_until(job.is_complete, 5)
+        self.assertEqual(JobStatus.SUCCESS, job.refresh().info.status)
+
+        study_id = self.ob.studies.lookup('1.2.3')
+        self.assertIsNotNone(study_id)
+
 
     def test_modalities_move(self):
         self.oa.delete_all_content()

@@ -87,7 +87,7 @@ class DicomModalities:
 
         payload = {
             "Resources": resources_ids,
-            "Synchronous": True
+            "Synchronous": False
         }
         if local_aet is not None:
             payload.update({"LocalAet": local_aet})

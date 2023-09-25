@@ -1,3 +1,9 @@
+v 0.14.0
+========
+
+- **BREAKING CHANGE:** `DicomModalities.send_async` was actually not asynchronous and 
+  now returns a job.
+
 v 0.13.8
 ========
 
