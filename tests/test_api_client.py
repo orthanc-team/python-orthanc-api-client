@@ -887,6 +887,7 @@ class TestApiClient(unittest.TestCase):
         job_id = r.json()['ID']
 
         job = self.oa.jobs.get(orthanc_id=job_id)
+        self.assertIsNotNone(job.content)
         self.assertEqual(JobType.ARCHIVE, job.info.type)
         self.assertEqual(1, job.info.content.get('InstancesCount'))
 

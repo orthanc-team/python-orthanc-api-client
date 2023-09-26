@@ -57,7 +57,7 @@ class Job:
 
     @property
     def content(self):
-        return self._info.content
+        return self.info.content
 
     def refresh(self) -> "Job":
         self._load_info()
