@@ -56,6 +56,9 @@ patient_id = study.patient_main_dicom_tags.get('PatientID')
 study_description = study.main_dicom_tags.get('StudyDescription')
 dicom_id = study.dicom_id
 
+# get the ids of all the studies of a patient
+studies = orthanc_a.patients.get_studies_ids(patient_id)
+
 # access metadata
 orthanc_a.instances.set_string_metadata(orthanc_id=all_instances_ids[0], 
                                  metadata_name=1024, 
