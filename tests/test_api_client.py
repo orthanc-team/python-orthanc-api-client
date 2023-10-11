@@ -97,6 +97,42 @@ class TestApiClient(unittest.TestCase):
         modalities = self.oa.studies.get_modalities(study_id)
         self.assertEqual(["CT"], list(modalities))
 
+    def test_patients_get_tags(self):
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        patient_id = self.oa.instances.get_parent_patient_id(instances_ids[0])
+        tags = self.oa.patients.get_tags(patient_id)
+
+        self.assertEqual("1CT1", tags['PatientID'])
+        self.assertEqual("CompressedSamples^CT1", tags['PatientName'])
+
+        instance_tags = self.oa.patients.get_first_instance_tags(patient_id)
+        self.assertEqual("19970430", instance_tags['ContentDate'])
+
+        modalities = self.oa.patients.get_modalities(patient_id)
+        self.assertEqual(["CT"], list(modalities))
+
+    def test_patient(self):
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        patient_id = self.oa.instances.get_parent_patient_id(instances_ids[0])
+
+        patient = self.oa.patients.get(patient_id)
+        self.assertEqual("1CT1", patient.main_dicom_tags.get('PatientID'))
+        self.assertEqual("CompressedSamples^CT1", patient.main_dicom_tags.get('PatientName'))
+        self.assertEqual(1, patient.statistics.instances_count)
+        self.assertEqual(datetime.date.today(), patient.last_update.date())
+
+        with tempfile.NamedTemporaryFile() as file:
+            self.assertTrue(os.path.getsize(file.name) == 0)
+            self.oa.patients.download_archive(patient_id, file.name)
+            self.assertTrue(os.path.exists(file.name))
+            self.assertTrue(os.path.getsize(file.name) > 0)
+
+        with tempfile.NamedTemporaryFile() as file:
+            self.assertTrue(os.path.getsize(file.name) == 0)
+            self.oa.patients.download_media(patient_id, file.name)
+            self.assertTrue(os.path.exists(file.name))
+            self.assertTrue(os.path.getsize(file.name) > 0)
+
 
     def test_study(self):
         instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
@@ -109,7 +145,6 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual('8a8cf898-ca27c490-d0c7058c-929d0581-2bbf104d', study.orthanc_id)
         self.assertEqual(1, study.statistics.instances_count)
         self.assertEqual(datetime.date.today(), study.last_update.date())
-
 
         with tempfile.NamedTemporaryFile() as file:
             self.assertTrue(os.path.getsize(file.name) == 0)
@@ -225,10 +260,12 @@ class TestApiClient(unittest.TestCase):
         instance_id = self.oa.instances.get_all_ids()[0]
         series_id = self.oa.series.get_all_ids()[0]
         study_id = self.oa.studies.get_all_ids()[0]
+        patient_id = self.oa.patients.get_all_ids()[0]
 
         self.assertEqual(instance_id, instances_ids[0])
         self.assertEqual(series_id, self.oa.instances.get_parent_series_id(instance_id))
         self.assertEqual(study_id, self.oa.instances.get_parent_study_id(instance_id))
+        self.assertEqual(patient_id, self.oa.instances.get_parent_patient_id(instance_id))
 
     def test_get_ordered_slices(self):
         self.oa.delete_all_content()
@@ -338,6 +375,7 @@ class TestApiClient(unittest.TestCase):
         self.assertIsNotNone(self.ob.instances.lookup('7.8.9'))
 
         #request C to move it from B to A
+
         self.oc.modalities.move_study(from_modality='orthanc-b', dicom_id='1.2.3', to_modality_aet='ORTHANCA')
         self.assertIsNotNone(1, self.oa.studies.lookup('1.2.3'))
         self.oa.delete_all_content()
@@ -609,7 +647,25 @@ class TestApiClient(unittest.TestCase):
         )
 
         self.assertEqual(self.oa.studies.get_tags(study_id)['PatientName'], self.oa.studies.get_tags(anon_study_id)['PatientName'])
-        self.assertNotEqual('ANON', self.oa.studies.get_tags(anon_study_id)['PatientName'])
+        self.assertEqual('ANON', self.oa.studies.get_tags(anon_study_id)['PatientID'])
+
+    def test_anonymize_patient(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        patient_id = self.oa.instances.get_parent_patient_id(instances_ids[0])
+
+        # default anonymize
+        anon_patient_id = self.oa.patients.anonymize(
+            orthanc_id=patient_id,
+            keep_tags=['PatientName'],
+            force=True,
+            delete_original=False
+        )
+
+        self.assertEqual(self.oa.patients.get_tags(patient_id)['PatientName'], self.oa.patients.get_tags(anon_patient_id)['PatientName'])
+        self.assertNotEqual('1CT1', self.oa.patients.get_tags(anon_patient_id)['PatientID'])
+
 
     def test_modify_series_instance_by_instance(self):
         self.oa.delete_all_content()
@@ -708,6 +764,29 @@ class TestApiClient(unittest.TestCase):
 
         self.assertFalse('InstitutionName' in modified_tags)
         self.assertEqual('1.2.3.4', modified_tags['StudyInstanceUID'])
+
+
+    def test_modify_patient(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        patient_id = self.oa.instances.get_parent_patient_id(instances_ids[0])
+
+        modified_patient_id = self.oa.patients.modify(
+            orthanc_id=patient_id,
+            remove_tags=['PatientWeight'],
+            replace_tags={
+                'PatientID': 'modified-id',
+            },
+            delete_original=False,
+            force=True
+        )
+
+        modified_tags = self.oa.patients.get_tags(modified_patient_id)
+
+        self.assertFalse('PatientWeight' in modified_tags)
+        self.assertEqual('modified-id', modified_tags['PatientID'])
+
 
     def test_modify_study_keep_tags(self):
         self.oa.delete_all_content()
@@ -873,6 +952,22 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual(1, len(studies))
         self.assertEqual('1.3.6.1.4.1.5962.1.2.1.20040119072730.12322', studies[0].dicom_id)
         self.assertEqual("e+1", studies[0].main_dicom_tags.get('StudyDescription'))
+
+    def test_find_patient(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        patient_id = self.oa.instances.get_parent_patient_id(instances_ids[0])
+
+        patients = self.oa.patients.find(
+            query={
+                'PatientID': '1C*'
+            }
+        )
+
+        self.assertEqual(1, len(patients))
+        self.assertEqual('1CT1', patients[0].dicom_id)
+
 
     def test_jobs(self):
         instances_ids = self.oa.upload_file(here / "stimuli/CT_small.zip")
