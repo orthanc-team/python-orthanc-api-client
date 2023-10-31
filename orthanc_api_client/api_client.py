@@ -374,3 +374,22 @@ class OrthancApiClient(HttpClient):
         List all the labels that are associated with any resource of the Orthanc database
         """
         return self.get_json(endpoint = "/tools/labels")
+
+    def execute_lua_script(self, buffer: bytes):
+        """
+        Uploads the content of a binary buffer to be executed as a lua script
+
+        Parameters:
+            buffer: lua script content in a binary format
+
+        Returns:
+            The content of the response.
+        """
+        try:
+            response = self.post('tools/execute-script', data=buffer)
+            return response.content
+        except HttpError as ex:
+            if ex.http_status_code == 403:
+                raise Forbidden(ex)
+            else:
+                raise ex

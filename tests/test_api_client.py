@@ -1350,6 +1350,12 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual(1, len(read_labels))
         self.assertIn(my_label2, read_labels)
 
+    def test_execute_lua_script(self):
+        script = b"print(42)"
+        r = self.oa.execute_lua_script(script)
+
+        self.assertEqual(r, b"42\n")
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     unittest.main()

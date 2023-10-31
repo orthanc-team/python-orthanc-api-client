@@ -17,6 +17,7 @@ services:
       ORTHANC__ORTHANC_PEERS: |
         {"orthanc-b": ["http://orthanc-b:8042/", "test", "test"]}
 
+      ORTHANC__EXECUTE_LUA_ENABLED: "true"
       TRANSFERS_PLUGIN_ENABLED: "true"
       ORTHANC__CHECK_REVISIONS: "true"
       ORTHANC__OVERWRITE_INSTANCES: "true"

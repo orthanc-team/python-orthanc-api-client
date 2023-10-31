@@ -1,3 +1,9 @@
+v 0.14.2
+========
+
+- added `execute_lua_script` in `OrthancApiClient`
+
+
 v 0.14.1
 ========
 

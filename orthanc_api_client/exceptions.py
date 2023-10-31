@@ -44,6 +44,10 @@ class NotAuthorized(HttpError):
     def __init__(self, http_status_code, msg = "Not authorized.  Make sure to provide login/pwd.", url = None):
         super().__init__(http_status_code = http_status_code, msg = msg, url = url)
 
+class Forbidden(HttpError):
+    def __init__(self, http_status_code, msg = "Forbidden.  Check Orthanc configuration.", url = None):
+        super().__init__(http_status_code = http_status_code, msg = msg, url = url)
+
 
 class BadFileFormat(HttpError):
     """ Bad file format while uploading a DICOM file"""
