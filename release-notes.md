@@ -1,3 +1,8 @@
+v 0.14.3
+========
+
+- added `get_log_level` and `set_log_level` in `OrthancApiClient`
+
 v 0.14.2
 ========
 
