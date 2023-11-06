@@ -302,7 +302,7 @@ class DicomModalities:
 
         remote_instances = []
         for result in results:
-            remote_instance = RemoteModalitySeries()
+            remote_instance = RemoteModalityInstance()
             remote_instance.dicom_id = result.tags.get('SOPInstanceUID')
             remote_instance.tags = result.tags
             remote_instance.remote_modality_id = from_modality
