@@ -3,7 +3,7 @@ import unittest
 import subprocess
 import logging
 import datetime
-from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType, Study, Job, JobStatus, JobType, InstancesSet, LabelsConstraint
+from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType, Study, Job, JobStatus, JobType, InstancesSet, LabelsConstraint, LogLevel
 from orthanc_api_client.helpers import to_dicom_date, wait_until
 import orthanc_api_client.exceptions as api_exceptions
 import pathlib
@@ -1355,6 +1355,18 @@ class TestApiClient(unittest.TestCase):
         r = self.oa.execute_lua_script(script)
 
         self.assertEqual(r, b"42\n")
+
+
+    def test_get_log_level(self):
+        r = self.oa.get_log_level()
+
+        self.assertEqual(r, LogLevel.VERBOSE)
+
+
+    def test_set_log_level(self):
+        r = self.oa.set_log_level(level=LogLevel.DEFAULT)
+
+        self.assertEqual(r, LogLevel.DEFAULT)
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

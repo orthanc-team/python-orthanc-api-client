@@ -16,7 +16,7 @@ from .modalities import DicomModalities
 from .change import Change, ChangeType, ResourceType
 from .transfers import Transfers
 from .peers import Peers
-
+from .logging import LogLevel
 
 logger = logging.getLogger(__name__)
 
@@ -393,3 +393,10 @@ class OrthancApiClient(HttpClient):
                 raise Forbidden(ex)
             else:
                 raise ex
+
+    def get_log_level(self):
+        return LogLevel(self.get_binary(endpoint="/tools/log-level").decode('utf-8'))
+
+    def set_log_level(self, level: LogLevel):
+        self.put(endpoint="/tools/log-level", data=level)
+        return LogLevel(self.get_binary(endpoint="/tools/log-level").decode('utf-8'))
