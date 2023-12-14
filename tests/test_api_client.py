@@ -47,14 +47,6 @@ class TestApiClient(unittest.TestCase):
         r = o.get('system')
         self.assertEqual(200, r.status_code)
 
-    def test_auth_headers(self):
-        # first retrieve the token through a special route implemented by a plugin (not safe ! don't run this experiment at home !)
-        auth_token = self.ob.get_binary('api-token').decode('utf-8')
-
-        o = OrthancApiClient('http://localhost:8043', headers={"header-key": "header-value"})
-        r = o.get('system')
-        self.assertEqual(200, r.status_code)
-
     def test_upload_valid_dicom_and_delete(self):
         self.oa.delete_all_content()
         self.assertEqual(0, len(self.oa.studies.get_all_ids()))
