@@ -1,3 +1,8 @@
+v 0.14.4
+========
+
+- `ignore_errors` in `upload` methods now ignoring 409 errors (conflict)
+
 v 0.14.3
 ========
 

@@ -100,6 +100,8 @@ class OrthancApiClient(HttpClient):
             else:
                 return [response.json()['ID']]
         except HttpError as ex:
+            if ex.http_status_code == 409 and ignore_errors:  # same instance being uploaded twice at the same time
+                return []
             if ex.http_status_code == 400 and ex.request_response.json()['OrthancStatus'] == 15:
                 if ignore_errors:
                     return []
