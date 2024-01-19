@@ -20,7 +20,17 @@ from .logging import LogLevel
 
 logger = logging.getLogger(__name__)
 
-    
+class SystemStatistics:
+
+    def __init__(self, json_stats):
+        self.instances_count = json_stats['CountInstances']
+        self.patients_count = json_stats['CountPatients']
+        self.series_count = json_stats['CountSeries']
+        self.studies_count = json_stats['CountStudies']
+        self.total_disk_size = int(json_stats['TotalDiskSize'])
+        self.total_disk_size_mb = json_stats['TotalDiskSizeMB']
+        self.total_uncompressed_size = int(json_stats['TotalUncompressedSize'])
+        self.total_uncompressed_size_mb = json_stats['TotalUncompressedSizeMB']
 
 
 class OrthancApiClient(HttpClient):
@@ -77,6 +87,9 @@ class OrthancApiClient(HttpClient):
 
     def get_system(self) -> object:
         return self.get_json('system')
+
+    def get_statistics(self) -> SystemStatistics:
+        return SystemStatistics(json_stats=self.get_json('statistics'))
 
     def delete_all_content(self):
         """Deletes all content from Orthanc"""

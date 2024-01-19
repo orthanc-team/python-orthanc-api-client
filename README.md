@@ -45,6 +45,9 @@ orthanc_a.studies.print_daily_stats(from_date=datetime.date(2022, 2, 4), to_date
 orthanc_a.series.print_daily_stats() # show last 8 days per default
 orthanc_a.instances.print_daily_stats()
 
+# get system stats
+print(f"This Orthanc stores {orthanc_a.get_statistics().studies_count} studies for a total of {orthanc_a.get_statistics().total_disk_size_mb} MB")
+
 # instances methods
 dicom_file = orthanc_a.instances.get_file(orthanc_id=all_instances_ids[0])
 instances_ids = orthanc_b.upload(buffer=dicom_file)

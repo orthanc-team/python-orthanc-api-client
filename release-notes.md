@@ -1,3 +1,8 @@
+v 0.14.5
+========
+
+- added `get_statistics()` in `OrthancApiClient`
+
 v 0.14.4
 ========
 

@@ -104,6 +104,7 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual(["CT"], list(modalities))
 
     def test_patient(self):
+        self.oa.delete_all_content()
         instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
         patient_id = self.oa.instances.get_parent_patient_id(instances_ids[0])
 
@@ -111,6 +112,8 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual("1CT1", patient.main_dicom_tags.get('PatientID'))
         self.assertEqual("CompressedSamples^CT1", patient.main_dicom_tags.get('PatientName'))
         self.assertEqual(1, patient.statistics.instances_count)
+        self.assertEqual(1, self.oa.get_statistics().patients_count)
+        self.assertEqual(patient.statistics.disk_size, self.oa.get_statistics().total_disk_size)
         self.assertEqual(datetime.date.today(), patient.last_update.date())
 
         with tempfile.NamedTemporaryFile() as file:
@@ -127,6 +130,7 @@ class TestApiClient(unittest.TestCase):
 
 
     def test_study(self):
+        self.oa.delete_all_content()
         instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
         study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
 
@@ -136,6 +140,8 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual('1.3.6.1.4.1.5962.1.2.1.20040119072730.12322', study.dicom_id)
         self.assertEqual('8a8cf898-ca27c490-d0c7058c-929d0581-2bbf104d', study.orthanc_id)
         self.assertEqual(1, study.statistics.instances_count)
+        self.assertEqual(1, self.oa.get_statistics().instances_count)
+        self.assertEqual(study.statistics.instances_count, self.oa.get_statistics().instances_count)
         self.assertEqual(datetime.date.today(), study.last_update.date())
 
         with tempfile.NamedTemporaryFile() as file:
@@ -151,6 +157,7 @@ class TestApiClient(unittest.TestCase):
             self.assertTrue(os.path.getsize(file.name) > 0)
 
     def test_series(self):
+        self.oa.delete_all_content()
         instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
         series_id = self.oa.instances.get_parent_series_id(instances_ids[0])
 
@@ -159,6 +166,9 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual('1.3.6.1.4.1.5962.1.3.1.1.20040119072730.12322', series.dicom_id)
         self.assertEqual('93034833-163e42c3-bc9a428b-194620cf-2c5799e5', series.orthanc_id)
         self.assertEqual(1, series.statistics.instances_count)
+        self.assertEqual(1, self.oa.get_statistics().instances_count)
+        self.assertEqual(1, self.oa.get_statistics().series_count)
+        self.assertEqual(series.statistics.disk_size, self.oa.get_statistics().total_disk_size)
 
         study = series.study
         self.assertEqual("1CT1", study.patient_main_dicom_tags.get('PatientID'))
