@@ -3,7 +3,7 @@ import unittest
 import subprocess
 import logging
 import datetime
-from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType, Study, Job, JobStatus, JobType, InstancesSet, LabelsConstraint, LogLevel
+from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType, Study, Job, JobStatus, JobType, InstancesSet, LabelsConstraint, LogLevel, RemoteJob
 from orthanc_api_client.helpers import to_dicom_date, wait_until
 import orthanc_api_client.exceptions as api_exceptions
 import pathlib
@@ -461,6 +461,26 @@ class TestApiClient(unittest.TestCase):
         job.wait_completed(timeout=5)
 
         study_id = self.ob.studies.lookup('1.2.3')
+        self.assertIsNotNone(study_id)
+
+
+    def test_transfers_send_study_pull(self):
+        self.oa.delete_all_content()
+        self.oc.delete_all_content()
+
+        dicom = generate_test_dicom_file(width=33, height=33, tags={'StudyInstanceUID': '1.2.3'})
+        instances_ids = self.oa.upload(dicom)
+        study_id = self.oa.studies.lookup('1.2.3')
+
+        remote_job = self.oa.transfers.send_async('orthanc-c', resources_ids=study_id, resource_type=ResourceType.STUDY, compress=True)
+        self.assertTrue(isinstance(remote_job, RemoteJob))
+
+        job = self.oc.jobs.get(orthanc_id=remote_job.remote_job_id)
+
+        self.assertEqual(JobType.PULL_TRANSFER, job.info.type)
+        wait_until(job.is_complete, 5)
+
+        study_id = self.oc.studies.lookup('1.2.3')
         self.assertIsNotNone(study_id)
 
 

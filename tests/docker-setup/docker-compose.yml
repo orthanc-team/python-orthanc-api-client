@@ -15,7 +15,15 @@ services:
       ORTHANC__DICOM_WEB__SERVERS: |
         {"orthanc-b": ["http://orthanc-b:8042/dicom-web/", "test", "test"]}
       ORTHANC__ORTHANC_PEERS: |
-        {"orthanc-b": ["http://orthanc-b:8042/", "test", "test"]}
+        {
+          "orthanc-b": ["http://orthanc-b:8042/", "test", "test"],
+          "orthanc-c" : {
+            "Url": "http://orthanc-c:8042/",
+            "Username": "test",
+            "Password": "test",
+            "RemoteSelf": "orthanc-a"
+          }
+        }
 
       ORTHANC__EXECUTE_LUA_ENABLED: "true"
       TRANSFERS_PLUGIN_ENABLED: "true"
@@ -56,6 +64,8 @@ services:
         {"orthanc-a": ["ORTHANCA", "orthanc-a", 4242], "orthanc-b": ["ORTHANCB", "orthanc-b", 4242], "orthanc-c": ["ORTHANCC", "orthanc-c", 4242]}
       ORTHANC__DICOM_WEB__SERVERS: |
         {"orthanc-a": ["http://orthanc-a:8042/dicom-web/", "test", "test"]}
+      ORTHANC__ORTHANC_PEERS: |
+        {"orthanc-a": ["http://orthanc-a:8042/", "test", "test"]}
 
       TRANSFERS_PLUGIN_ENABLED: "true"
       ORTHANC__OVERWRITE_INSTANCES: "true"

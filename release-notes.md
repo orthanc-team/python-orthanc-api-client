@@ -1,3 +1,8 @@
+v 0.14.6
+========
+
+- added a `RemoteJob` class that can be created when a `PULL_TRANSFER` is created
+
 v 0.14.5
 ========
 
