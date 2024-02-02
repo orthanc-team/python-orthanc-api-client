@@ -50,11 +50,47 @@ def from_dicom_date(dicom_date: str) -> datetime.date:
 
     return datetime.date(int(m.group('year')), int(m.group('month')), int(m.group('day')))
 
+def from_dicom_time(dicom_time: str, default: datetime.time = None) -> datetime.time:
+    if dicom_time is None or len(dicom_time) == 0:
+        return None
+
+    m = re.match('(?P<hours>[0-9]{2})(?P<minutes>[0-9]{2})(?P<seconds>[0-9]{2})\.(?P<dec>[0-9]{1,6})', dicom_time)
+    if m:
+        return datetime.time(int(m.group('hours')), int(m.group('minutes')), int(m.group('seconds')),
+                             microsecond=int(m.group('dec')) * pow(10, 6 - len(m.group('dec'))))
+
+    m = re.match('(?P<hours>[0-9]{2})(?P<minutes>[0-9]{2})(?P<seconds>[0-9]{2})', dicom_time)
+    if m:
+        return datetime.time(int(m.group('hours')), int(m.group('minutes')), int(m.group('seconds')))
+
+    m = re.match('(?P<hours>[0-9]{2})(?P<minutes>[0-9]{2})', dicom_time)
+    if m:
+        return datetime.time(int(m.group('hours')), int(m.group('minutes')), 0)
+
+    m = re.match('(?P<hours>[0-9]{2})', dicom_time)
+    if m:
+        return datetime.time(int(m.group('hours')), 0, 0)
+
+    if default:
+        return default
+
+    raise ValueError("Not a valid DICOM time: '{0}'".format(dicom_time))
+
+
 def from_orthanc_datetime(orthanc_datetime: str) -> datetime.datetime:
     if orthanc_datetime is None or len(orthanc_datetime) == 0:
         return None
 
     return datetime.datetime.strptime(orthanc_datetime, "%Y%m%dT%H%M%S")
+
+def from_dicom_date_and_time(dicom_date: str, dicom_time: str) -> datetime.datetime:
+    if dicom_date is None or len(dicom_date) == 0:
+        return None
+
+    date = from_dicom_date(dicom_date)
+    time = from_dicom_time(dicom_time, default=datetime.time(0, 0, 0))
+
+    return datetime.datetime(date.year, date.month, date.day, time.hour, time.minute, time.second, time.microsecond)
 
 def generate_test_dicom_file(
         width: int = 128,

@@ -4,7 +4,7 @@ import subprocess
 import logging
 import datetime
 from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType, Study, Job, JobStatus, JobType, InstancesSet, LabelsConstraint, LogLevel, RemoteJob
-from orthanc_api_client.helpers import to_dicom_date, wait_until
+from orthanc_api_client.helpers import *
 import orthanc_api_client.exceptions as api_exceptions
 import pathlib
 import asyncio
@@ -1389,6 +1389,19 @@ class TestApiClient(unittest.TestCase):
         r = self.oa.set_log_level(level=LogLevel.DEFAULT)
 
         self.assertEqual(r, LogLevel.DEFAULT)
+
+    def test_date_helpers(self):
+        self.assertEqual(datetime.date(2024, 8, 15), from_dicom_date("20240815"))
+        self.assertEqual(datetime.time(9, 12, 35), from_dicom_time("091235"))
+        self.assertEqual(datetime.time(9, 12, 35, 100000), from_dicom_time("091235.1"))
+        self.assertEqual(datetime.time(9, 12, 35, 120000), from_dicom_time("091235.12"))
+        self.assertEqual(datetime.time(9, 12, 35, 123000), from_dicom_time("091235.123"))
+        self.assertEqual(datetime.time(9, 12, 35, 123450), from_dicom_time("091235.12345"))
+        self.assertEqual(datetime.time(9, 12, 35, 123456), from_dicom_time("091235.123456"))
+        self.assertEqual(datetime.datetime(2024, 8, 15, 9, 12, 35), from_dicom_date_and_time("20240815", "091235"))
+        #self.assertEqual(datetime.datetime(2024, 8, 15, 9, 12, 35), from_dicom_datetime("20240815T091235"))  # TODO
+        #self.assertEqual(datetime.datetime(2024, 8, 15, 9, 12, 35), from_dicom_datetime("20240815T091235+0205"))  # TODO
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
