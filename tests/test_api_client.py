@@ -1399,6 +1399,8 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual(datetime.time(9, 12, 35, 123450), from_dicom_time("091235.12345"))
         self.assertEqual(datetime.time(9, 12, 35, 123456), from_dicom_time("091235.123456"))
         self.assertEqual(datetime.datetime(2024, 8, 15, 9, 12, 35), from_dicom_date_and_time("20240815", "091235"))
+        self.assertEqual(datetime.datetime(2024, 8, 15, 0, 0, 0), from_dicom_date_and_time("20240815", ""))
+        self.assertEqual(datetime.datetime(2024, 8, 15, 0, 0, 0), from_dicom_date_and_time("20240815", None))
         #self.assertEqual(datetime.datetime(2024, 8, 15, 9, 12, 35), from_dicom_datetime("20240815T091235"))  # TODO
         #self.assertEqual(datetime.datetime(2024, 8, 15, 9, 12, 35), from_dicom_datetime("20240815T091235+0205"))  # TODO
 

@@ -52,7 +52,10 @@ def from_dicom_date(dicom_date: str) -> datetime.date:
 
 def from_dicom_time(dicom_time: str, default: datetime.time = None) -> datetime.time:
     if dicom_time is None or len(dicom_time) == 0:
-        return None
+        if default:
+            return default
+        else:
+            return None
 
     m = re.match('(?P<hours>[0-9]{2})(?P<minutes>[0-9]{2})(?P<seconds>[0-9]{2})\.(?P<dec>[0-9]{1,6})', dicom_time)
     if m:
