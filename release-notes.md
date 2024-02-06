@@ -1,3 +1,10 @@
+v 0.14.9
+========
+
+- added functions to check the Orthanc and plugin versions:
+  `helpers.is_version_at_least`, `OrthancApiClient.is_orthanc_version_at_least`
+  `OrthancApiClient.is_plugin_version_at_least`, `OrthancApiClient.has_loaded_plugin`.
+
 v 0.14.8
 ========
 

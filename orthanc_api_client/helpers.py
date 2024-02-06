@@ -1,9 +1,9 @@
 import time
 import re
-import typing
 import pydicom
 import datetime
 import random
+from typing import Union, Optional
 from .helpers_internal import write_dataset_to_bytes
 from pydicom.dataset import Dataset, FileDataset
 from pydicom.uid import ExplicitVRLittleEndian
@@ -34,7 +34,7 @@ def get_random_dicom_date(date_from: datetime.date, date_to: datetime.date = dat
     return '{0:4}{1:02}{2:02}'.format(rand_date.year, rand_date.month, rand_date.day)
 
 
-def to_dicom_date(date: typing.Union[datetime.date, datetime.datetime]) -> str:
+def to_dicom_date(date: Union[datetime.date, datetime.datetime]) -> str:
     return '{0:4}{1:02}{2:02}'.format(date.year, date.month, date.day)
 
 def to_dicom_time(dt: datetime.datetime) -> str:
@@ -175,3 +175,22 @@ def encode_multipart_related(fields, boundary=None):
     content_type = str('multipart/related; type=application/dicom; boundary=%s' % boundary)
 
     return body, content_type
+
+
+def is_version_at_least(version_string: str, expected_major: int, expected_minor: int, expected_patch: Optional[int] = None) -> bool:
+    split_version = version_string.split(".")
+    if len(split_version) == 0:
+        return False
+
+    if len(split_version) >= 1:
+        if int(split_version[0]) < expected_major:
+            return False
+
+    if len(split_version) >= 2:
+        if int(split_version[1]) < expected_minor:
+            return False
+
+    if len(split_version) >= 3 and expected_patch is not None:
+        if int(split_version[2]) < expected_patch:
+            return False
+    return True

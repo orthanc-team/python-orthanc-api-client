@@ -9,7 +9,7 @@ from urllib.parse import urlunsplit, urlencode
 from .http_client import HttpClient
 from .resources import Instances, SeriesList, Studies, Jobs, Patients
 
-from .helpers import wait_until, encode_multipart_related
+from .helpers import wait_until, encode_multipart_related, is_version_at_least
 from .exceptions import *
 from .dicomweb_servers import DicomWebServers
 from .modalities import DicomModalities
@@ -84,6 +84,20 @@ class OrthancApiClient(HttpClient):
             return True
         except Exception as e:
             return False
+
+    def is_orthanc_version_at_least(self, expected_major: int, expected_minor: int, expected_patch: Optional[int] = None) -> bool:
+        s = self.get_system()
+        return is_version_at_least(s.get("Version"), expected_major, expected_minor, expected_patch)
+
+    def is_plugin_version_at_least(self, plugin_name: str, expected_major: int, expected_minor: int, expected_patch: Optional[int] = None) -> bool:
+        if self.has_loaded_plugin(plugin_name):
+            plugin = self.get_json(f"plugins/{plugin_name}")
+            return is_version_at_least(plugin.get("Version"), expected_major, expected_minor, expected_patch)
+        return False
+
+    def has_loaded_plugin(self, plugin_name: str) -> bool:
+        plugins = self.get_json('plugins')
+        return plugin_name in plugins
 
     def get_system(self) -> object:
         return self.get_json('system')

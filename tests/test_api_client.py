@@ -1404,6 +1404,22 @@ class TestApiClient(unittest.TestCase):
         #self.assertEqual(datetime.datetime(2024, 8, 15, 9, 12, 35), from_dicom_datetime("20240815T091235"))  # TODO
         #self.assertEqual(datetime.datetime(2024, 8, 15, 9, 12, 35), from_dicom_datetime("20240815T091235+0205"))  # TODO
 
+    def test_version(self):
+        self.assertTrue(is_version_at_least("0.0.0", 0, 0, 0))
+        self.assertTrue(is_version_at_least("0.0.1", 0, 0, 1))
+        self.assertTrue(is_version_at_least("0.1.0", 0, 1, 0))
+        self.assertTrue(is_version_at_least("1.2.3", 1, 2, 3))
+        self.assertTrue(is_version_at_least("1.2.4", 1, 2, 3))
+        self.assertFalse(is_version_at_least("1.2.2", 1, 2, 3))
+        self.assertFalse(is_version_at_least("1.1.4", 1, 2, 3))
+        self.assertFalse(is_version_at_least("0.2.3", 1, 2, 3))
+        self.assertTrue(is_version_at_least("1.2", 1, 2, 3))
+        self.assertFalse(is_version_at_least("1.1", 1, 2, 3))
+
+        self.assertTrue(self.oa.is_orthanc_version_at_least(1, 9, 0))
+        self.assertTrue(self.oa.is_plugin_version_at_least("dicom-web", 1, 5))
+        self.assertTrue(self.oa.has_loaded_plugin("dicom-web"))
+        self.assertFalse(self.oa.has_loaded_plugin("wsi"))
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
