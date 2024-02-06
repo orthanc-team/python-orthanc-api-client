@@ -1,4 +1,4 @@
-v 0.14.9
+v 0.14.10
 ========
 
 - added functions to check the Orthanc and plugin versions:

@@ -1416,6 +1416,8 @@ class TestApiClient(unittest.TestCase):
         self.assertTrue(is_version_at_least("1.2", 1, 2, 3))
         self.assertFalse(is_version_at_least("1.1", 1, 2, 3))
 
+        self.assertTrue(is_version_at_least("mainline", 1, 2, 3))  # mainline is always bigger than any version number !!!
+
         self.assertTrue(self.oa.is_orthanc_version_at_least(1, 9, 0))
         self.assertTrue(self.oa.is_plugin_version_at_least("dicom-web", 1, 5))
         self.assertTrue(self.oa.has_loaded_plugin("dicom-web"))
