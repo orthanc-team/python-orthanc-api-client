@@ -68,6 +68,9 @@ class OrthancApiClient(HttpClient):
         self.transfers = Transfers(api_client=self)
         self.peers = Peers(api_client=self)
 
+    def __repr__(self) -> str:
+        return f"{self._root_url}"
+
     def wait_started(self, timeout: float = None) -> bool:
         return wait_until(self.is_alive, timeout)
 

@@ -1,3 +1,6 @@
+
+- added `__repr__` to `OrthancApiClient` for nice display in debugger.
+
 v 0.14.10
 ========
 
