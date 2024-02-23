@@ -188,7 +188,43 @@ class OrthancApiClient(HttpClient):
                 instances_ids.extend(self.upload_folder(full_path, ignore_errors=ignore_errors, skip_extensions=skip_extensions))
         
         return instances_ids
+    
+    def upload_folder_return_details(self, folder_path: str) -> (typing.Set, typing.Set, typing.List):
+        '''
+        Uploads all the files contained in the folder, including the ones in the sub-folders.
+        Returns some details
+        Parameters
+        ----------
+        folder_path: the folder to upload
 
+        Returns
+        -------
+        - A Set with all the StudyInstanceUID uploaded
+        - A Set with all the Study orthanc Ids uploaded
+        - A List with all the files names which were not correctly uploaded + corresponding error
+        '''
+        dicom_ids_set = set()
+        orthanc_ids_set = set()
+        rejected_files_list = []
+
+        for path in os.listdir(folder_path):
+            full_path = os.path.join(folder_path, path)
+            if os.path.isfile(full_path):
+                try:
+                    instance_orthanc_ids = self.upload_file(full_path, ignore_errors=False)
+                    for id in instance_orthanc_ids:
+                        dicom_ids_set.add(self.instances.get_tags(id)["StudyInstanceUID"])
+                        orthanc_ids_set.add(self.instances.get_parent_study_id(id))
+                except Exception as e:
+                    rejected_files_list.append([str(full_path), e.args[0]])
+            elif os.path.isdir(full_path):
+                sub_dicom_ids_set, sub_orthanc_ids_set, sub_rejected_files_list = self.upload_folder_return_details(full_path)
+                dicom_ids_set.update(sub_dicom_ids_set)
+                orthanc_ids_set.update(sub_orthanc_ids_set)
+                rejected_files_list.extend(sub_rejected_files_list)
+
+        return dicom_ids_set, orthanc_ids_set, rejected_files_list
+    
     def upload_files_dicom_web(self, paths: List[str], ignore_errors: bool = False) -> any:
         """Uploads a file to Orthanc through its DicomWeb API (only DICOM files, no zip files)
 
