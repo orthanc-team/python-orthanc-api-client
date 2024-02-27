@@ -1,3 +1,7 @@
+v 0.14.12
+========
+- fixed slash bug affecting several methods: `get_changes`, `get_all_labels`, `get_log_level`, `set_log_level`
+
 v 0.14.11
 ========
 - added `upload_folder_return_details` method in `OrthancApiClient`
