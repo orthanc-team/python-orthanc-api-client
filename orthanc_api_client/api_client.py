@@ -309,7 +309,7 @@ class OrthancApiClient(HttpClient):
             args['limit'] = limit
 
         response = self.get_json(
-            endpoint = "/changes?" + urlencode(args)
+            endpoint="changes?" + urlencode(args)
         )
 
         changes = []
@@ -441,7 +441,7 @@ class OrthancApiClient(HttpClient):
         """
         List all the labels that are associated with any resource of the Orthanc database
         """
-        return self.get_json(endpoint = "/tools/labels")
+        return self.get_json(endpoint="tools/labels")
 
     def execute_lua_script(self, buffer: bytes):
         """
@@ -463,8 +463,8 @@ class OrthancApiClient(HttpClient):
                 raise ex
 
     def get_log_level(self):
-        return LogLevel(self.get_binary(endpoint="/tools/log-level").decode('utf-8'))
+        return LogLevel(self.get_binary(endpoint="tools/log-level").decode('utf-8'))
 
     def set_log_level(self, level: LogLevel):
-        self.put(endpoint="/tools/log-level", data=level)
-        return LogLevel(self.get_binary(endpoint="/tools/log-level").decode('utf-8'))
+        self.put(endpoint="tools/log-level", data=level)
+        return LogLevel(self.get_binary(endpoint="tools/log-level").decode('utf-8'))

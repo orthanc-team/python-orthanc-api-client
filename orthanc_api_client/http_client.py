@@ -21,6 +21,8 @@ class HttpClient:
         self._pwd = pwd
 
     def get_abs_url(self, endpoint: str) -> str:
+        if endpoint.startswith('/'):
+            raise ValueError("Endpoint should not start with '/' !")
         return urllib.parse.urljoin(self._root_url, endpoint)
 
     def get(self, endpoint: str, **kwargs) -> requests.Response:
