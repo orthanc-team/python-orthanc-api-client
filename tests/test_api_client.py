@@ -1432,6 +1432,10 @@ class TestApiClient(unittest.TestCase):
         self.assertTrue(self.oa.has_loaded_plugin("dicom-web"))
         self.assertFalse(self.oa.has_loaded_plugin("wsi"))
 
+    def test_path(self):
+        # test issue #4
+        self.assertEqual(self.oa.get_json('statistics'), self.oa.get_json('/statistics'))
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     unittest.main()

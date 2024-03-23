@@ -1,3 +1,8 @@
+v 0.14.13
+=========
+
+- Fix #4: re-allow `endpoint` argument to start with a `'/'` e.g. in `get_json()`
+
 v 0.14.12
 ========
 - fixed slash bug affecting several methods: `get_changes`, `get_all_labels`, `get_log_level`, `set_log_level`
