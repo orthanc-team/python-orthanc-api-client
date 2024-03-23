@@ -1,4 +1,4 @@
-v 0.14.13
+v 0.14.14
 =========
 
 - Fix #4: re-allow `endpoint` argument to start with a `'/'` e.g. in `get_json()`
