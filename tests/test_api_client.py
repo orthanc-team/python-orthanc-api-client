@@ -1389,6 +1389,7 @@ class TestApiClient(unittest.TestCase):
 
 
     def test_get_log_level(self):
+        r = self.oa.set_log_level(level=LogLevel.VERBOSE)
         r = self.oa.get_log_level()
 
         self.assertEqual(r, LogLevel.VERBOSE)

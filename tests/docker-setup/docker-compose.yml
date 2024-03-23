@@ -1,7 +1,7 @@
 version: "3"
 services:
   orthanc-a:
-    image: osimis/orthanc:23.4.0
+    image: orthancteam/orthanc:24.2.3
     ports: ["10042:8042"]
     environment:
       VERBOSE_STARTUP: "true"
@@ -51,7 +51,7 @@ services:
       ORTHANC__OVERWRITE_INSTANCES: "true"
 
   orthanc-c:
-    image: osimis/orthanc:23.4.0
+    image: orthancteam/orthanc:24.2.3
     ports: ["10044:8042"]
     environment:
       VERBOSE_STARTUP: "true"

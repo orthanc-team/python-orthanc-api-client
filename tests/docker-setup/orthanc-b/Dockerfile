@@ -1,4 +1,4 @@
-FROM osimis/orthanc:23.4.0
+FROM orthancteam/orthanc:24.2.3
 
 RUN pip install pydicom
 
