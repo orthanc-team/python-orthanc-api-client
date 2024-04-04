@@ -29,6 +29,7 @@ services:
       TRANSFERS_PLUGIN_ENABLED: "true"
       ORTHANC__CHECK_REVISIONS: "true"
       ORTHANC__OVERWRITE_INSTANCES: "true"
+      ORTHANC__KEEP_ALIVE_TIMEOUT: "2"
 
   orthanc-b:
     build: orthanc-b
@@ -49,6 +50,7 @@ services:
       TRANSFERS_PLUGIN_ENABLED: "true"
       ORTHANC__CHECK_REVISIONS: "false"
       ORTHANC__OVERWRITE_INSTANCES: "true"
+      ORTHANC__KEEP_ALIVE_TIMEOUT: "2"
 
   orthanc-c:
     image: orthancteam/orthanc:24.2.3
@@ -66,6 +68,7 @@ services:
         {"orthanc-a": ["http://orthanc-a:8042/dicom-web/", "test", "test"]}
       ORTHANC__ORTHANC_PEERS: |
         {"orthanc-a": ["http://orthanc-a:8042/", "test", "test"]}
+      ORTHANC__KEEP_ALIVE_TIMEOUT: "2"
 
       TRANSFERS_PLUGIN_ENABLED: "true"
       ORTHANC__OVERWRITE_INSTANCES: "true"
