@@ -698,7 +698,7 @@ class TestApiClient(unittest.TestCase):
         self.assertNotEqual('1CT1', self.oa.patients.get_tags(anon_patient_id)['PatientID'])
 
 
-    def test_modify_series_instance_by_instance(self):
+    def test_modify_bulk_series(self):
         self.oa.delete_all_content()
 
         instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
@@ -706,9 +706,8 @@ class TestApiClient(unittest.TestCase):
 
         original_tags = self.oa.series.get_tags(series_id)
 
-        # default anonymize
-        modified_series_id = self.oa.series.modify_instance_by_instance(
-            orthanc_id=series_id,
+        _, modified_series_ids, __, ___ = self.oa.series.modify_bulk(
+            orthanc_ids=[series_id],
             remove_tags=['InstitutionName'],
             replace_tags={
                 'PatientID': 'modified-id',
@@ -716,16 +715,17 @@ class TestApiClient(unittest.TestCase):
                 'StudyInstanceUID': original_tags['StudyInstanceUID'],
                 'SeriesInstanceUID': original_tags['SeriesInstanceUID'],
             },
+            force=True,
             delete_original=True
         )
 
-        modified_tags = self.oa.series.get_tags(modified_series_id)
+        modified_tags = self.oa.series.get_tags(modified_series_ids[0])
 
         self.assertEqual(original_tags['StudyInstanceUID'], modified_tags['StudyInstanceUID'])
         self.assertEqual(original_tags['SeriesInstanceUID'], modified_tags['SeriesInstanceUID'])
         self.assertEqual('modified-id', modified_tags['PatientID'])
 
-    def test_modify_study_instance_by_instance(self):
+    def test_modify_bulk_study(self):
         self.oa.delete_all_content()
 
         instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
@@ -734,8 +734,8 @@ class TestApiClient(unittest.TestCase):
         original_tags = self.oa.studies.get_tags(study_id)
 
         # default anonymize
-        modified_study_id = self.oa.studies.modify_instance_by_instance(
-            orthanc_id=study_id,
+        _, _, modified_studies_ids, _ = self.oa.studies.modify_bulk(
+            orthanc_ids=[study_id],
             remove_tags=['InstitutionName'],
             replace_tags={
                 'PatientID': 'modified-id',
@@ -743,10 +743,11 @@ class TestApiClient(unittest.TestCase):
                 'StudyInstanceUID': original_tags['StudyInstanceUID'],
                 'SeriesInstanceUID': original_tags['SeriesInstanceUID'],
             },
+            force=True,
             delete_original=True
         )
 
-        modified_tags = self.oa.studies.get_tags(modified_study_id)
+        modified_tags = self.oa.studies.get_tags(modified_studies_ids[0])
 
         self.assertEqual(original_tags['StudyInstanceUID'], modified_tags['StudyInstanceUID'])
         self.assertEqual(original_tags['SeriesInstanceUID'], modified_tags['SeriesInstanceUID'])
@@ -872,6 +873,46 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual(original_tags.get('StudyInstanceUID'), modified_tags.get('StudyInstanceUID'))
         self.assertEqual(original_tags.get('SeriesInstanceUID'), modified_tags.get('SeriesInstanceUID'))
         self.assertEqual(original_tags.get('SOPInstanceUID'), modified_tags.get('SOPInstanceUID'))
+
+    def test_modify_bulk_instances_async(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_folder(here / "stimuli/MR/Brain")
+
+        job = self.oa.instances.modify_bulk_async(
+            orthanc_ids=instances_ids,
+            remove_tags=['InstitutionName'],
+            keep_tags=['SeriesInstanceUID', 'SOPInstanceUID'],
+            replace_tags={
+                'StudyInstanceUID': "1.2.3.4"
+            },
+            transcode="1.2.840.10008.1.2.4.70",
+            force=True
+        )
+        job.wait_completed()
+        self.assertEqual(JobStatus.SUCCESS, job.info.status)
+
+    def test_modify_bulk_instances(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_folder(here / "stimuli/MR/Brain")
+
+        modified_instances_ids, modified_series_ids, modified_studies_ids, modified_patients_ids = self.oa.instances.modify_bulk(
+            orthanc_ids=instances_ids,
+            remove_tags=['InstitutionName'],
+            keep_tags=['SeriesInstanceUID', 'SOPInstanceUID'],
+            replace_tags={
+                'StudyInstanceUID': "1.2.3.4"
+            },
+            transcode="1.2.840.10008.1.2.4.70",
+            delete_original=True,
+            force=True
+        )
+        self.assertEqual(3, len(modified_instances_ids))
+        self.assertEqual(2, len(modified_series_ids))
+        self.assertEqual(1, len(modified_studies_ids))
+        self.assertEqual(1, len(modified_patients_ids))
+        self.assertNotIn(instances_ids[0], modified_instances_ids)  # make sure the new ids are different from the original ones
 
 
     def test_asyncio(self):

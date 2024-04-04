@@ -1,3 +1,12 @@
+v 0.15.0
+========
+
+- **BREAKING CHANGE:** `OrthancApiClient.instances.modify_bulk` now returns a tuple with
+  `modified_instances_ids, modifies_series_ids, modified_studies_ids, modifies_patients_ids`
+- **BREAKING CHANGE:** `modify_instance_by_instance` has been removed since recent Orthanc versions allow
+  using `force=True` and `keep_tags` can preserve DICOM identifiers
+
+
 v 0.14.14
 =========
 

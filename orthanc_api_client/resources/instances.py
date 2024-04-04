@@ -1,5 +1,4 @@
 import os
-import typing
 
 from .resources import Resources
 from ..tags import Tags
@@ -32,25 +31,6 @@ class Instances(Resources):
         json_tags = self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/tags")
         return Tags(json_tags)
 
-    def modify_bulk(self, orthanc_ids: List[str] = [], replace_tags: Any = {}, remove_tags: List[str] = [], keep_tags: List[str] = [], delete_original: bool = True, force: bool = False) -> List[str]:
-        modified_instances_ids = []
-
-        for orthanc_id in orthanc_ids:
-            modified_dicom = self.modify(
-                orthanc_id=orthanc_id,
-                replace_tags=replace_tags,
-                remove_tags=remove_tags,
-                keep_tags=keep_tags,
-                force=force
-            )
-
-            modified_instance_id = self._api_client.upload(modified_dicom)[0]
-            if delete_original and modified_instance_id != orthanc_id:
-                self.delete(orthanc_id)
-
-            modified_instances_ids.append(modified_instance_id)
-
-        return modified_instances_ids
 
     def modify(self, orthanc_id: str, replace_tags: Any = {}, remove_tags: List[str] = [], keep_tags: List[str] = [], force: bool = False) -> bytes:
 
@@ -132,7 +112,7 @@ class Instances(Resources):
 
         return DownloadedInstance(instance_id, path)
 
-    def download_instances(self, instances_ids: typing.List[str], path: str) -> typing.List[DownloadedInstance]:
+    def download_instances(self, instances_ids: List[str], path: str) -> List[DownloadedInstance]:
         """
         downloads the instances DICOM files to disk
         Args:

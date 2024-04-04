@@ -1,10 +1,12 @@
 import datetime
 
-import requests
+import json
 import logging
 from typing import List, Tuple, Optional, Any
 from ..exceptions import *
 from ..helpers import to_dicom_date
+from ..job import Job, JobStatus
+import orthanc_api_client.exceptions as api_exceptions
 
 
 logger = logging.getLogger(__name__)
@@ -256,6 +258,75 @@ class Resources:
             return modified_id
 
         return None  # TODO: raise exception ???
+
+    def modify_bulk(self, orthanc_ids: List[str] = [], replace_tags: Any = {}, remove_tags: List[str] = [], keep_tags: List[str] = [], delete_original: bool = True, force: bool = False, transcode: Optional[str] = None)  -> Tuple[List[str], List[str], List[str], List[str]]:
+        """
+        returns a tuple with:
+        - the list of modified instances ids
+        - the list of modified series ids
+        - the list of modified studies ids
+        - the list of modified patients ids
+        """
+        modified_instances_ids = []
+        modified_series_ids = []
+        modified_studies_ids = []
+        modified_patients_ids = []
+
+        job = self.modify_bulk_async(
+            orthanc_ids=orthanc_ids,
+            replace_tags=replace_tags,
+            remove_tags=remove_tags,
+            keep_tags=keep_tags,
+            delete_original=delete_original,
+            force=force,
+            transcode=transcode
+        )
+
+        job.wait_completed()
+
+        if job.info.status == JobStatus.SUCCESS and "Resources" in job.content:
+            # extract the list of modified instances ids from the job content
+            for r in job.content.get("Resources"):
+                if r.get("Type") == "Instance":
+                    modified_instances_ids.append(r.get("ID"))
+                elif r.get("Type") == "Series":
+                    modified_series_ids.append(r.get("ID"))
+                elif r.get("Type") == "Study":
+                    modified_studies_ids.append(r.get("ID"))
+                elif r.get("Type") == "Patient":
+                    modified_patients_ids.append(r.get("ID"))
+            return modified_instances_ids, modified_series_ids, modified_studies_ids, modified_patients_ids
+        else:
+            raise api_exceptions.OrthancApiException(msg=f"Error while modifying bulk {self._get_level()}, job failed {json.dumps(job.info.content)}")
+
+
+    def modify_bulk_async(self, orthanc_ids: List[str] = [], replace_tags: Any = {}, remove_tags: List[str] = [], keep_tags: List[str] = [], delete_original: bool = True, force: bool = False, transcode: Optional[str] = None) -> Job:
+        query = {
+            "Force": force,
+            "Level": self._get_level(),
+            "Resources": orthanc_ids,
+            "Asynchronous": True
+        }
+
+        if replace_tags is not None and len(replace_tags) > 0:
+            query['Replace'] = replace_tags
+        if remove_tags is not None and len(remove_tags) > 0:
+            query['Remove'] = remove_tags
+        if keep_tags is not None and len(keep_tags) > 0:
+            query['Keep'] = keep_tags
+        if transcode:
+            query['Transcode'] = transcode
+        if delete_original:
+            query['KeepSource'] = False
+
+        r = self._api_client.post(
+            endpoint=f"/tools/bulk-modify",
+            json=query)
+
+        if r.status_code == 200 and "ID" in r.json():
+            return Job(api_client=self._api_client, orthanc_id=r.json()['ID'])
+        else:
+            raise HttpError(http_status_code=r.status_code, msg="Error in bulk-modify", url=r.url, request_response=r)
 
     def print_daily_stats(self, from_date: datetime.date = None, to_date: datetime.date = None):
         if self._url_segment == "patients":

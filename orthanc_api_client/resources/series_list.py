@@ -58,17 +58,6 @@ class SeriesList(Resources):
             force=force
         )
 
-    def modify_instance_by_instance(self, orthanc_id: str, replace_tags: Any = {}, remove_tags: List[str] = [], delete_original: bool = True, force: bool = True) -> str:
-        modified_instances_ids = self._api_client.instances.modify_bulk(
-            orthanc_ids=self.get_instances_ids(orthanc_id),
-            replace_tags=replace_tags,
-            remove_tags=remove_tags,
-            delete_original=delete_original,
-            force=force
-        )
-
-        return self._api_client.instances.get_parent_series_id(modified_instances_ids[0])
-
     def get_tags(self, orthanc_id: str) -> Tags:
         """
         returns tags from a "random" instance of the series, it shall contain all series tags
