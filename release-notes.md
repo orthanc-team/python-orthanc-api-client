@@ -1,3 +1,5 @@
+- added `Permissive` argument to `OrthancApiClient.resources.modify_bulk` 
+
 v 0.15.0
 ========
 

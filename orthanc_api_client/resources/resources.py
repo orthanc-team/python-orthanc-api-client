@@ -259,7 +259,7 @@ class Resources:
 
         return None  # TODO: raise exception ???
 
-    def modify_bulk(self, orthanc_ids: List[str] = [], replace_tags: Any = {}, remove_tags: List[str] = [], keep_tags: List[str] = [], delete_original: bool = True, force: bool = False, transcode: Optional[str] = None)  -> Tuple[List[str], List[str], List[str], List[str]]:
+    def modify_bulk(self, orthanc_ids: List[str] = [], replace_tags: Any = {}, remove_tags: List[str] = [], keep_tags: List[str] = [], delete_original: bool = True, force: bool = False, transcode: Optional[str] = None, permissive: bool = False)  -> Tuple[List[str], List[str], List[str], List[str]]:
         """
         returns a tuple with:
         - the list of modified instances ids
@@ -300,12 +300,13 @@ class Resources:
             raise api_exceptions.OrthancApiException(msg=f"Error while modifying bulk {self._get_level()}, job failed {json.dumps(job.info.content)}")
 
 
-    def modify_bulk_async(self, orthanc_ids: List[str] = [], replace_tags: Any = {}, remove_tags: List[str] = [], keep_tags: List[str] = [], delete_original: bool = True, force: bool = False, transcode: Optional[str] = None) -> Job:
+    def modify_bulk_async(self, orthanc_ids: List[str] = [], replace_tags: Any = {}, remove_tags: List[str] = [], keep_tags: List[str] = [], delete_original: bool = True, force: bool = False, transcode: Optional[str] = None, permissive: bool = False) -> Job:
         query = {
             "Force": force,
             "Level": self._get_level(),
             "Resources": orthanc_ids,
-            "Asynchronous": True
+            "Asynchronous": True,
+            "Permissive": permissive
         }
 
         if replace_tags is not None and len(replace_tags) > 0:
@@ -327,6 +328,7 @@ class Resources:
             return Job(api_client=self._api_client, orthanc_id=r.json()['ID'])
         else:
             raise HttpError(http_status_code=r.status_code, msg="Error in bulk-modify", url=r.url, request_response=r)
+
 
     def print_daily_stats(self, from_date: datetime.date = None, to_date: datetime.date = None):
         if self._url_segment == "patients":
