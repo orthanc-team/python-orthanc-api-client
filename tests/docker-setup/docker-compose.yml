@@ -29,7 +29,9 @@ services:
       TRANSFERS_PLUGIN_ENABLED: "true"
       ORTHANC__CHECK_REVISIONS: "true"
       ORTHANC__OVERWRITE_INSTANCES: "true"
-      ORTHANC__KEEP_ALIVE_TIMEOUT: "2"
+      # keep default KeepAliveTimeout and reduce the number of threads in order to test the retry mechanism
+      ORTHANC__KEEP_ALIVE_TIMEOUT: "1"
+      ORTHANC__HTTP_THREADS_COUNT: "10"
 
   orthanc-b:
     build: orthanc-b
@@ -50,7 +52,9 @@ services:
       TRANSFERS_PLUGIN_ENABLED: "true"
       ORTHANC__CHECK_REVISIONS: "false"
       ORTHANC__OVERWRITE_INSTANCES: "true"
-      ORTHANC__KEEP_ALIVE_TIMEOUT: "2"
+      # keep default KeepAliveTimeout and reduce the number of threads in order to test the retry mechanism
+      ORTHANC__KEEP_ALIVE_TIMEOUT: "1"
+      ORTHANC__HTTP_THREADS_COUNT: "10"
 
   orthanc-c:
     image: orthancteam/orthanc:24.2.3
@@ -68,7 +72,9 @@ services:
         {"orthanc-a": ["http://orthanc-a:8042/dicom-web/", "test", "test"]}
       ORTHANC__ORTHANC_PEERS: |
         {"orthanc-a": ["http://orthanc-a:8042/", "test", "test"]}
-      ORTHANC__KEEP_ALIVE_TIMEOUT: "2"
+      # keep default KeepAliveTimeout and reduce the number of threads in order to test the retry mechanism
+      ORTHANC__KEEP_ALIVE_TIMEOUT: "1"
+      ORTHANC__HTTP_THREADS_COUNT: "5"
 
       TRANSFERS_PLUGIN_ENABLED: "true"
       ORTHANC__OVERWRITE_INSTANCES: "true"

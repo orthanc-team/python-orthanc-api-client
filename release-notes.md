@@ -1,4 +1,12 @@
-- added `Permissive` argument to `OrthancApiClient.resources.modify_bulk` 
+v 0.15.1
+========
+ 
+- The `OrthancApiClient` now implements 3 retries in case of:
+  - ConnectionError
+  - 502 Bad Gateway
+  - 503 Service Unavailable
+- added `permissive` argument to `OrthancApiClient.resources.modify_bulk` 
+
 
 v 0.15.0
 ========

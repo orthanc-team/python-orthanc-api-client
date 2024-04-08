@@ -2,6 +2,7 @@ from typing import Any
 import requests
 import urllib.parse
 import json
+from requests.adapters import HTTPAdapter, Retry
 
 from orthanc_api_client import exceptions as api_exceptions
 
@@ -20,11 +21,25 @@ class HttpClient:
         self._user = user
         self._pwd = pwd
 
+        # only retries on ConnectionError and on Transient errors when we are sure that the request has not reached to Orthanc
+        retries = Retry(  # doc: https://urllib3.readthedocs.io/en/stable/reference/urllib3.util.html#urllib3.util.Retry
+            connect=3,
+            read=3,
+            status=3,
+            allowed_methods=frozenset({'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PUT', 'TRACE', 'POST'}), # allow "POST" because we retry only when the request has not reached Orthanc !
+            status_forcelist=frozenset({502, 503}),  # only retry "Bad Gateway" and "Service Unavailable"
+            backoff_factor=0.2
+        )
+        url_schema = urllib.parse.urlparse(root_url).scheme + "://"
+        self._http_session.mount(url_schema, HTTPAdapter(max_retries=retries))
+
+
     def get_abs_url(self, endpoint: str) -> str:
         # remove the leading '/' because _root_url might be something like 'http://my.domain/orthanc/' and urljoin would then remove the '/orthanc'
         normalised_endpoint = endpoint[1:] if endpoint.startswith("/") else endpoint
 
         return urllib.parse.urljoin(self._root_url, normalised_endpoint)
+
 
     def get(self, endpoint: str, **kwargs) -> requests.Response:
         try:
