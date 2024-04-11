@@ -105,7 +105,7 @@ orthanc_a.modalities.retrieve_study(
 
 # send to a remote modality
 orthanc_a.modalities.send(
-    modality='orthanc-b',
+    target_modality='orthanc-b',
     resources_ids=[study_id],
     synchronous=True
 )
