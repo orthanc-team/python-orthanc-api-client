@@ -1,3 +1,10 @@
+v 0.15.2
+========
+ 
+- Fix `to_dicom_time` method in Helpers
+- Added `to_dicom_time_from_seconds` method in Helpers
+
+
 v 0.15.1
 ========
  

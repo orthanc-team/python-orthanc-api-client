@@ -38,7 +38,13 @@ def to_dicom_date(date: Union[datetime.date, datetime.datetime]) -> str:
     return '{0:4}{1:02}{2:02}'.format(date.year, date.month, date.day)
 
 def to_dicom_time(dt: datetime.datetime) -> str:
-    return '{0:2}{1:02}{2:02}'.format(dt.hour, dt.minute, dt.second)
+    return '{0:02}{1:02}{2:02}'.format(dt.hour, dt.minute, dt.second)
+
+def to_dicom_time_from_seconds(seconds: int) -> str:
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = seconds % 60
+    return to_dicom_time(datetime.datetime.today().replace(hour=hours, minute=minutes, second=seconds))
 
 def from_dicom_date(dicom_date: str) -> datetime.date:
     if dicom_date is None or len(dicom_date) == 0:
