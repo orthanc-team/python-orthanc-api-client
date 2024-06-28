@@ -1,3 +1,9 @@
+v 0.15.3
+========
+ 
+- Added an option to `upload_folder_return_details` method to unzip files (if any) before upload
+
+
 v 0.15.2
 ========
  
