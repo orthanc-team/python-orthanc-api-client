@@ -3,6 +3,8 @@ import os
 import logging
 import typing
 import datetime
+import zipfile
+import tempfile
 from typing import List, Optional, Dict
 from urllib.parse import urlunsplit, urlencode
 
@@ -192,13 +194,15 @@ class OrthancApiClient(HttpClient):
         
         return instances_ids
     
-    def upload_folder_return_details(self, folder_path: str) -> (typing.Set, typing.Set, typing.List):
+    def upload_folder_return_details(self, folder_path: str, unzip_before_upload: bool = False) -> (typing.Set, typing.Set, typing.List):
         '''
         Uploads all the files contained in the folder, including the ones in the sub-folders.
         Returns some details
         Parameters
         ----------
         folder_path: the folder to upload
+        unzip_before_upload: if True, a zip file will be unzipped and all resulting files will be uploaded
+                             (if False, the zip file will be uploaded as it is)
 
         Returns
         -------
@@ -213,13 +217,23 @@ class OrthancApiClient(HttpClient):
         for path in os.listdir(folder_path):
             full_path = os.path.join(folder_path, path)
             if os.path.isfile(full_path):
-                try:
-                    instance_orthanc_ids = self.upload_file(full_path, ignore_errors=False)
-                    for id in instance_orthanc_ids:
-                        dicom_ids_set.add(self.instances.get_tags(id)["StudyInstanceUID"])
-                        orthanc_ids_set.add(self.instances.get_parent_study_id(id))
-                except Exception as e:
-                    rejected_files_list.append([str(full_path), e.args[0]])
+
+                if unzip_before_upload and zipfile.is_zipfile(full_path):
+                    with tempfile.TemporaryDirectory() as tempDir:
+                        with zipfile.ZipFile(full_path, 'r') as z:
+                            z.extractall(tempDir)
+                        zip_dicom_ids_set, zip_orthanc_ids_set, zip_rejected_files_list = self.upload_folder_return_details(folder_path=tempDir)
+                        dicom_ids_set.update(zip_dicom_ids_set)
+                        orthanc_ids_set.update(zip_orthanc_ids_set)
+                        rejected_files_list.extend(zip_rejected_files_list)
+                else:
+                    try:
+                        instance_orthanc_ids = self.upload_file(full_path, ignore_errors=False)
+                        for id in instance_orthanc_ids:
+                            dicom_ids_set.add(self.instances.get_tags(id)["StudyInstanceUID"])
+                            orthanc_ids_set.add(self.instances.get_parent_study_id(id))
+                    except Exception as e:
+                        rejected_files_list.append([str(full_path), e.args[0]])
             elif os.path.isdir(full_path):
                 sub_dicom_ids_set, sub_orthanc_ids_set, sub_rejected_files_list = self.upload_folder_return_details(full_path)
                 dicom_ids_set.update(sub_dicom_ids_set)

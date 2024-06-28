@@ -229,6 +229,15 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual(0, len(self.oa.studies.get_all_ids()))
         self.assertEqual(2, len(rejected_files_list))
 
+    def test_upload_folder_return_details_unzip_before_upload(self):
+        self.oa.delete_all_content()
+        dicom_ids_set, orthanc_ids_set, rejected_files_list = self.oa.upload_folder_return_details(here / "stimuli", unzip_before_upload=True)
+
+        self.assertLessEqual(4, len(dicom_ids_set))
+        self.oa.studies.delete(orthanc_ids=orthanc_ids_set)
+        self.assertEqual(0, len(self.oa.studies.get_all_ids()))
+        self.assertEqual(2, len(rejected_files_list))
+
     def test_upload_file_dicom_web(self):
         self.oa.delete_all_content()
 
