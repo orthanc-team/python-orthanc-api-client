@@ -7,7 +7,7 @@ from typing import Union, Optional
 from .helpers_internal import write_dataset_to_bytes
 from pydicom.dataset import Dataset, FileDataset
 from pydicom.uid import ExplicitVRLittleEndian
-import pydicom._storage_sopclass_uids
+import pydicom.uid
 from urllib3.filepost import encode_multipart_formdata, choose_boundary
 
 
@@ -109,7 +109,7 @@ def generate_test_dicom_file(
     buffer = bytearray(height * width * 2)
 
     meta = pydicom.Dataset()
-    meta.MediaStorageSOPClassUID = pydicom._storage_sopclass_uids.MRImageStorage
+    meta.MediaStorageSOPClassUID = pydicom.uid.MRImageStorage
     meta.MediaStorageSOPInstanceUID = pydicom.uid.generate_uid()
     meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian  
 
@@ -143,13 +143,13 @@ def generate_test_dicom_file(
     ds.PixelRepresentation = 1
 
     if ds.Modality == "MR":
-        ds.SOPClassUID = pydicom._storage_sopclass_uids.MRImageStorage
+        ds.SOPClassUID = pydicom.uid.MRImageStorage
     elif ds.Modality == "CT":
-        ds.SOPClassUID = pydicom._storage_sopclass_uids.CTImageStorage
+        ds.SOPClassUID = pydicom.uid.CTImageStorage
     elif ds.Modality == "CR":
-        ds.SOPClassUID = pydicom._storage_sopclass_uids.ComputedRadiographyImageStorage
+        ds.SOPClassUID = pydicom.uid.ComputedRadiographyImageStorage
     elif ds.Modality == "DX":
-        ds.SOPClassUID = pydicom._storage_sopclass_uids.DigitalXRayImageStorageForPresentation
+        ds.SOPClassUID = pydicom.uid.DigitalXRayImageStorageForPresentation
     else:
         raise NotImplementedError
 

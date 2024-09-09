@@ -1,3 +1,8 @@
+v 0.16.0
+========
+
+- Fixed an incompatibility with pydicom 3.0.0
+
 v 0.15.3
 ========
  
