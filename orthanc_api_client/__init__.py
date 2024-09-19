@@ -1,6 +1,7 @@
 from .api_client import OrthancApiClient
 from .exceptions import *
 from .helpers import *
+from .capabilities import Capabilities
 from .change import ChangeType, ResourceType
 from .study import Study, StudyInfo
 from .series import Series, SeriesInfo

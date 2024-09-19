@@ -1,3 +1,12 @@
+v 0.16.1
+========
+
+- Added `capabilities`:
+  - `o.Capabilities.has_extended_find`
+  - `o.Capabilities.has_extended_changes`
+  - `o.Capabilities.has_label_support`
+  - `o.Capabilities.has_revision_support`
+
 v 0.16.0
 ========
 

@@ -19,6 +19,7 @@ from .change import Change, ChangeType, ResourceType
 from .transfers import Transfers
 from .peers import Peers
 from .logging import LogLevel
+from .capabilities import Capabilities
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +70,7 @@ class OrthancApiClient(HttpClient):
         self.jobs = Jobs(api_client=self)
         self.transfers = Transfers(api_client=self)
         self.peers = Peers(api_client=self)
+        self.capabilities = Capabilities(api_client=self)
 
     def __repr__(self) -> str:
         return f"{self._root_url}"

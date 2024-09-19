@@ -1483,6 +1483,12 @@ class TestApiClient(unittest.TestCase):
         self.assertTrue(self.oa.has_loaded_plugin("dicom-web"))
         self.assertFalse(self.oa.has_loaded_plugin("wsi"))
 
+    def test_capabilities(self):
+        self.assertTrue(self.oa.capabilities.has_label_support)         # since we are using SQLite
+        self.assertTrue(self.oa.capabilities.has_revision_support)      # since we are using SQLite
+        self.assertFalse(self.oa.capabilities.has_extended_changes)     # TODO: update once we switch to newer version
+        self.assertFalse(self.oa.capabilities.has_extended_find)        # TODO: update once we switch to newer version
+
     def test_path(self):
         # test issue #4
         self.assertEqual(self.oa.get_json('statistics'), self.oa.get_json('/statistics'))
