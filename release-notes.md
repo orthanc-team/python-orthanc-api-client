@@ -1,3 +1,8 @@
+v 0.16.2
+========
+
+- `o.is_orthanc_version_at_least()` and `o.is_plugin_version_at_least()` now support "mainline-commitId" patterns
+
 v 0.16.1
 ========
 

@@ -184,7 +184,7 @@ def encode_multipart_related(fields, boundary=None):
 
 
 def is_version_at_least(version_string: str, expected_major: int, expected_minor: int, expected_patch: Optional[int] = None) -> bool:
-    if version_string == "mainline":
+    if version_string.startswith("mainline"):
         return True
 
     split_version = version_string.split(".")
