@@ -6,9 +6,6 @@ import pydicom
 
 from io import BytesIO
 
-from pydicom import dcmread, dcmwrite
-from pydicom.filebase import DicomFileLike
-
 
 TOKEN = orthanc.GenerateRestApiAuthorizationToken()
 
@@ -16,15 +13,8 @@ TOKEN = orthanc.GenerateRestApiAuthorizationToken()
 def write_dataset_to_bytes(dataset):
     # create a buffer
     with BytesIO() as buffer:
-        # create a DicomFileLike object that has some properties of DataSet
-        memory_dataset = DicomFileLike(buffer)
-        # write the dataset to the DicomFileLike object
-        dcmwrite(memory_dataset, dataset)
-        # to read from the object, you have to rewind it
-        memory_dataset.seek(0)
-        # read the contents as bytes
-        return memory_dataset.read()
-
+        dataset.save_as(buffer)
+        return buffer.getvalue()
 
 
 def get_api_token(output, uri, **request):
@@ -43,15 +33,26 @@ def worklist_callback(answers, query, issuerAet, calledAet):
     json_tags = json.loads(orthanc.DicomBufferToJson(dicom, orthanc.DicomToJsonFormat.FULL, orthanc.DicomToJsonFlags.NONE, 0))
 
     dataset = pydicom.dataset.Dataset()
-    dataset.is_little_endian = True
-    dataset.is_implicit_VR = False
+
+    file_meta = pydicom.dataset.FileMetaDataset()
+
+    # Set the FileMeta attributes
+    file_meta.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.31'
+    file_meta.MediaStorageSOPInstanceUID = generate_uid()
+    file_meta.ImplementationClassUID = '1.2.840.10008.5.1.4.1.1.2'
+    file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian
+    dataset.file_meta = file_meta
+
+    # dataset.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian
     dataset.AccessionNumber = 'A123456'
     dataset.StudyInstanceUID = '1.2.3.4'
     dataset.PatientName = 'PatientName'
     dataset.PatientID = 'PatientID'
     dataset.PatientBirthDate = '20220208'
     dataset.PatientSex = 'O'
-
+    # dataset.is_little_endian = True
+    # dataset.is_implicit_VR = False
+    # dataset.file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian
     dataset_bytes = write_dataset_to_bytes(dataset)
 
     answers.WorklistAddAnswer(query, dataset_bytes)

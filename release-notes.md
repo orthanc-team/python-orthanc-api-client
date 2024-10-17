@@ -1,3 +1,8 @@
+v 0.16.3
+========
+
+- Avoid pydicom warning when generating test files
+
 v 0.16.2
 ========
 

@@ -28,7 +28,7 @@ setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/guides/single-sourcing-package-version/
-    version='0.16.2',  # Required
+    version='0.16.3',  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
@@ -134,7 +134,7 @@ setup(
     # https://packaging.python.org/discussions/install-requires-vs-requirements/
     install_requires=[
         'requests>=2.31.0',
-        'pydicom>=3.0.0',
+        'pydicom>=3.0.1',
         'StrEnum>=0.4.15'
     ],
 

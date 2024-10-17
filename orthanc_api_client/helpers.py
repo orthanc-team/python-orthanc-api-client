@@ -5,8 +5,6 @@ import datetime
 import random
 from typing import Union, Optional
 from .helpers_internal import write_dataset_to_bytes
-from pydicom.dataset import Dataset, FileDataset
-from pydicom.uid import ExplicitVRLittleEndian
 import pydicom.uid
 from urllib3.filepost import encode_multipart_formdata, choose_boundary
 
@@ -108,16 +106,13 @@ def generate_test_dicom_file(
         ) -> bytes:
     buffer = bytearray(height * width * 2)
 
-    meta = pydicom.Dataset()
-    meta.MediaStorageSOPClassUID = pydicom.uid.MRImageStorage
-    meta.MediaStorageSOPInstanceUID = pydicom.uid.generate_uid()
-    meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian  
+    file_meta = pydicom.dataset.FileMetaDataset()
+    file_meta.MediaStorageSOPClassUID = pydicom.uid.MRImageStorage
+    file_meta.MediaStorageSOPInstanceUID = pydicom.uid.generate_uid()
+    file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian
 
-    ds = Dataset()
-    ds.file_meta = meta
-
-    ds.is_little_endian = True
-    ds.is_implicit_VR = False
+    ds = pydicom.dataset.Dataset()
+    ds.file_meta = file_meta
 
     ds.Modality = "MR"
     ds.SOPInstanceUID = pydicom.uid.generate_uid()
