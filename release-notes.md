@@ -1,3 +1,8 @@
+v 0.17.0
+========
+
+- Added `OrthancApiClient.instances.anonymize_bulk` and `OrthancApiClient.instances.anonymize_bulk_async`
+
 v 0.16.3
 ========
 
