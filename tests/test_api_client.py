@@ -252,6 +252,10 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual(0, len(orthanc_ids_set))
         self.assertEqual(9, len(rejected_files_list))
 
+        # let's uninhibit the destination
+        with open(here / "docker-setup/uninhibit.lua", 'rb') as f:
+            lua_script = f.read()
+        self.oa.execute_lua_script(lua_script)
 
     def test_upload_file_dicom_web(self):
         self.oa.delete_all_content()
