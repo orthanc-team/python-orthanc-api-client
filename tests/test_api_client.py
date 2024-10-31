@@ -250,7 +250,7 @@ class TestApiClient(unittest.TestCase):
 
         self.assertEqual(0, len(dicom_ids_set))
         self.assertEqual(0, len(orthanc_ids_set))
-        self.assertEqual(2, len(rejected_files_list))
+        self.assertEqual(9, len(rejected_files_list))
 
 
     def test_upload_file_dicom_web(self):
