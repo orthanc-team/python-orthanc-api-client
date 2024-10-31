@@ -1,3 +1,18 @@
+v 0.17.0
+========
+
+- Added `OrthancApiClient.instances.anonymize_bulk` and `OrthancApiClient.instances.anonymize_bulk_async`
+
+v 0.16.3
+========
+
+- Avoid pydicom warning when generating test files
+
+v 0.16.2
+========
+
+- `o.is_orthanc_version_at_least()` and `o.is_plugin_version_at_least()` now support "mainline-commitId" patterns
+
 v 0.16.1
 ========
 

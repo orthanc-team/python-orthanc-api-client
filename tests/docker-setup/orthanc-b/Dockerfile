@@ -1,6 +1,6 @@
-FROM orthancteam/orthanc:24.2.3
+FROM orthancteam/orthanc:24.10.1
 
-RUN pip install pydicom
+RUN pip install  --break-system-packages pydicom==3.0.1
 
 RUN mkdir /scripts
 COPY plugin.py /scripts

@@ -301,6 +301,59 @@ class Resources:
 
 
     def modify_bulk_async(self, orthanc_ids: List[str] = [], replace_tags: Any = {}, remove_tags: List[str] = [], keep_tags: List[str] = [], delete_original: bool = True, force: bool = False, transcode: Optional[str] = None, permissive: bool = False) -> Job:
+        return self._modify_bulk_async(
+            operation="modify",
+            orthanc_ids=orthanc_ids,
+            replace_tags=replace_tags,
+            remove_tags=remove_tags,
+            keep_tags=keep_tags,
+            delete_original=delete_original,
+            force=force,
+            transcode=transcode,
+            permissive=permissive)
+
+    def _modify_bulk(self, operation: str, orthanc_ids: List[str] = [], replace_tags: Any = {}, remove_tags: List[str] = [], keep_tags: List[str] = [], delete_original: bool = True, force: bool = False, transcode: Optional[str] = None, permissive: bool = False)  -> Tuple[List[str], List[str], List[str], List[str]]:
+        """
+        returns a tuple with:
+        - the list of modified instances ids
+        - the list of modified series ids
+        - the list of modified studies ids
+        - the list of modified patients ids
+        """
+        modified_instances_ids = []
+        modified_series_ids = []
+        modified_studies_ids = []
+        modified_patients_ids = []
+
+        job = self._modify_bulk_async(
+            operation=operation,
+            orthanc_ids=orthanc_ids,
+            replace_tags=replace_tags,
+            remove_tags=remove_tags,
+            keep_tags=keep_tags,
+            delete_original=delete_original,
+            force=force,
+            transcode=transcode
+        )
+
+        job.wait_completed()
+
+        if job.info.status == JobStatus.SUCCESS and "Resources" in job.content:
+            # extract the list of modified instances ids from the job content
+            for r in job.content.get("Resources"):
+                if r.get("Type") == "Instance":
+                    modified_instances_ids.append(r.get("ID"))
+                elif r.get("Type") == "Series":
+                    modified_series_ids.append(r.get("ID"))
+                elif r.get("Type") == "Study":
+                    modified_studies_ids.append(r.get("ID"))
+                elif r.get("Type") == "Patient":
+                    modified_patients_ids.append(r.get("ID"))
+            return modified_instances_ids, modified_series_ids, modified_studies_ids, modified_patients_ids
+        else:
+            raise api_exceptions.OrthancApiException(msg=f"Error while {'modifying' if operation == 'modify' else 'anonymizing'} bulk {self._get_level()}, job failed {json.dumps(job.info.content)}")
+
+    def _modify_bulk_async(self, operation: str, orthanc_ids: List[str] = [], replace_tags: Any = {}, remove_tags: List[str] = [], keep_tags: List[str] = [], delete_original: bool = True, force: bool = False, transcode: Optional[str] = None, permissive: bool = False) -> Job:
         query = {
             "Force": force,
             "Level": self._get_level(),
@@ -321,14 +374,45 @@ class Resources:
             query['KeepSource'] = False
 
         r = self._api_client.post(
-            endpoint=f"/tools/bulk-modify",
+            endpoint=f"/tools/bulk-{operation}",
             json=query)
 
         if r.status_code == 200 and "ID" in r.json():
             return Job(api_client=self._api_client, orthanc_id=r.json()['ID'])
         else:
-            raise HttpError(http_status_code=r.status_code, msg="Error in bulk-modify", url=r.url, request_response=r)
+            raise HttpError(http_status_code=r.status_code, msg=f"Error in bulk-{operation}", url=r.url, request_response=r)
 
+
+    def anonymize_bulk(self, orthanc_ids: List[str] = [], replace_tags: Any = {}, remove_tags: List[str] = [], keep_tags: List[str] = [], delete_original: bool = False, force: bool = False, transcode: Optional[str] = None, permissive: bool = False)  -> Tuple[List[str], List[str], List[str], List[str]]:
+        """
+        returns a tuple with:
+        - the list of anonymized instances ids
+        - the list of anonymized series ids
+        - the list of anonymized studies ids
+        - the list of anonymized patients ids
+        """
+        return self._modify_bulk(
+            operation="anonymize",
+            orthanc_ids=orthanc_ids,
+            replace_tags=replace_tags,
+            remove_tags=remove_tags,
+            keep_tags=keep_tags,
+            delete_original=delete_original,
+            force=force,
+            transcode=transcode,
+            permissive=permissive)
+
+    def anonymize_bulk_async(self, orthanc_ids: List[str] = [], replace_tags: Any = {}, remove_tags: List[str] = [], keep_tags: List[str] = [], delete_original: bool = False, force: bool = False, transcode: Optional[str] = None, permissive: bool = False) -> Job:
+        return self._modify_bulk_async(
+            operation="anonymize",
+            orthanc_ids=orthanc_ids,
+            replace_tags=replace_tags,
+            remove_tags=remove_tags,
+            keep_tags=keep_tags,
+            delete_original=delete_original,
+            force=force,
+            transcode=transcode,
+            permissive=permissive)
 
     def print_daily_stats(self, from_date: datetime.date = None, to_date: datetime.date = None):
         if self._url_segment == "patients":

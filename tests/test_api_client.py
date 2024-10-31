@@ -3,6 +3,8 @@ import unittest
 import subprocess
 import logging
 import datetime
+import uuid
+
 from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType, Study, Job, JobStatus, JobType, InstancesSet, LabelsConstraint, LogLevel, RemoteJob
 from orthanc_api_client.helpers import *
 import orthanc_api_client.exceptions as api_exceptions
@@ -937,6 +939,59 @@ class TestApiClient(unittest.TestCase):
         self.assertNotIn(instances_ids[0], modified_instances_ids)  # make sure the new ids are different from the original ones
 
 
+    def test_anonymize_bulk_series(self):
+        self.oa.delete_all_content()
+
+        self.oa.upload_folder(here / "stimuli/MR/Brain")
+        series_ids = self.oa.series.get_all_ids()
+
+        self.assertEqual(1, len(self.oa.studies.get_all_ids()))
+
+        _, modified_series_ids, __, ___ = self.oa.series.anonymize_bulk(
+            orthanc_ids=series_ids,
+            delete_original=False,
+            keep_tags=["SeriesDescription", "StudyDescription"]
+        )
+
+        self.assertEqual(2, len(modified_series_ids))
+        tags1 = self.oa.series.get_tags(modified_series_ids[0])
+        tags2 = self.oa.series.get_tags(modified_series_ids[1])
+        self.assertEqual(tags1.get("PatientName"), tags2.get("PatientName"))
+        self.assertEqual(tags1.get("StudyDescription"), tags2.get("StudyDescription"))
+        self.assertEqual(tags1.get("StudyInstanceUID"), tags2.get("StudyInstanceUID"))
+        self.assertIn(tags1.get("SeriesDescription"), ["sT2W/FLAIR", "T1/3D/FFE/C"])
+        # make sure both series are in the same anonymized study (the original study is still in Orthanc)
+        self.assertEqual(2, len(self.oa.studies.get_all_ids()))
+
+
+    def test_anonymize_bulk_study(self):
+        self.oa.delete_all_content()
+
+        self.oa.upload_folder(here / "stimuli/MR/Brain")
+        self.oa.upload_file(here / "stimuli/CT_small.dcm")
+
+        self.assertEqual(2, len(self.oa.studies.get_all_ids()))
+
+        _, __, modified_studies_ids, ___ = self.oa.series.anonymize_bulk(
+            orthanc_ids=self.oa.studies.get_all_ids(),
+            delete_original=False,
+            keep_tags=["SeriesDescription", "StudyDescription"],
+            replace_tags={
+                "PatientID": str(uuid.uuid4()),                    # orthanc does not put all studies in the same patient -> you must do it manually
+                "PatientName": f"Anonymized " + str(uuid.uuid4())
+            },
+            force=True
+        )
+
+        self.assertEqual(2, len(modified_studies_ids))
+        tags1 = self.oa.studies.get_tags(modified_studies_ids[0])
+        tags2 = self.oa.studies.get_tags(modified_studies_ids[1])
+        self.assertEqual(tags1.get("PatientName"), tags2.get("PatientName"))
+        self.assertNotEqual(tags1.get("StudyDescription"), tags2.get("StudyDescription"))
+        self.assertNotEqual(tags1.get("StudyInstanceUID"), tags2.get("StudyInstanceUID"))
+        # make sure both studies are in the same anonymized patient (the original patients are still in Orthanc)
+        self.assertEqual(3, len(self.oa.patients.get_all_ids()))
+
     def test_asyncio(self):
         self.oa.delete_all_content()
 
@@ -1490,6 +1545,7 @@ class TestApiClient(unittest.TestCase):
         self.assertFalse(is_version_at_least("1.1", 1, 2, 3))
 
         self.assertTrue(is_version_at_least("mainline", 1, 2, 3))  # mainline is always bigger than any version number !!!
+        self.assertTrue(is_version_at_least("mainline-548748", 1, 2, 3))  # mainline is always bigger than any version number !!!
 
         self.assertTrue(self.oa.is_orthanc_version_at_least(1, 9, 0))
         self.assertTrue(self.oa.is_plugin_version_at_least("dicom-web", 1, 5))
