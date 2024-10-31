@@ -235,7 +235,7 @@ class OrthancApiClient(HttpClient):
                             dicom_ids_set.add(self.instances.get_tags(id)["StudyInstanceUID"])
                             orthanc_ids_set.add(self.instances.get_parent_study_id(id))
                     except Exception as e:
-                        rejected_files_list.append([str(full_path), e.args[0]])
+                        rejected_files_list.append([str(full_path), str(e)])
             elif os.path.isdir(full_path):
                 sub_dicom_ids_set, sub_orthanc_ids_set, sub_rejected_files_list = self.upload_folder_return_details(full_path)
                 dicom_ids_set.update(sub_dicom_ids_set)
