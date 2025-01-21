@@ -1578,8 +1578,8 @@ class TestApiClient(unittest.TestCase):
     def test_capabilities(self):
         self.assertTrue(self.oa.capabilities.has_label_support)         # since we are using SQLite
         self.assertTrue(self.oa.capabilities.has_revision_support)      # since we are using SQLite
-        self.assertFalse(self.oa.capabilities.has_extended_changes)     # TODO: update once we switch to newer version
-        self.assertFalse(self.oa.capabilities.has_extended_find)        # TODO: update once we switch to newer version
+        self.assertTrue(self.oa.capabilities.has_extended_changes)      # since we are using SQLite
+        self.assertTrue(self.oa.capabilities.has_extended_find)         # since we are using SQLite
 
     def test_path(self):
         # test issue #4
