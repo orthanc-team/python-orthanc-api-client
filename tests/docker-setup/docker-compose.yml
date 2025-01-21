@@ -1,7 +1,7 @@
 version: "3"
 services:
   orthanc-a:
-    image: orthancteam/orthanc:24.10.1
+    image: orthancteam/orthanc-pre-release:2025.01.20
     ports: ["10042:8042"]
     environment:
       VERBOSE_STARTUP: "true"

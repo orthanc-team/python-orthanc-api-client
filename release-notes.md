@@ -1,3 +1,8 @@
+v 0.18.0
+========
+
+- Added `OrthancApiClient.modalities.get_study`, `get_series`, `get_instance` to retrieve resources with C-GET.
+
 v 0.17.0
 ========
 

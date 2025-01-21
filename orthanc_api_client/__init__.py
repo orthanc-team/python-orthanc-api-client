@@ -12,8 +12,5 @@ from .http_client import HttpClient
 from .downloaded_instance import DownloadedInstance
 from .labels_constraint import LabelsConstraint
 from .logging import LogLevel
+from .retrieve_method import RetrieveMethod
 from .transfers import RemoteJob
-
-# __all__ = [
-#     'OrthancApiClient'
-# ]

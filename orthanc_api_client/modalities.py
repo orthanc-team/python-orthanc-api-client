@@ -4,6 +4,7 @@ from .tags import SimplifiedTags
 from .study import Study
 from .job import Job
 from .exceptions import ResourceNotFound
+from .retrieve_method import RetrieveMethod
 
 from .exceptions import *
 
@@ -126,7 +127,7 @@ class DicomModalities:
             endpoint=f"{self._url_segment}/{target_modality}/store",
             json=payload)
 
-    def retrieve_study(self, from_modality: str, dicom_id: str) -> str:
+    def retrieve_study(self, from_modality: str, dicom_id: str, retrieve_method: RetrieveMethod = RetrieveMethod.MOVE) -> str:
         """
         retrieves a study from a remote modality (C-Move)
 
@@ -134,18 +135,83 @@ class DicomModalities:
 
         :param from_modality: the modality alias configured in orthanc
         :param dicom_id: the StudyInstanceUid of the study to retrieve
+        :param retrieve_method: whether we should use C-MOVE, C-GET or the System default configuration
 
         Returns: the study orthanc_id of the study once it has been retrieved in orthanc
         """
 
-        # move the study from the remote modality to this orthanc
-        self.move_study(
-            from_modality=from_modality,
-            dicom_id=dicom_id
-        )
+        if retrieve_method == RetrieveMethod.MOVE:
+            # move the study from the remote modality to this orthanc
+            self.move_study(
+                from_modality=from_modality,
+                dicom_id=dicom_id
+            )
+        else:
+            # retrieve the study from the remote modality to this orthanc
+            self.get_study(
+                from_modality=from_modality,
+                dicom_id=dicom_id
+            )
 
         # this request has no real response '{}' if it succeeds
         return self._api_client.studies.lookup(dicom_id)
+
+    def get_study(self, from_modality: str, dicom_id: str):
+        """
+        retrieves a study from a remote modality (C-Get)
+
+        this call is synchronous.  It completes once the C-Get is complete.
+
+        :param from_modality: the modality alias configured in orthanc
+        :param dicom_id: the StudyInstanceUid of the study to move
+        """
+        self._get(
+            level="Study",
+            resource={
+                "StudyInstanceUID": dicom_id
+            },
+            from_modality=from_modality
+        )
+
+    def get_series(self, from_modality: str, dicom_id: str, study_dicom_id: str):
+        """
+        retrieves a series from a remote modality (C-Get)
+
+        this call is synchronous.  It completes once the C-Get is complete.
+
+        :param from_modality: the modality alias configured in orthanc
+        :param dicom_id: the SeriesInstanceUID of the series to move
+        :param study_dicom_id: the StudyInstanceUID of the parent study
+        """
+        self._get(
+            level="Series",
+            resource={
+                "SeriesInstanceUID": dicom_id,
+                "StudyInstanceUID": study_dicom_id
+            },
+            from_modality=from_modality
+        )
+
+    def get_instance(self, from_modality: str, dicom_id: str, series_dicom_id: str, study_dicom_id: str):
+        """
+        retrieves an instance from a remote modality (C-Get) to a target modality (AET)
+
+        this call is synchronous.  It completes once the C-Get is complete.
+
+        :param from_modality: the modality alias configured in orthanc
+        :param dicom_id: the SOPInstanceUid of the instance to move
+        :param series_dicom_id: the SeriesInstanceUID of the parent series
+        :param study_dicom_id: the StudyInstanceUID of the parent study
+        """
+        self._get(
+            level="Instance",
+            resource={
+                "SOPInstanceUID": dicom_id,
+                "SeriesInstanceUID": series_dicom_id,
+                "StudyInstanceUID": study_dicom_id
+            },
+            from_modality=from_modality
+        )
 
     def move_study(self, from_modality: str, dicom_id: str, to_modality_aet: str = None):
         """
@@ -230,6 +296,25 @@ class DicomModalities:
 
         self._api_client.post(
             endpoint=f"{self._url_segment}/{from_modality}/move",
+            json=payload)
+
+
+    def _get(self, level: str, resource: object, from_modality: str):
+        """
+        retrieves a study from a remote modality (C-Get)
+
+        this call is synchronous.  It completes once the C-Get is complete.
+
+        :param from_modality: the modality alias configured in orthanc
+        """
+
+        payload = {
+            'Level': level,
+            'Resources': [resource]
+        }
+
+        self._api_client.post(
+            endpoint=f"{self._url_segment}/{from_modality}/get",
             json=payload)
 
 

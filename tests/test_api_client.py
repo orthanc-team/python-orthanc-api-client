@@ -5,7 +5,7 @@ import logging
 import datetime
 import uuid
 
-from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType, Study, Job, JobStatus, JobType, InstancesSet, LabelsConstraint, LogLevel, RemoteJob
+from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType, Study, Job, JobStatus, JobType, InstancesSet, LabelsConstraint, LogLevel, RemoteJob, RetrieveMethod
 from orthanc_api_client.helpers import *
 import orthanc_api_client.exceptions as api_exceptions
 import pathlib
@@ -440,6 +440,25 @@ class TestApiClient(unittest.TestCase):
         self.oa.modalities.move_instance(from_modality='orthanc-b', dicom_id='7.8.9', series_dicom_id='4.5.6', study_dicom_id='1.2.3')
         self.assertIsNotNone(self.oa.instances.lookup('7.8.9'))
         self.oa.delete_all_content()
+
+        #request A to get it from B
+        self.oa.modalities.get_study(from_modality='orthanc-b', dicom_id='1.2.3')
+        self.assertIsNotNone(1, self.oa.studies.lookup('1.2.3'))
+        self.oa.delete_all_content()
+
+        self.oa.modalities.get_series(from_modality='orthanc-b', dicom_id='4.5.6', study_dicom_id='1.2.3')
+        self.assertIsNotNone(self.oa.series.lookup('4.5.6'))
+        self.oa.delete_all_content()
+
+        self.oa.modalities.get_instance(from_modality='orthanc-b', dicom_id='7.8.9', series_dicom_id='4.5.6', study_dicom_id='1.2.3')
+        self.assertIsNotNone(self.oa.instances.lookup('7.8.9'))
+        self.oa.delete_all_content()
+
+        #request A to get it from B
+        self.oa.modalities.retrieve_study(from_modality='orthanc-b', dicom_id='1.2.3', retrieve_method=RetrieveMethod.GET)
+        self.assertIsNotNone(1, self.oa.studies.lookup('1.2.3'))
+        self.oa.delete_all_content()
+
 
     def test_peers_send(self):
         self.oa.delete_all_content()
