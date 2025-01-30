@@ -37,7 +37,7 @@ class SeriesList(Resources):
 
     def get_preview_url(self, orthanc_id: str) -> str:
         middle_instance_id = self.get_middle_instance_id(orthanc_id=orthanc_id)
-        return f"{self._url_segment}/{middle_instance_id}/preview"
+        return f"instances/{middle_instance_id}/preview"
 
     def anonymize(self, orthanc_id: str, replace_tags={}, keep_tags=[], delete_original=True, force=False) -> str:
         return self._anonymize(
