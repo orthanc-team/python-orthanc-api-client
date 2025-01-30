@@ -1,3 +1,8 @@
+v 0.18.1
+========
+
+- Fixed a bug in `get_preview_url` method.
+
 v 0.18.0
 ========
 
