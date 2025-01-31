@@ -1,3 +1,9 @@
+v 0.18.2
+========
+
+- Added the `get_preview_file` method.
+
+
 v 0.18.1
 ========
 

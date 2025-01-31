@@ -229,7 +229,7 @@ class TestApiClient(unittest.TestCase):
         self.assertLessEqual(4, len(dicom_ids_set))
         self.oa.studies.delete(orthanc_ids=orthanc_ids_set)
         self.assertEqual(0, len(self.oa.studies.get_all_ids()))
-        self.assertEqual(2, len(rejected_files_list))
+        self.assertEqual(3, len(rejected_files_list))
 
     def test_upload_folder_return_details_unzip_before_upload(self):
         self.oa.delete_all_content()
@@ -238,7 +238,7 @@ class TestApiClient(unittest.TestCase):
         self.assertLessEqual(4, len(dicom_ids_set))
         self.oa.studies.delete(orthanc_ids=orthanc_ids_set)
         self.assertEqual(0, len(self.oa.studies.get_all_ids()))
-        self.assertEqual(2, len(rejected_files_list))
+        self.assertEqual(3, len(rejected_files_list))
 
     def test_upload_folder_return_details_error_case(self):
         # Let's make orthanc unresponsive
@@ -250,7 +250,7 @@ class TestApiClient(unittest.TestCase):
 
         self.assertEqual(0, len(dicom_ids_set))
         self.assertEqual(0, len(orthanc_ids_set))
-        self.assertEqual(9, len(rejected_files_list))
+        self.assertEqual(10, len(rejected_files_list))
 
         # let's uninhibit the destination
         with open(here / "docker-setup/uninhibit.lua", 'rb') as f:
@@ -1315,6 +1315,24 @@ class TestApiClient(unittest.TestCase):
             downloaded_instances = self.oa.studies.download_instances(study_id, tempDir)
         self.assertEqual(len(instances_id), len(downloaded_instances))
 
+    def test_get_preview_file(self):
+        self.oa.delete_all_content()
+
+        # upload an instance
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+
+        # get series id
+        series_id = self.oa.series.get_all_ids()[0]
+
+        # fetch the preview
+        preview_file = self.oa.series.get_preview_file(orthanc_id=series_id)
+
+        # read the preview reference
+        with open(here / 'stimuli/preview.png', 'rb') as f:
+            reference =f.read()
+
+        # should be the exact same ones
+        self.assertEqual(reference, preview_file)
 
     def test_instances_set(self):
         self.oa.delete_all_content()
