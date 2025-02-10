@@ -1,3 +1,8 @@
+v 0.18.3
+========
+
+- Fixed the `get_preview_file` method in case of unsupported image.
+
 v 0.18.2
 ========
 

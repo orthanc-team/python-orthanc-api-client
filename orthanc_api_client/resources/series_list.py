@@ -39,12 +39,13 @@ class SeriesList(Resources):
         middle_instance_id = self.get_middle_instance_id(orthanc_id=orthanc_id)
         return f"instances/{middle_instance_id}/preview"
 
-    def get_preview_file(self, orthanc_id: str, jpeg_format: bool = False) -> bytes:
+    def get_preview_file(self, orthanc_id: str, jpeg_format: bool = False, return_unsupported_image: bool = True) -> bytes:
         """
         downloads the preview file (middle instance of the series) in png format (or jpeg)
         Args:
             orthanc_id: the series id to download the preview file from
             jpeg_format: replace default png format by jpeg format
+            return_unsupported_image: if True, an unavailable preview will return an 'unsupported image', if False, a 415 error
 
         Returns:
             
@@ -55,8 +56,11 @@ class SeriesList(Resources):
         else:
             headers = { "Accept": "image/png"}
 
-        parameters = {"returnUnsupportedImage": True}
-        return self._api_client.get_binary(endpoint=url, headers=headers, params=parameters)
+        if return_unsupported_image:
+            parameters = {"returnUnsupportedImage": True}
+        else:
+            parameters = {}
+        return self._api_client.get_binary(endpoint=url, headers=headers, params=parameters, allow_redirects=True)
 
     def anonymize(self, orthanc_id: str, replace_tags={}, keep_tags=[], delete_original=True, force=False) -> str:
         return self._anonymize(
