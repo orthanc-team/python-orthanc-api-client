@@ -13,6 +13,7 @@ class StudyInfo:
         self.series_ids = json_study.get('Series')
         self.patient_orthanc_id = json_study.get('ParentPatient')
         self.last_update = json_study.get('LastUpdate')
+        self.labels = json_study.get('Labels') or []
 
 
 class StudyStatistics:
@@ -78,3 +79,7 @@ class Study:
     @property
     def last_update(self):
         return from_orthanc_datetime(self.info.last_update)
+
+    @property
+    def labels(self):
+        return self.info.labels

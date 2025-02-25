@@ -10,6 +10,7 @@ class SeriesInfo:
         self.dicom_id = self.main_dicom_tags.get('SeriesInstanceUID')
         self.instances_orthanc_ids = json_series.get('Instances')
         self.study_orthanc_id = json_series.get('ParentStudy')
+        self.labels = json_series.get('Labels') or []
 
 
 class SeriesStatistics:
@@ -74,3 +75,7 @@ class Series:
                 self._instances.append(instance)
 
         return self._instances
+
+    @property
+    def labels(self):
+        return self.info.labels

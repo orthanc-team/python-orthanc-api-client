@@ -11,6 +11,8 @@ class PatientInfo:
         self.dicom_id = self.main_dicom_tags.get('PatientID')
         self.studies_ids = json_patient.get('Studies')
         self.last_update = json_patient.get('LastUpdate')
+        self.labels = json_patient.get('Labels') or []
+
 
 class PatientStatistics:
 
@@ -72,3 +74,7 @@ class Patient:
     @property
     def last_update(self):
         return from_orthanc_datetime(self.info.last_update)
+
+    @property
+    def labels(self):
+        return self.info.labels

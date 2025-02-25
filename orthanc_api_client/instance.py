@@ -9,6 +9,7 @@ class InstanceInfo:
         self.orthanc_id = json_instance.get('ID')
         self.dicom_id = self.main_dicom_tags.get('SOPInstanceUID')
         self.series_orthanc_id = json_instance.get('ParentSeries')
+        self.labels = json_instance.get('Labels') or []
 
 
 class Instance:
@@ -52,3 +53,7 @@ class Instance:
         if self._tags is None:
             self._tags = self._api_client.instances.get_tags(orthanc_id=self.orthanc_id)
         return self._tags
+
+    @property
+    def labels(self):
+        return self.info.labels

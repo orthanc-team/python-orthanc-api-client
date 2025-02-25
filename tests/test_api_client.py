@@ -962,6 +962,31 @@ class TestApiClient(unittest.TestCase):
         self.assertNotIn(instances_ids[0], modified_instances_ids)  # make sure the new ids are different from the original ones
 
 
+    def test_modify_bulk_instances_modify_patient_data(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_folder(here / "stimuli/MR/Brain")
+
+        modified_instances_ids, modified_series_ids, modified_studies_ids, modified_patients_ids = self.oa.instances.modify_bulk(
+            orthanc_ids=instances_ids,
+            remove_tags=['InstitutionName'],
+            keep_tags=['SeriesInstanceUID', 'SOPInstanceUID', 'StudyInstanceUID', 'PatientID'],
+            replace_tags={
+                'PatientName': "test"
+            },
+            delete_original=False,
+            force=True
+        )
+        self.assertEqual(3, len(modified_instances_ids))
+        self.assertEqual(2, len(modified_series_ids))
+        self.assertEqual(1, len(modified_studies_ids))
+        self.assertEqual(1, len(modified_patients_ids))
+        self.assertIn(instances_ids[0], modified_instances_ids)  # make sure the new ids are identical since we kept all DICOM ids equal
+        self.assertIn(instances_ids[1], modified_instances_ids)
+        self.assertIn(instances_ids[2], modified_instances_ids)
+        self.assertEqual("test", self.oa.studies.get(modified_studies_ids[0]).patient_main_dicom_tags.get("PatientName"))
+
+
     def test_anonymize_bulk_series(self):
         self.oa.delete_all_content()
 
@@ -1505,6 +1530,8 @@ class TestApiClient(unittest.TestCase):
             labels_constraint=LabelsConstraint.ALL
         )
         self.assertEqual(1, len(studies))
+        self.assertIn(my_label, studies[0].labels)
+        self.assertIn(my_label2, studies[0].labels)
 
         # study with 1 label is found (constraint = 'Any')
         self.oa.studies.delete_label(study_id, my_label2)

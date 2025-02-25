@@ -1,3 +1,8 @@
+v 0.18.4
+========
+
+- Added `labels` property in `Patient`, `Study`, `Series` and `Instance`.
+
 v 0.18.3
 ========
 
