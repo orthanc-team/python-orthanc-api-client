@@ -9,7 +9,7 @@ Functionalities are very limited now !  Backward compat will break a lot in the 
 Another project [`pyorthanc`](https://github.com/gacou54/pyorthanc) is quite similar to `python-orthanc-api-client`. 
 
 If you are wondering which one to use, please refer to this [discussion](https://github.com/gacou54/pyorthanc/issues/80).
-
+**tl;dr**: this project is mainly an internal tool made public.  `pyorthanc` is more feature complete and its documentation is much better.
 
 Installation:
 
