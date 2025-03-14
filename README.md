@@ -4,6 +4,13 @@ A python client to ease using the Orthanc Rest API.
 
 Functionalities are very limited now !  Backward compat will break a lot in the near future !
 
+## PyOrthanc or python-orthanc-api-client? 
+
+Another project [`pyorthanc`](https://github.com/gacou54/pyorthanc) is quite similar to `python-orthanc-api-client`. 
+
+If you are wondering which one to use, please refer to this [discussion](https://github.com/gacou54/pyorthanc/issues/80).
+
+
 Installation:
 
 ```shell
