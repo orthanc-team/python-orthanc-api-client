@@ -1,3 +1,6 @@
+ 
+- #7: fix wrong exception handling 
+
 v 0.18.4
 ========
 

@@ -45,11 +45,11 @@ class HttpClient:
         try:
             url = self.get_abs_url(endpoint)
             response = self._http_session.get(url, **kwargs)
+
+            self._raise_on_errors(response, url=url)
+            return response
         except requests.RequestException as request_exception:
             self._translate_exception(request_exception, url=url)
-
-        self._raise_on_errors(response, url=url)
-        return response
 
     def get_json(self, endpoint: str, **kwargs) -> Any:
         return self.get(endpoint, **kwargs).json()
@@ -61,31 +61,31 @@ class HttpClient:
         try:
             url = self.get_abs_url(endpoint)
             response = self._http_session.post(url, **kwargs)
+
+            self._raise_on_errors(response, url=url)
+            return response
         except requests.RequestException as request_exception:
             self._translate_exception(request_exception, url=url)
-
-        self._raise_on_errors(response, url=url)
-        return response
 
     def put(self, endpoint: str, **kwargs) -> requests.Response:
         try:
             url = self.get_abs_url(endpoint)
             response = self._http_session.put(url, **kwargs)
+
+            self._raise_on_errors(response, url=url)
+            return response
         except requests.RequestException as request_exception:
             self._translate_exception(request_exception, url=url)
-
-        self._raise_on_errors(response, url=url)
-        return response
 
     def delete(self, endpoint: str, **kwargs) -> requests.Response:
         try:
             url = self.get_abs_url(endpoint)
             response = self._http_session.delete(url, **kwargs)
+
+            self._raise_on_errors(response, url=url)
+            return response
         except requests.RequestException as request_exception:
             self._translate_exception(request_exception, url=url)
-
-        self._raise_on_errors(response, url=url)
-        return response
 
     def close(self):
         self._http_session.close()
