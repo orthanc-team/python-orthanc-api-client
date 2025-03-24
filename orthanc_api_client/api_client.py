@@ -244,8 +244,8 @@ class OrthancApiClient(HttpClient):
 
         return dicom_ids_set, orthanc_ids_set, rejected_files_list
     
-    def upload_files_dicom_web(self, paths: List[str], ignore_errors: bool = False) -> any:
-        """Uploads a file to Orthanc through its DicomWeb API (only DICOM files, no zip files)
+    def upload_files_dicom_web(self, paths: List[str], ignore_errors: bool = False, endpoint: str = "dicom-web/studies") -> any:
+        """Uploads files to Orthanc through its DicomWeb API (only DICOM files, no zip files)
 
         Parameters
         ----------
@@ -262,7 +262,7 @@ class OrthancApiClient(HttpClient):
                 counter += 1
 
         body, content_type = encode_multipart_related(fields=files)
-        r = self.post(endpoint="dicom-web/studies",
+        r = self.post(endpoint=endpoint,
                       data=body,
                       headers = {
                           'Accept':'application/json',

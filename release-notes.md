@@ -1,4 +1,7 @@
- 
+v 0.18.5
+========
+
+- New `endpoint` argument to `upload_files_dicom_web` method.
 - #7: fix wrong exception handling 
 
 v 0.18.4

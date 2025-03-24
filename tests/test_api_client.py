@@ -259,10 +259,18 @@ class TestApiClient(unittest.TestCase):
 
     def test_upload_file_dicom_web(self):
         self.oa.delete_all_content()
-
         self.oa.upload_files_dicom_web([here / "stimuli/CT_small.dcm"])
+        self.assertEqual(1, len(self.oa.studies.get_all_ids()))
+
+
+    def test_upload_file_dicom_web_study_level(self):
+        self.oa.delete_all_content()
+
+        self.oa.upload_files_dicom_web([here / "stimuli/MR/Brain/1/IM0"])
+        self.oa.upload_files_dicom_web([here / "stimuli/MR/Brain/1/IM1"], endpoint="dicom-web/studies/2.16.840.1.113669.632.20.1211.10000357775")
 
         self.assertEqual(1, len(self.oa.studies.get_all_ids()))
+        self.assertEqual(2, len(self.oa.instances.get_all_ids()))
 
 
     def test_generate_and_upload_test_file_find_study(self):
