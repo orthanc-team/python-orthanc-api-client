@@ -1,3 +1,8 @@
+v 0.18.6
+========
+
+- enhanced `Studies.find` to allow sorting and pagination.
+
 v 0.18.5
 ========
 

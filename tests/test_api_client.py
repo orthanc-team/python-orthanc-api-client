@@ -1550,6 +1550,37 @@ class TestApiClient(unittest.TestCase):
         )
         self.assertEqual(1, len(studies))
 
+    def test_find_study_with_order_by(self):
+        self.oa.delete_all_content()
+
+        # let's upload 3 different studies with an interval of 1s
+        instances_ids = []
+        instances_ids.append(self.oa.upload(generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '1.2.3', 'SeriesInstanceUID': '4.5.6', 'StudyDate': '20220205'}))[0])
+        time.sleep(1) # to be sure that the LastUpdate is different
+        instances_ids.append(self.oa.upload(generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '4.5.6', 'SeriesInstanceUID': '4.5.7', 'StudyDate': '20220204'}))[0])
+        time.sleep(1) # to be sure that the LastUpdate is different
+        instances_ids.append(self.oa.upload(generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '7.8.9', 'SeriesInstanceUID': '4.5.8', 'StudyDate': '20220206'}))[0])
+
+        study_1 = self.oa.studies.get(self.oa.instances.get_parent_study_id(instances_ids[0]))
+        study_2 = self.oa.studies.get(self.oa.instances.get_parent_study_id(instances_ids[1]))
+        study_3 = self.oa.studies.get(self.oa.instances.get_parent_study_id(instances_ids[2]))
+
+        # let's get all the studies from Orthanc, sorting them by latest first
+        sorted_studies = self.oa.studies.find(
+            query={},
+            order_by=[{
+                    "Type": "Metadata",
+                    "Key": "LastUpdate",
+                    "Direction": "DESC"
+                }]
+        )
+
+        # check the sorting
+        self.assertEqual(sorted_studies[0].dicom_id, study_3.dicom_id)
+        self.assertEqual(sorted_studies[1].dicom_id, study_2.dicom_id)
+        self.assertEqual(sorted_studies[2].dicom_id, study_1.dicom_id)
+
+
     def test_get_labels(self):
         self.oa.delete_all_content()
 

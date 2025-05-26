@@ -55,13 +55,30 @@ class Studies(Resources):
         """
         return self._lookup(filter='Study', dicom_id=dicom_id)
 
-    def find(self, query: object, case_sensitive: bool = True, labels: [str] = [], labels_constraint: LabelsConstraint = LabelsConstraint.ANY) -> List[Study]:
+    def find(self,
+             query: object,
+             case_sensitive: bool = True,
+             labels: [str] = [],
+             labels_constraint: LabelsConstraint = LabelsConstraint.ANY,
+             limit: int = 0,
+             since: int = 0,
+             order_by: [dict] = []
+             ) -> List[Study]:
         """
         find a study in Orthanc based on the query and the labels
 
         args:
             labels: the list of the labels to filter to
             labels_constraint: "Any" (=default value), "All", "None"
+            limit: Limit the number of reported resources
+            since: Show only the resources since the provided index (in conjunction with Limit)
+            order_by: Array of associative arrays containing the requested ordering
+                example:
+                [{
+                    "Type": "Metadata",
+                    "Key": "LastUpdate",
+                    "Direction": "DESC"
+                }]
         """
         payload = {
             "Level": "Study",
@@ -69,7 +86,10 @@ class Studies(Resources):
             "Expand": True,
             "CaseSensitive": case_sensitive,
             "Labels": labels,
-            "LabelsConstraint": labels_constraint
+            "LabelsConstraint": labels_constraint,
+            "Limit": limit,
+            "Since": since,
+            "OrderBy": order_by
         }
 
         r = self._api_client.post(
