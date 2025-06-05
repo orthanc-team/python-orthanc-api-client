@@ -57,7 +57,7 @@ class SeriesList(Resources):
             headers = { "Accept": "image/png"}
 
         if return_unsupported_image:
-            parameters = {"returnUnsupportedImage": True}
+            parameters = {"returnUnsupportedImage": "true"}
         else:
             parameters = {}
         return self._api_client.get_binary(endpoint=url, headers=headers, params=parameters, allow_redirects=True)
