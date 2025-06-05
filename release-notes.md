@@ -1,3 +1,9 @@
+v 0.18.7
+========
+
+- fix in `get_preview_file` method.
+
+
 v 0.18.6
 ========
 
