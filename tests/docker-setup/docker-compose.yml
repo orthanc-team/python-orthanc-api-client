@@ -8,6 +8,7 @@ services:
       VERBOSE_ENABLED: "true"
       ORTHANC__DICOM_AET: ORTHANCA
       ORTHANC__NAME: orthanc-a-for-python-api-client-tests
+      ORTHANC__STABLE_AGE: "2"
       ORTHANC__REGISTERED_USERS: |
         {"test": "test"}
       ORTHANC__DICOM_MODALITIES: |

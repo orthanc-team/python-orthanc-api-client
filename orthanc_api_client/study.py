@@ -78,8 +78,13 @@ class Study:
 
     @property
     def last_update(self):
-        return from_orthanc_datetime(self.info.last_update)
+        return from_orthanc_datetime(self._api_client.studies.get_json(self.orthanc_id).get('LastUpdate'))
 
     @property
     def labels(self):
         return self.info.labels
+
+    @property
+    def is_stable(self):
+        return bool(self._api_client.studies.get_json(self.orthanc_id).get('IsStable'))
+

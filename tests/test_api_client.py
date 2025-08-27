@@ -137,6 +137,15 @@ class TestApiClient(unittest.TestCase):
         study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
 
         study = self.oa.studies.get(study_id)
+        self.assertFalse(study.is_stable)
+        last_update_1 = study.last_update
+        time.sleep(4)   # wait the study to be stable
+        self.assertTrue(study.is_stable)
+
+        self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        last_update_2 = study.last_update
+        self.assertNotEqual(last_update_1, last_update_2)
+
         self.assertEqual("1CT1", study.patient_main_dicom_tags.get('PatientID'))
         self.assertEqual("e+1", study.main_dicom_tags.get('StudyDescription'))
         self.assertEqual('1.3.6.1.4.1.5962.1.2.1.20040119072730.12322', study.dicom_id)
@@ -157,6 +166,8 @@ class TestApiClient(unittest.TestCase):
             self.oa.studies.download_media(study_id, file.name)
             self.assertTrue(os.path.exists(file.name))
             self.assertTrue(os.path.getsize(file.name) > 0)
+
+
 
     def test_series(self):
         self.oa.delete_all_content()
