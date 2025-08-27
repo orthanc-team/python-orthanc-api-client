@@ -1,3 +1,10 @@
+v 0.18.8
+========
+
+- Added `is_stable` property for `study`.
+- Still in `study`, modified `last_update` property to reflect current value.
+
+
 v 0.18.7
 ========
 
