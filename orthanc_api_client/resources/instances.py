@@ -31,6 +31,8 @@ class Instances(Resources):
         json_tags = self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/tags")
         return Tags(json_tags)
 
+    def get_metadata(self, orthanc_id: str) -> dict:
+        return self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/metadata?expand")
 
     def modify(self, orthanc_id: str, replace_tags: Any = {}, remove_tags: List[str] = [], keep_tags: List[str] = [], force: bool = False) -> bytes:
 

@@ -4,7 +4,8 @@ from typing import List, Any, Union, Set
 from .resources import Resources
 from ..tags import Tags
 from ..exceptions import *
-from ..study import StudyInfo, Study
+from ..study import Study
+from ..instance import Instance
 from ..helpers import to_dicom_date, to_dicom_time
 from ..downloaded_instance import DownloadedInstance
 from ..labels_constraint import LabelsConstraint
@@ -24,6 +25,23 @@ class Studies(Resources):
             instances_ids.extend(self._api_client.series.get_instances_ids(series_id))
 
         return instances_ids
+
+    def get_instances(self, orthanc_id: str) -> List[Instance]:
+        instances = []
+
+        instances_info = self._api_client.post(
+            f"tools/find",
+            json={
+                "Level": "Instance",
+                "Query": {},
+                "ResponseContent": ["MainDicomTags", "Metadata", "Parent", "Labels"],
+                "ParentStudy": orthanc_id
+            }).json()
+        
+        for instance_info in instances_info:
+            instances.append(Instance.from_json(self._api_client, instance_info))
+
+        return instances
 
     def get_series_ids(self, orthanc_id: str) -> List[str]:
         study_info = self._api_client.get_json(f"{self._url_segment}/{orthanc_id}")
@@ -58,11 +76,11 @@ class Studies(Resources):
     def find(self,
              query: object,
              case_sensitive: bool = True,
-             labels: [str] = [],
+             labels: List[str] = [],
              labels_constraint: LabelsConstraint = LabelsConstraint.ANY,
              limit: int = 0,
              since: int = 0,
-             order_by: [dict] = []
+             order_by: List[dict] = []
              ) -> List[Study]:
         """
         find a study in Orthanc based on the query and the labels

@@ -1,3 +1,11 @@
+v 0.19.0
+========
+
+- Added `Instance.get_metadata()`
+- Added `Study.get_instances()` that also retrieves the metadata in a single API call
+- fix `Instances.has_metadata`
+
+
 v 0.18.8
 ========
 

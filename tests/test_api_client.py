@@ -167,6 +167,16 @@ class TestApiClient(unittest.TestCase):
             self.assertTrue(os.path.exists(file.name))
             self.assertTrue(os.path.getsize(file.name) > 0)
 
+    def test_study_instances(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_folder(here / "stimuli/MR/Brain")
+        study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
+
+        instances = self.oa.studies.get_instances(study_id)
+        self.assertEqual(3, len(instances))
+        self.assertEqual('1.2.840.10008.5.1.4.1.1.4', instances[0].get_metadata('SopClassUid'))
+
 
 
     def test_series(self):
@@ -642,6 +652,9 @@ class TestApiClient(unittest.TestCase):
             default_value=None
         )
         self.assertEqual(None, value)
+        self.assertFalse(self.oa.instances.has_metadata(instances_ids[0], '1024'))
+        instance = self.oa.instances.get(instances_ids[0])
+        self.assertIsNone(instance.get_metadata('1024'))
 
         content = b'123456789'
         revision = self.oa.instances.set_binary_metadata(
@@ -657,6 +670,9 @@ class TestApiClient(unittest.TestCase):
         )
 
         self.assertEqual(content, content_readback.encode('utf-8'))
+        self.assertTrue(self.oa.instances.has_metadata(instances_ids[0], '1025'))
+        instance = self.oa.instances.get(instances_ids[0])
+        self.assertIsNotNone(instance.get_metadata('1025'))
 
         # update if match current revision
         self.oa.instances.set_string_metadata(

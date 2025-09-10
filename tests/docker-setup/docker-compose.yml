@@ -1,7 +1,7 @@
 version: "3"
 services:
   orthanc-a:
-    image: orthancteam/orthanc-pre-release:2025.01.20
+    image: orthancteam/orthanc:25.8.2
     ports: ["10042:8042"]
     environment:
       VERBOSE_STARTUP: "true"
@@ -58,7 +58,7 @@ services:
       ORTHANC__HTTP_THREADS_COUNT: "10"
 
   orthanc-c:
-    image: orthancteam/orthanc:24.2.3
+    image: orthancteam/orthanc:25.8.2
     ports: ["10044:8042"]
     environment:
       VERBOSE_STARTUP: "true"
