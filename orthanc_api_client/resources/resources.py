@@ -450,7 +450,7 @@ class Resources:
             print(f"{current_date} - " + str(len(r.json())))
             current_date += datetime.timedelta(days=1)
 
-    def _lookup(self, filter: str, dicom_id: str) -> str:
+    def _lookup(self, filter: str, dicom_id: str) -> Optional[str]:
         """
         finds a resource in Orthanc based on its dicom id
 

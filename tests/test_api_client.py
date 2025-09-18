@@ -443,9 +443,8 @@ class TestApiClient(unittest.TestCase):
         self.assertIsNotNone(self.ob.instances.lookup('7.8.9'))
 
         #request C to move it from B to A
-
         self.oc.modalities.move_study(from_modality='orthanc-b', dicom_id='1.2.3', to_modality_aet='ORTHANCA')
-        self.assertIsNotNone(1, self.oa.studies.lookup('1.2.3'))
+        self.assertIsNotNone(self.oa.studies.lookup('1.2.3'))
         self.oa.delete_all_content()
 
         self.oc.modalities.move_series(from_modality='orthanc-b', dicom_id='4.5.6', study_dicom_id='1.2.3', to_modality_aet='ORTHANCA')
@@ -459,7 +458,7 @@ class TestApiClient(unittest.TestCase):
 
         #request A to move it from B to A (retrieve)
         self.oa.modalities.move_study(from_modality='orthanc-b', dicom_id='1.2.3')
-        self.assertIsNotNone(1, self.oa.studies.lookup('1.2.3'))
+        self.assertIsNotNone(self.oa.studies.lookup('1.2.3'))
         self.oa.delete_all_content()
 
         self.oa.modalities.move_series(from_modality='orthanc-b', dicom_id='4.5.6', study_dicom_id='1.2.3')
@@ -470,9 +469,28 @@ class TestApiClient(unittest.TestCase):
         self.assertIsNotNone(self.oa.instances.lookup('7.8.9'))
         self.oa.delete_all_content()
 
+        # move async
+        job = self.oa.modalities.move_study_async(from_modality='orthanc-b', dicom_id='1.2.3')
+        job.wait_completed()
+        self.assertEqual(JobStatus.SUCCESS, job.info.status)
+        self.assertIsNotNone(self.oa.studies.lookup('1.2.3'))
+        self.oa.delete_all_content()
+
+        # move async (study that does not exists)
+        job = self.oa.modalities.move_study_async(from_modality='orthanc-b', dicom_id='10.20.30')
+        job.wait_completed()
+        if self.oa.is_orthanc_version_at_least(1, 12, 10):
+            self.assertEqual(JobStatus.FAILURE, job.info.status)
+            # not validated yet
+            # self.assertIsNotNone(job.info.dimseErrorStatus)
+            # self.assertEqual(0xC000, job.info.dimseErrorStatus)
+        self.assertIsNone(self.oa.studies.lookup('10.20.30'))
+        self.oa.delete_all_content()
+
+
         #request A to get it from B
         self.oa.modalities.get_study(from_modality='orthanc-b', dicom_id='1.2.3')
-        self.assertIsNotNone(1, self.oa.studies.lookup('1.2.3'))
+        self.assertIsNotNone(self.oa.studies.lookup('1.2.3'))
         self.oa.delete_all_content()
 
         self.oa.modalities.get_series(from_modality='orthanc-b', dicom_id='4.5.6', study_dicom_id='1.2.3')
@@ -483,9 +501,26 @@ class TestApiClient(unittest.TestCase):
         self.assertIsNotNone(self.oa.instances.lookup('7.8.9'))
         self.oa.delete_all_content()
 
+        # get async
+        job = self.oa.modalities.get_study_async(from_modality='orthanc-b', dicom_id='1.2.3')
+        job.wait_completed()
+        self.assertEqual(JobStatus.SUCCESS, job.info.status)
+        self.assertIsNotNone(self.oa.studies.lookup('1.2.3'))
+        self.oa.delete_all_content()
+
+        # get async (study that does not exists)
+        job = self.oa.modalities.get_study_async(from_modality='orthanc-b', dicom_id='10.20.30')
+        job.wait_completed()
+        if self.oa.is_orthanc_version_at_least(1, 12, 10):
+            self.assertEqual(JobStatus.FAILURE, job.info.status)
+            self.assertIsNotNone(job.info.dimseErrorStatus)
+            self.assertEqual(0xC000, job.info.dimseErrorStatus)
+        self.assertIsNone(self.oa.studies.lookup('10.20.30'))
+        self.oa.delete_all_content()
+
         #request A to get it from B
         self.oa.modalities.retrieve_study(from_modality='orthanc-b', dicom_id='1.2.3', retrieve_method=RetrieveMethod.GET)
-        self.assertIsNotNone(1, self.oa.studies.lookup('1.2.3'))
+        self.assertIsNotNone(self.oa.studies.lookup('1.2.3'))
         self.oa.delete_all_content()
 
 

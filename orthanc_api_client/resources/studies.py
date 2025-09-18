@@ -1,5 +1,5 @@
 import datetime
-from typing import List, Any, Union, Set
+from typing import List, Any, Union, Set, Optional
 
 from .resources import Resources
 from ..tags import Tags
@@ -63,7 +63,7 @@ class Studies(Resources):
     def get_parent_patient_id(self, orthanc_id: str) -> str:
         return self._api_client.get_json(f"{self._url_segment}/{orthanc_id}/patient")['ID']
 
-    def lookup(self, dicom_id: str) -> str:
+    def lookup(self, dicom_id: str) -> Optional[str]:
         """
         finds a study in Orthanc based on its StudyInstanceUid
 

@@ -1,4 +1,3 @@
-version: "3"
 services:
   orthanc-a:
     image: orthancteam/orthanc:25.8.2

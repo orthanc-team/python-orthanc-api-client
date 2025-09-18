@@ -1,3 +1,8 @@
+v 0.20.0
+========
+
+- Added `Modalities.get_async()` & `Modalities.move_async()`
+
 v 0.19.0
 ========
 
