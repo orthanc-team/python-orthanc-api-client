@@ -114,6 +114,7 @@ class HttpClient:
             error_messages = []
             error_message = None
             # try to get details from the payload
+            payload = {}
             if len(response.content) > 0:
                 try:
                     payload = json.loads(response.content)
@@ -130,7 +131,8 @@ class HttpClient:
                 http_status_code=response.status_code,
                 msg=error_message,
                 url=url,
-                request_response=response)
+                request_response=response,
+                dimse_error_status=payload.get("DimseErrorStatus"))
 
     def _translate_exception(self, request_exception, url):
         if isinstance(request_exception, requests.ConnectionError):

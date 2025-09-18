@@ -1,3 +1,8 @@
+v 0.20.1
+========
+
+- `HttpError` might now have a `dimse_error_status` field in case of DICOM related errors
+
 v 0.20.0
 ========
 
