@@ -1,3 +1,8 @@
+v 0.21.0
+========
+
+- Added `requested_tags` for `find`method on `studies`
+
 v 0.20.1
 ========
 
