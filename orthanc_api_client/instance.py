@@ -10,6 +10,7 @@ class InstanceInfo:
         self.dicom_id = self.main_dicom_tags.get('SOPInstanceUID')
         self.series_orthanc_id = json_instance.get('ParentSeries')
         self.labels = json_instance.get('Labels') or []
+        self.metadata = json_instance.get('Metadata') or None
 
 
 class Instance:
@@ -57,3 +58,8 @@ class Instance:
     @property
     def labels(self):
         return self.info.labels
+    
+    def get_metadata(self, metadata_name: str) -> str:
+        if self.info.metadata is None:
+            self.info.metadata = self._api_client.instances.get_metadata(self.orthanc_id)
+        return self.info.metadata.get(metadata_name)

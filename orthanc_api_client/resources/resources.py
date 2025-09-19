@@ -141,7 +141,7 @@ class Resources:
 
     def get_binary_metadata(self, orthanc_id: str, metadata_name: str, default_value: Optional[str] = None) -> bytes:
 
-        content, revision = self.get_metadata_with_revision(
+        content, revision = self.get_binary_metadata_with_revision(
             orthanc_id=orthanc_id,
             metadata_name=metadata_name,
             default_value=default_value
@@ -184,7 +184,7 @@ class Resources:
         return content.decode('utf-8') if content is not None else None, revision
 
     def has_metadata(self, orthanc_id: str, metadata_name: str) -> bool:
-        return self.get_metadata(orthanc_id=orthanc_id, metadata_name=metadata_name, default_value=None) is not None
+        return self.get_binary_metadata(orthanc_id=orthanc_id, metadata_name=metadata_name, default_value=None) is not None
 
     def _anonymize(self, orthanc_id: str, replace_tags={}, keep_tags=[], delete_original=True, force=False) -> str:
         """
@@ -450,7 +450,7 @@ class Resources:
             print(f"{current_date} - " + str(len(r.json())))
             current_date += datetime.timedelta(days=1)
 
-    def _lookup(self, filter: str, dicom_id: str) -> str:
+    def _lookup(self, filter: str, dicom_id: str) -> Optional[str]:
         """
         finds a resource in Orthanc based on its dicom id
 

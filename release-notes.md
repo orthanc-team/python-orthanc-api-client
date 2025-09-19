@@ -1,3 +1,21 @@
+v 0.20.1
+========
+
+- `HttpError` might now have a `dimse_error_status` field in case of DICOM related errors
+
+v 0.20.0
+========
+
+- Added `Modalities.get_async()` & `Modalities.move_async()`
+
+v 0.19.0
+========
+
+- Added `Instance.get_metadata()`
+- Added `Study.get_instances()` that also retrieves the metadata in a single API call
+- fix `Instances.has_metadata`
+
+
 v 0.18.8
 ========
 

@@ -173,6 +173,25 @@ class DicomModalities:
             from_modality=from_modality
         )
 
+    def get_study_async(self, from_modality: str, dicom_id: str) -> Job:
+        """
+        retrieves a study from a remote modality (C-Get)
+
+        This call is asynchronous and returns a job.
+
+        :param from_modality: the modality alias configured in orthanc
+        :param dicom_id: the StudyInstanceUid of the study to move
+        """
+        return Job.from_json(self._api_client, self._get(
+            level="Study",
+            resource={
+                "StudyInstanceUID": dicom_id
+            },
+            from_modality=from_modality,
+            asynchronous=True
+        ))
+
+
     def get_series(self, from_modality: str, dicom_id: str, study_dicom_id: str):
         """
         retrieves a series from a remote modality (C-Get)
@@ -232,6 +251,26 @@ class DicomModalities:
             to_modality_aet=to_modality_aet
         )
 
+    def move_study_async(self, from_modality: str, dicom_id: str, to_modality_aet: str = None) -> Job:
+        """
+        moves a study from a remote modality (C-Move) to a target modality (AET)
+
+        This call is asynchronous.  It returns a job.
+
+        :param from_modality: the modality alias configured in orthanc
+        :param dicom_id: the StudyInstanceUid of the study to move
+        :param to_modality_aet: the AET of the target modality
+        """
+        return Job.from_json(self._api_client, self._move(
+            level="Study",
+            resource={
+                "StudyInstanceUID": dicom_id
+            },
+            from_modality=from_modality,
+            to_modality_aet=to_modality_aet,
+            asynchronous=True
+        ))
+
     def move_series(self, from_modality: str, dicom_id: str, study_dicom_id: str, to_modality_aet: str = None):
         """
         moves a series from a remote modality (C-Move) to a target modality (AET)
@@ -276,11 +315,9 @@ class DicomModalities:
             to_modality_aet=to_modality_aet
         )
 
-    def _move(self, level: str, resource: object, from_modality: str, to_modality_aet: str = None):
+    def _move(self, level: str, resource: object, from_modality: str, to_modality_aet: str = None, asynchronous: bool = False):
         """
         moves a study from a remote modality (C-Move) to a target modality (AET)
-
-        this call is synchronous.  It completes once the C-Move is complete.
 
         :param from_modality: the modality alias configured in orthanc
         :param to_modality_aet: the AET of the target modality
@@ -288,18 +325,19 @@ class DicomModalities:
 
         payload = {
             'Level': level,
-            'Resources': [resource]
+            'Resources': [resource],
+            'Asynchronous': asynchronous
         }
 
         if to_modality_aet:
             payload['TargetAet'] = to_modality_aet
 
-        self._api_client.post(
+        return self._api_client.post(
             endpoint=f"{self._url_segment}/{from_modality}/move",
-            json=payload)
+            json=payload).json()
 
 
-    def _get(self, level: str, resource: object, from_modality: str):
+    def _get(self, level: str, resource: object, from_modality: str, asynchronous: bool = False):
         """
         retrieves a study from a remote modality (C-Get)
 
@@ -310,12 +348,13 @@ class DicomModalities:
 
         payload = {
             'Level': level,
-            'Resources': [resource]
+            'Resources': [resource],
+            'Asynchronous': asynchronous
         }
 
-        self._api_client.post(
+        return self._api_client.post(
             endpoint=f"{self._url_segment}/{from_modality}/get",
-            json=payload)
+            json=payload).json()
 
 
     def query_studies(self, from_modality: str, query: object) -> typing.List[RemoteModalityStudy]:
