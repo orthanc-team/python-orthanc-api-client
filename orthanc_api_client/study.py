@@ -14,6 +14,7 @@ class StudyInfo:
         self.patient_orthanc_id = json_study.get('ParentPatient')
         self.last_update = json_study.get('LastUpdate')
         self.labels = json_study.get('Labels') or []
+        self.requested_tags = SimplifiedTags(json_study.get('RequestedTags')) or []
 
 
 class StudyStatistics:
@@ -54,6 +55,10 @@ class Study:
     @property
     def patient_main_dicom_tags(self):
         return self.info.patient_main_dicom_tags
+
+    @property
+    def requested_tags(self):
+        return self.info.requested_tags
 
     @property
     def dicom_id(self):

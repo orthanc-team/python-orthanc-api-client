@@ -1169,6 +1169,25 @@ class TestApiClient(unittest.TestCase):
         self.assertEqual('1.3.6.1.4.1.5962.1.2.1.20040119072730.12322', studies[0].dicom_id)
         self.assertEqual("e+1", studies[0].main_dicom_tags.get('StudyDescription'))
 
+    def test_find_study_with_requested_tags(self):
+        self.oa.delete_all_content()
+
+        instances_ids = self.oa.upload_file(here / "stimuli/CT_small.dcm")
+        study_id = self.oa.instances.get_parent_study_id(instances_ids[0])
+
+        studies = self.oa.studies.find(
+            query={
+                'PatientID': '1C*',
+                'StudyDescription': ''
+            },
+            requested_tags=["ModalitiesInStudy"]
+        )
+
+        self.assertEqual(1, len(studies))
+        self.assertEqual('1.3.6.1.4.1.5962.1.2.1.20040119072730.12322', studies[0].dicom_id)
+        self.assertEqual("e+1", studies[0].main_dicom_tags.get('StudyDescription'))
+        self.assertEqual("CT", studies[0].requested_tags.get('ModalitiesInStudy'))
+
     def test_find_patient(self):
         self.oa.delete_all_content()
 

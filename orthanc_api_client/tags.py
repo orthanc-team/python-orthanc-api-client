@@ -8,6 +8,8 @@ class SimplifiedTags:
         self._fill(json_tags)
 
     def _fill(self, json_tags: object):
+        if json_tags is None:
+            return
         for name, value in json_tags.items():
             self._tags_by_name[name] = value
 

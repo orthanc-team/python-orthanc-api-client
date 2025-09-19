@@ -62,7 +62,8 @@ class Studies(Resources):
              labels_constraint: LabelsConstraint = LabelsConstraint.ANY,
              limit: int = 0,
              since: int = 0,
-             order_by: [dict] = []
+             order_by: [dict] = [],
+             requested_tags: [str] = []
              ) -> List[Study]:
         """
         find a study in Orthanc based on the query and the labels
@@ -89,7 +90,8 @@ class Studies(Resources):
             "LabelsConstraint": labels_constraint,
             "Limit": limit,
             "Since": since,
-            "OrderBy": order_by
+            "OrderBy": order_by,
+            "RequestedTags": requested_tags
         }
 
         r = self._api_client.post(
