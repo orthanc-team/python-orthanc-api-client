@@ -137,6 +137,10 @@ def generate_test_dicom_file(
     ds.PhotometricInterpretation = "MONOCHROME2"
     ds.PixelRepresentation = 1
 
+    # copy tags values in the dataset
+    for (k, v) in tags.items():
+        ds.__setattr__(k, v)
+
     if ds.Modality == "MR":
         ds.SOPClassUID = pydicom.uid.MRImageStorage
     elif ds.Modality == "CT":
@@ -147,10 +151,6 @@ def generate_test_dicom_file(
         ds.SOPClassUID = pydicom.uid.DigitalXRayImageStorageForPresentation
     else:
         raise NotImplementedError
-
-    # copy tags values in the dataset
-    for (k, v) in tags.items():
-        ds.__setattr__(k, v)
 
 
     ds.BitsStored = 16
