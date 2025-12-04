@@ -385,6 +385,50 @@ class TestApiClient(unittest.TestCase):
         study_id = self.ob.studies.lookup('1.2.3')
         self.assertIsNotNone(study_id)
 
+    def test_dicomweb_retrieve_study(self):
+        self.oa.delete_all_content()
+        self.ob.delete_all_content()
+
+        dicom = generate_test_dicom_file(width=33, height=33, tags={'StudyInstanceUID': '1.2.3', 'PatientID': 'tutu'})
+        instances_ids = self.ob.upload(dicom)
+        dicom = generate_test_dicom_file(width=33, height=33, tags={'StudyInstanceUID': '1.2.3', 'PatientID': 'tutu'})
+        instances_ids.extend(self.ob.upload(dicom))
+
+        self.assertEqual(2, self.oa.dicomweb_servers.retrieve_study('orthanc-b', '1.2.3'))
+
+        study_id = self.oa.studies.lookup('1.2.3')
+        self.assertIsNotNone(study_id)
+        self.assertEqual(2, self.oa.get_statistics().instances_count)
+
+    def test_dicomweb_retrieve_series(self):
+        self.oa.delete_all_content()
+        self.ob.delete_all_content()
+
+        dicom = generate_test_dicom_file(width=33, height=33, tags={'StudyInstanceUID': '1.2.3', 'PatientID': 'tutu', 'SeriesInstanceUID': '2.3.4'})
+        instances_ids = self.ob.upload(dicom)
+        dicom = generate_test_dicom_file(width=33, height=33, tags={'StudyInstanceUID': '1.2.3', 'PatientID': 'tutu', 'SeriesInstanceUID': '2.3.4'})
+        instances_ids.extend(self.ob.upload(dicom))
+
+        self.assertEqual(2, self.oa.dicomweb_servers.retrieve_series('orthanc-b', '1.2.3', '2.3.4'))
+
+        series_id = self.oa.series.lookup('2.3.4')
+        self.assertIsNotNone(series_id)
+        self.assertEqual(2, self.oa.get_statistics().instances_count)
+
+    def test_dicomweb_retrieve_instance(self):
+        self.oa.delete_all_content()
+        self.ob.delete_all_content()
+
+        dicom = generate_test_dicom_file(width=33, height=33, tags={'StudyInstanceUID': '1.2.3', 'PatientID': 'tutu', 'SeriesInstanceUID': '2.3.4', 'SOPInstanceUID': '3.4.5'})
+        self.ob.upload(dicom)
+
+        self.assertTrue(self.oa.dicomweb_servers.retrieve_instance('orthanc-b', '1.2.3', '2.3.4', '3.4.5'))
+
+        instance_id = self.oa.instances.lookup('3.4.5')
+        self.assertIsNotNone(instance_id)
+        self.assertEqual(1, self.oa.get_statistics().instances_count)
+
+
     def test_modalities_send(self):
         self.oa.delete_all_content()
         self.ob.delete_all_content()
