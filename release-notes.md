@@ -1,4 +1,4 @@
-v 0.22.0
+v 0.22.1
 ========
 
 - Added `dicomweb_servers.retrieve_study`, `retrieve_series` and `retrieve_instance`

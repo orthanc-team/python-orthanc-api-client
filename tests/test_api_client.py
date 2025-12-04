@@ -1186,7 +1186,10 @@ class TestApiClient(unittest.TestCase):
         future_instance_ids = []
         for dicom in dicoms:
             future_instance_ids.append(asyncio.to_thread(self.oa.upload, buffer=dicom))
-        result_list = asyncio.get_event_loop().run_until_complete(asyncio.gather(*future_instance_ids))
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        result_list = loop.run_until_complete(asyncio.gather(*future_instance_ids))
+
         instances_ids = [i for r in result_list for i in r]
         elapsed = time.perf_counter() - s
 
