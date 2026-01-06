@@ -1,3 +1,8 @@
+v 0.22.2
+========
+
+- Added support for `OT` modality in `helpers.generate_test_dicom_file`
+
 v 0.22.1
 ========
 

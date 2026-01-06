@@ -149,6 +149,8 @@ def generate_test_dicom_file(
         ds.SOPClassUID = pydicom.uid.ComputedRadiographyImageStorage
     elif ds.Modality == "DX":
         ds.SOPClassUID = pydicom.uid.DigitalXRayImageStorageForPresentation
+    elif ds.Modality == "OT":
+        ds.SOPClassUID = pydicom.uid.EncapsulatedPDFStorage
     else:
         raise NotImplementedError
 
