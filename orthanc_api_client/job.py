@@ -34,7 +34,6 @@ class JobInfo:
         self.status = json_job.get('State')
         self.type = json_job.get('Type')
         self.content = json_job.get('Content')
-        self.dimseErrorStatus = json_job.get('DimseErrorStatus')  # new in Orthanc 1.12.10
 
 
 class Job:

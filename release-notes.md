@@ -1,3 +1,9 @@
+- BREAKING CHANGES: 
+  - `HttpError` no longer have a `dimse_error_status` field in case of DICOM related errors (it was actually not functional !).
+    It is now replaced by an `error_payload` field.
+  - `JobInfo` no longer has a `dimseErrorStatus` field (it was actually not functional !)
+
+
 v 0.22.2
 ========
 

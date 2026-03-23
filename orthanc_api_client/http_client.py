@@ -132,7 +132,7 @@ class HttpClient:
                 msg=error_message,
                 url=url,
                 request_response=response,
-                dimse_error_status=payload.get("DimseErrorStatus"))
+                error_payload=payload.get("ErrorPayload"))
 
     def _translate_exception(self, request_exception, url):
         if isinstance(request_exception, requests.ConnectionError):

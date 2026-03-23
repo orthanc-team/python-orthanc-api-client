@@ -25,11 +25,11 @@ class TooManyResourcesFound(OrthancApiException):
 
 class HttpError(OrthancApiException):
 
-    def __init__(self, http_status_code = None, msg = "Unknown Orthanc HTTP Rest API exception", url = None, request_response = None, dimse_error_status = None):
+    def __init__(self, http_status_code = None, msg = "Unknown Orthanc HTTP Rest API exception", url = None, request_response = None, error_payload = None):
         super().__init__(msg = msg, url = url)
         self.http_status_code = http_status_code
         self.request_response = request_response
-        self.dimse_error_status = dimse_error_status
+        self.error_payload = error_payload
 
     def __str__(self):
         orthanc_error = (self.request_response.text if self.request_response is not None else "")

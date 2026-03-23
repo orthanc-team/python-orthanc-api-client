@@ -525,9 +525,9 @@ class TestApiClient(unittest.TestCase):
         job.wait_completed()
         if self.oa.is_orthanc_version_at_least(1, 12, 10):
             self.assertEqual(JobStatus.FAILURE, job.info.status)
-            # not validated yet
-            # self.assertIsNotNone(job.info.dimseErrorStatus)
-            # self.assertEqual(0xC000, job.info.dimseErrorStatus)
+            self.assertIn("Details", job.content)
+            self.assertEqual(1, len(job.content["Details"]))
+            self.assertEqual(0xC000, job.content["Details"][0]["DimseErrorStatus"])
         self.assertIsNone(self.oa.studies.lookup('10.20.30'))
         self.oa.delete_all_content()
 
@@ -557,18 +557,17 @@ class TestApiClient(unittest.TestCase):
         job.wait_completed()
         if self.oa.is_orthanc_version_at_least(1, 12, 10):
             self.assertEqual(JobStatus.FAILURE, job.info.status)
-            # not validated yet
-            # self.assertIsNotNone(job.info.dimseErrorStatus)
-            # self.assertEqual(0xC000, job.info.dimseErrorStatus)
+            self.assertIn("Details", job.content)
+            self.assertEqual(1, len(job.content["Details"]))
+            self.assertEqual(0xC000, job.content["Details"][0]["DimseErrorStatus"])
         self.assertIsNone(self.oa.studies.lookup('10.20.30'))
         self.oa.delete_all_content()
 
         # sync get a study that does not exists
-        # if self.oa.is_orthanc_version_at_least(1, 12, 10):
-            # not validated yet
-            # with self.assertRaises(api_exceptions.HttpError) as ex:
-            #     self.oa.modalities.get_study(from_modality='orthanc-b', dicom_id='10.20.30')
-            # self.assertEqual(0xc000, ex.exception.dimse_error_status)
+        if self.oa.is_orthanc_version_at_least(1, 12, 10):
+            with self.assertRaises(api_exceptions.HttpError) as ex:
+                self.oa.modalities.get_study(from_modality='orthanc-b', dicom_id='10.20.30')
+            self.assertEqual(0xc000, ex.exception.error_payload.get('Content')[0]["DimseErrorStatus"])
 
         #request A to get it from B
         self.oa.modalities.retrieve_study(from_modality='orthanc-b', dicom_id='1.2.3', retrieve_method=RetrieveMethod.GET)
