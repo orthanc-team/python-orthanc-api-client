@@ -4,3 +4,4 @@ from .series_list import SeriesList
 from .studies import Studies
 from .patients import Patients
 from .jobs import Jobs
+from .worklists import Worklists

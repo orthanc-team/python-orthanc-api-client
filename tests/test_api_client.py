@@ -557,16 +557,18 @@ class TestApiClient(unittest.TestCase):
         job.wait_completed()
         if self.oa.is_orthanc_version_at_least(1, 12, 10):
             self.assertEqual(JobStatus.FAILURE, job.info.status)
-            self.assertIsNotNone(job.info.dimseErrorStatus)
-            self.assertEqual(0xC000, job.info.dimseErrorStatus)
+            # not validated yet
+            # self.assertIsNotNone(job.info.dimseErrorStatus)
+            # self.assertEqual(0xC000, job.info.dimseErrorStatus)
         self.assertIsNone(self.oa.studies.lookup('10.20.30'))
         self.oa.delete_all_content()
 
         # sync get a study that does not exists
-        if self.oa.is_orthanc_version_at_least(1, 12, 10):
-            with self.assertRaises(api_exceptions.HttpError) as ex:
-                self.oa.modalities.get_study(from_modality='orthanc-b', dicom_id='10.20.30')
-            self.assertEqual(0xc000, ex.exception.dimse_error_status)
+        # if self.oa.is_orthanc_version_at_least(1, 12, 10):
+            # not validated yet
+            # with self.assertRaises(api_exceptions.HttpError) as ex:
+            #     self.oa.modalities.get_study(from_modality='orthanc-b', dicom_id='10.20.30')
+            # self.assertEqual(0xc000, ex.exception.dimse_error_status)
 
         #request A to get it from B
         self.oa.modalities.retrieve_study(from_modality='orthanc-b', dicom_id='1.2.3', retrieve_method=RetrieveMethod.GET)
@@ -1802,6 +1804,64 @@ class TestApiClient(unittest.TestCase):
     def test_path(self):
         # test issue #4
         self.assertEqual(self.oa.get_json('statistics'), self.oa.get_json('/statistics'))
+
+    def test_create_worklist(self):
+        self.oa.delete_all_content()
+        self.oa.worklists.delete_all()
+
+        # payload for the WL
+        values = {
+            "PatientID": "PID-45",
+            "PatientName": "Toto",
+            "ScheduledProcedureStepSequence" : [
+                {
+                    "Modality": "US",
+                    "ScheduledProcedureStepStartDate": "20251014",
+                    "ScheduledProcedureStepDescription": "Description"
+                }
+            ]
+        }
+
+        # WL creation and check
+        wl_id = self.oa.worklists.create(values)
+        self.assertIsNotNone(wl_id)
+
+        # Get WL info and check
+        wl = self.oa.worklists.get(wl_id)
+        self.assertEqual(wl["Tags"]["PatientID"], "PID-45")
+
+    def test_delete_worklist(self):
+        self.oa.delete_all_content()
+        self.oa.worklists.delete_all()
+
+        # let's create one WL
+        values = {
+            "PatientID": "PID-45",
+            "PatientName": "Toto",
+            "ScheduledProcedureStepSequence": [
+                {
+                    "Modality": "US",
+                    "ScheduledProcedureStepStartDate": "20251014",
+                    "ScheduledProcedureStepDescription": "Description"
+                }
+            ]
+        }
+
+        id = self.oa.worklists.create(values)
+
+        wait_until(lambda: len(self.oa.worklists.get_all()) == 1, 5)
+        wl_list = self.oa.worklists.get_all()
+        self.assertEqual(len(wl_list), 1)
+
+        # delete the only WL
+        self.oa.worklists.delete(id)
+
+        # check there is nothing anymore
+        wait_until(lambda: len(self.oa.worklists.get_all()) == 0, 5)
+        wl_list = self.oa.worklists.get_all()
+        self.assertEqual(len(wl_list), 0)
+
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

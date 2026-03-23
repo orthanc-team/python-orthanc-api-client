@@ -1,6 +1,6 @@
 services:
   orthanc-a:
-    image: orthancteam/orthanc:25.8.2
+    image: orthancteam/orthanc:25.12.2
     ports: ["10042:8042"]
     environment:
       VERBOSE_STARTUP: "true"
@@ -32,6 +32,8 @@ services:
       # keep default KeepAliveTimeout and reduce the number of threads in order to test the retry mechanism
       ORTHANC__KEEP_ALIVE_TIMEOUT: "1"
       ORTHANC__HTTP_THREADS_COUNT: "10"
+      ORTHANC__WORKLISTS__ENABLE: "true"
+      ORTHANC__WORKLISTS__SAVE_IN_ORTHANC_DATABASE: "true"
 
   orthanc-b:
     build: orthanc-b
@@ -57,7 +59,7 @@ services:
       ORTHANC__HTTP_THREADS_COUNT: "10"
 
   orthanc-c:
-    image: orthancteam/orthanc:25.8.2
+    image: orthancteam/orthanc:25.12.2
     ports: ["10044:8042"]
     environment:
       VERBOSE_STARTUP: "true"

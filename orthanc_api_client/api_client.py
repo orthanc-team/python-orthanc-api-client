@@ -9,7 +9,7 @@ from typing import List, Optional, Dict
 from urllib.parse import urlunsplit, urlencode
 
 from .http_client import HttpClient
-from .resources import Instances, SeriesList, Studies, Jobs, Patients
+from .resources import Instances, SeriesList, Studies, Jobs, Patients, Worklists
 
 from .helpers import wait_until, encode_multipart_related, is_version_at_least
 from .exceptions import *
@@ -71,6 +71,7 @@ class OrthancApiClient(HttpClient):
         self.transfers = Transfers(api_client=self)
         self.peers = Peers(api_client=self)
         self.capabilities = Capabilities(api_client=self)
+        self.worklists = Worklists(api_client=self)
 
     def __repr__(self) -> str:
         return f"{self._root_url}"
