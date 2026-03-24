@@ -1,3 +1,6 @@
+v 0.23.0
+========
+- Added support for `Worklists` plugin
 - BREAKING CHANGES: 
   - `HttpError` no longer have a `dimse_error_status` field in case of DICOM related errors (it was actually not functional !).
     It is now replaced by an `error_payload` field.
