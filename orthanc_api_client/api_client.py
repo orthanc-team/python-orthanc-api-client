@@ -35,6 +35,19 @@ class SystemStatistics:
         self.total_uncompressed_size = int(json_stats['TotalUncompressedSize'])
         self.total_uncompressed_size_mb = json_stats['TotalUncompressedSizeMB']
 
+class Metrics:
+    
+    def __init__(self, metricsPrometheusText: str):
+        # mm = self.o.get_binary("/tools/metrics-prometheus").decode("utf-8")
+        self.metrics = {}
+        mm = [x.split(" ") for x in metricsPrometheusText.split("\n")]
+        for m in mm:
+            if len(m) >= 3:
+                self.metrics[m[0]] = m[1]
+
+    def get(self, metric_name: str) -> Optional[str]:
+        return self.metrics.get(metric_name)
+
 
 class OrthancApiClient(HttpClient):
 
@@ -112,6 +125,9 @@ class OrthancApiClient(HttpClient):
 
     def get_statistics(self) -> SystemStatistics:
         return SystemStatistics(json_stats=self.get_json('statistics'))
+
+    def get_metrics(self) -> Metrics:
+        return Metrics(metricsPrometheusText=self.get_binary("/tools/metrics-prometheus").decode("utf-8"))
 
     def delete_all_content(self):
         """Deletes all content from Orthanc"""

@@ -1860,6 +1860,9 @@ class TestApiClient(unittest.TestCase):
         wl_list = self.oa.worklists.get_all()
         self.assertEqual(len(wl_list), 0)
 
+    def test_metrics(self):
+        self.assertEqual('4', self.oa.get_metrics().get('orthanc_available_dicom_threads'))
+        self.assertIsNone(self.oa.get_metrics().get('name_that_does_not_exist'))
 
 
 if __name__ == '__main__':

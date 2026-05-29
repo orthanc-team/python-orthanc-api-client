@@ -1,5 +1,12 @@
+v 0.24.0
+========
+
+- Added support for metrics.  For example:
+  `orthanc.get_metrics().get('orthanc_available_dicom_threads')`
+
 v 0.23.0
 ========
+
 - Added support for `Worklists` plugin
 - BREAKING CHANGES: 
   - `HttpError` no longer have a `dimse_error_status` field in case of DICOM related errors (it was actually not functional !).
