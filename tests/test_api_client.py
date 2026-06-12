@@ -307,6 +307,24 @@ class TestApiClient(unittest.TestCase):
         self.assertLessEqual(1, len(instances_ids))
         self.assertIsNotNone(study_id)
 
+    def test_make_sure_test_dicom_files_are_valid(self):
+        self.oa.delete_all_content()
+
+        dicoms = [
+            generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '1.2.3', 'StudyDate': to_dicom_date(datetime.date.today())}, random_image_content=True),
+            generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '1.2.4', 'StudyDate': to_dicom_date(datetime.date.today())}, random_image_content=False),
+            generate_test_dicom_file(width=1024, height=1024, tags={'StudyInstanceUID': '1.2.5', 'StudyDate': to_dicom_date(datetime.date.today())}, random_image_content=True),
+            generate_test_dicom_file(width=1024, height=1024, tags={'StudyInstanceUID': '1.2.6', 'StudyDate': to_dicom_date(datetime.date.today())}, random_image_content=False)
+        ]
+        for dicom in dicoms:
+            instances_ids = self.oa.upload(dicom)
+            
+            # just make sure the image is valid and does not throw when previewing and transcoding
+            self.oa.get_binary(endpoint=f"/instances/{instances_ids[0]}/preview", headers = {'Accept': "image/jpeg"})
+            self.oa.get_binary(endpoint=f"/instances/{instances_ids[0]}/preview", headers = {'Accept': "image/png"})
+            self.oa.get_binary(endpoint=f"/instances/{instances_ids[0]}/file?transcode=1.2.840.10008.1.2.4.70", headers = {'Accept': 'application/dicom'})
+
+
     def test_daily_stats(self):
         self.oa.delete_all_content()
 

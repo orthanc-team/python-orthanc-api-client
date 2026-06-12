@@ -1,3 +1,8 @@
+V 0.24.1
+========
+
+- Added `TestImageContent` in `generate_test_dicom_file`.
+
 v 0.24.0
 ========
 

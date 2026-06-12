@@ -3,10 +3,15 @@ import re
 import pydicom
 import datetime
 import random
+from strenum import StrEnum
 from typing import Union, Optional
 from .helpers_internal import write_dataset_to_bytes
 import pydicom.uid
 from urllib3.filepost import encode_multipart_formdata, choose_boundary
+
+class TestImageContent(StrEnum):
+    FLAT = 'Flat'
+    RANDOM = 'Random'
 
 
 def wait_until(some_predicate, timeout, polling_interval=0.1, *args, **kwargs) -> bool:
@@ -102,9 +107,14 @@ def from_dicom_date_and_time(dicom_date: str, dicom_time: str) -> datetime.datet
 def generate_test_dicom_file(
         width: int = 128,
         height: int = 128,
-        tags: any = {}
+        tags: any = {},
+        image_content: TestImageContent = TestImageContent.FLAT
         ) -> bytes:
-    buffer = bytearray(height * width * 2)
+    
+    if image_content == TestImageContent.RANDOM:
+        buffer = random.randbytes(height * width * 2)
+    else:
+        buffer = bytearray(height * width * 2)
 
     file_meta = pydicom.dataset.FileMetaDataset()
     file_meta.MediaStorageSOPClassUID = pydicom.uid.MRImageStorage
