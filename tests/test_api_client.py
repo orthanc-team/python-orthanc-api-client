@@ -311,10 +311,10 @@ class TestApiClient(unittest.TestCase):
         self.oa.delete_all_content()
 
         dicoms = [
-            generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '1.2.3', 'StudyDate': to_dicom_date(datetime.date.today())}, random_image_content=True),
-            generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '1.2.4', 'StudyDate': to_dicom_date(datetime.date.today())}, random_image_content=False),
-            generate_test_dicom_file(width=1024, height=1024, tags={'StudyInstanceUID': '1.2.5', 'StudyDate': to_dicom_date(datetime.date.today())}, random_image_content=True),
-            generate_test_dicom_file(width=1024, height=1024, tags={'StudyInstanceUID': '1.2.6', 'StudyDate': to_dicom_date(datetime.date.today())}, random_image_content=False)
+            generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '1.2.3', 'StudyDate': to_dicom_date(datetime.date.today())}, image_content=TestImageContent.RANDOM),
+            generate_test_dicom_file(width=32, height=32, tags={'StudyInstanceUID': '1.2.4', 'StudyDate': to_dicom_date(datetime.date.today())}, image_content=TestImageContent.FLAT),
+            generate_test_dicom_file(width=1024, height=1024, tags={'StudyInstanceUID': '1.2.5', 'StudyDate': to_dicom_date(datetime.date.today())}, image_content=TestImageContent.RANDOM),
+            generate_test_dicom_file(width=1024, height=1024, tags={'StudyInstanceUID': '1.2.6', 'StudyDate': to_dicom_date(datetime.date.today())}, image_content=TestImageContent.FLAT)
         ]
         for dicom in dicoms:
             instances_ids = self.oa.upload(dicom)
