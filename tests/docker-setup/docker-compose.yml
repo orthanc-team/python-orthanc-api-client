@@ -56,7 +56,7 @@ services:
       ORTHANC__OVERWRITE_INSTANCES: "true"
       # keep default KeepAliveTimeout and reduce the number of threads in order to test the retry mechanism
       ORTHANC__KEEP_ALIVE_TIMEOUT: "1"
-      ORTHANC__HTTP_THREADS_COUNT: "10"
+      ORTHANC__HTTP_THREADS_COUNT: "20"
 
   orthanc-c:
     image: orthancteam/orthanc:25.12.2

@@ -13,6 +13,7 @@ import asyncio
 import tempfile
 import shutil
 import os
+import concurrent.futures
 
 here = pathlib.Path(__file__).parent.resolve()
 
@@ -30,6 +31,12 @@ class TestApiClient(unittest.TestCase):
 
         cls.ob = OrthancApiClient('http://localhost:10043', user='test', pwd='test')
         cls.ob.wait_started()
+
+        cls.ob_pool_10_block = OrthancApiClient('http://localhost:10043', user='test', pwd='test', pool_maxsize=10, pool_block=True)
+        cls.ob_pool_10_block.wait_started()
+
+        cls.ob_pool_20_block = OrthancApiClient('http://localhost:10043', user='test', pwd='test', pool_maxsize=20, pool_block=True)
+        cls.ob_pool_20_block.wait_started()
 
         cls.oc = OrthancApiClient('http://localhost:10044', user='test', pwd='test')
         cls.oc.wait_started()
@@ -1881,6 +1888,45 @@ class TestApiClient(unittest.TestCase):
     def test_metrics(self):
         self.assertEqual('4', self.oa.get_metrics().get('orthanc_available_dicom_threads'))
         self.assertIsNone(self.oa.get_metrics().get('name_that_does_not_exist'))
+
+
+    def test_pool_maxsize(self):
+
+        # execute 40 calls to sleep(2) with the standard pool size of 10 -> it should take 8 seconds (note, there are 20 HttpThreads in this Orthanc)
+        s = time.perf_counter()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+
+            futures = [executor.submit(lambda: self.ob_pool_10_block.get_binary("/sleep/2")) for i in range(40)]
+            results = [future.result() for future in concurrent.futures.as_completed(futures)]
+
+        elapsed10 = time.perf_counter() - s
+        print(f"sleep with pool 10 took : {elapsed10:0.3f} seconds")
+
+        # execute 40 calls to sleep(2) with a pool size of 20 -> it should take 4 seconds (note, there are 20 HttpThreads in this Orthanc)
+        s = time.perf_counter()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+
+            futures = [executor.submit(lambda: self.ob_pool_20_block.get_binary("/sleep/2")) for i in range(40)]
+            results = [future.result() for future in concurrent.futures.as_completed(futures)]
+
+        elapsed20 = time.perf_counter() - s
+        print(f"sleep with pool 20 took : {elapsed20:0.3f} seconds")
+        self.assertGreaterEqual(elapsed10, elapsed20)
+
+    def test_connection_reuse(self):
+
+        # execute 1000 calls to sleep(0.1) with a pool size of 20 and 20 HttpThreads in this Orthanc
+        # it should take around 1000 / 20 = 50 calls per connection -> 5 seconds
+        s = time.perf_counter()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+
+            futures = [executor.submit(lambda: self.ob_pool_20_block.get_binary("/sleep/0.1")) for i in range(1000)]
+            results = [future.result() for future in concurrent.futures.as_completed(futures)]
+
+        elapsed20 = time.perf_counter() - s
+        print(f"1000x sleep(0.1) with a pool of 20 took : {elapsed20:0.3f} seconds")
+        self.assertGreaterEqual(7, elapsed20)
+
 
 
 if __name__ == '__main__':

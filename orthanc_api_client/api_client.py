@@ -57,7 +57,8 @@ class OrthancApiClient(HttpClient):
                  pwd: Optional[str] = None, 
                  api_token: Optional[str] = None, 
                  headers: Optional[Dict[str, str]] = None,
-                 pool_connections: int = 10) -> None:
+                 pool_maxsize: int = 10,
+                 pool_block: bool = False) -> None:
         """Creates an HttpClient
 
         Parameters
@@ -68,8 +69,9 @@ class OrthancApiClient(HttpClient):
         api_token: a token obtained from inside an Orthanc python plugin through orthanc.GenerateRestApiAuthorizationToken
                    format: 'Bearer 3d03892c-fe...' or '3d03892c-fe...'
         headers: HTTP headers that will be included in each requests
-        pool_connections: The number of HTTP connections in the pool (default=10).  If you are using the client from more than 10 threads,
-                          you should increase this configuration.
+        pool_maxsize: The number of HTTP connections in the pool (default=10).  If you are using the client from more than 10 threads,
+                      you should increase this configuration.
+        pool_block: if set to True, the pool_maxsize is a hard limit and the threads will wait for a new connection to become available.
         """
         if api_token:
             if headers is None:
@@ -80,7 +82,12 @@ class OrthancApiClient(HttpClient):
                 header_value = f'Bearer {api_token}'
             headers['authorization'] = header_value
 
-        super().__init__(root_url=orthanc_root_url, user=user, pwd=pwd, headers=headers, pool_connections=pool_connections)
+        super().__init__(root_url=orthanc_root_url, 
+                         user=user, 
+                         pwd=pwd, 
+                         headers=headers, 
+                         pool_maxsize=pool_maxsize, 
+                         pool_block=pool_block)
 
         self.patients = Patients(api_client=self)
         self.studies = Studies(api_client=self)
