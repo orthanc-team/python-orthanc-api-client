@@ -3,6 +3,12 @@ V 0.25.0
 
 - Added components for the education plugin.
 
+v 0.24.3
+========
+
+- new optional `pool_maxsize` argument when creating an `OrthancApiClient`.
+  By default, the value is `10` which can create a bottleneck when e.g. 20 worker
+  threads are using the same client.
 
 V 0.24.1
 ========

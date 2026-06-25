@@ -9,7 +9,7 @@ from orthanc_api_client import exceptions as api_exceptions
 
 class HttpClient:
 
-    def __init__(self, root_url: str, user: str = None, pwd: str = None, headers: any = None, on_403_error = None) -> None:
+    def __init__(self, root_url: str, user: str = None, pwd: str = None, headers: any = None, on_403_error = None, pool_maxsize: int = 10, pool_block: bool = False) -> None:
         self._root_url = root_url
         self._http_session = requests.Session()
 
@@ -31,7 +31,9 @@ class HttpClient:
             backoff_factor=0.2
         )
         url_schema = urllib.parse.urlparse(root_url).scheme + "://"
-        self._http_session.mount(url_schema, HTTPAdapter(max_retries=retries))
+        self._http_session.mount(url_schema, HTTPAdapter(max_retries=retries,
+                                                         pool_maxsize=pool_maxsize,
+                                                         pool_block=pool_block))
 
         self._on_403_error = on_403_error
         self._token_updated = False

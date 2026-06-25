@@ -3,6 +3,7 @@ import json
 from pydicom.uid import generate_uid
 from typing import List
 import pydicom
+import time
 
 from io import BytesIO
 
@@ -21,6 +22,13 @@ def get_api_token(output, uri, **request):
     # unsafe !!!!  don't expose the token on a Rest API !!!! (don't run this experiment at home !)
     output.AnswerBuffer(TOKEN, 'text/plain')
 
+
+def get_sleep(output, uri, **request):
+    duration = request['groups'][0]
+    orthanc.LogInfo(f"Entering sleep of {duration} sec")
+    time.sleep(float(duration))
+    output.AnswerBuffer("that was a good sleep", 'text/plain')
+    orthanc.LogInfo(f"Exited sleep of {duration} sec")
 
 
 def worklist_callback(answers, query, issuerAet, calledAet):
@@ -60,3 +68,4 @@ def worklist_callback(answers, query, issuerAet, calledAet):
 
 orthanc.RegisterWorklistCallback(worklist_callback)
 orthanc.RegisterRestCallback('/api-token', get_api_token)
+orthanc.RegisterRestCallback('/sleep/(.*)', get_sleep)

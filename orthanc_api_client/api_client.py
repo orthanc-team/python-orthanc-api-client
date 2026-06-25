@@ -94,7 +94,9 @@ class OrthancApiClient(HttpClient):
                  pwd: Optional[str] = None,
                  api_token: Optional[str] = None,
                  headers: Optional[Dict[str, str]] = None,
-                 token_provider: Optional[EducationPluginHeaderProvider] = None ) -> None:
+                 token_provider: Optional[EducationPluginHeaderProvider] = None,
+                 pool_maxsize: int = 10,
+                 pool_block: bool = False) -> None:
         """Creates an HttpClient
 
         Parameters
@@ -106,6 +108,9 @@ class OrthancApiClient(HttpClient):
                    format: 'Bearer 3d03892c-fe...' or '3d03892c-fe...'
         headers: HTTP headers that will be included in each requests
         token_provider: if the education plugin is in the game, this will allow to get the token (actually, the headers)
+        pool_maxsize: The number of HTTP connections in the pool (default=10).  If you are using the client from more than 10 threads,
+                      you should increase this configuration.
+        pool_block: if set to True, the pool_maxsize is a hard limit and the threads will wait for a new connection to become available.
         """
 
         if api_token:
@@ -120,7 +125,13 @@ class OrthancApiClient(HttpClient):
         if token_provider:
             headers = token_provider.get_headers()
 
-        super().__init__(root_url=orthanc_root_url, user=user, pwd=pwd, headers=headers, on_403_error=token_provider.get_headers if token_provider is not None else None)
+        super().__init__(root_url=orthanc_root_url,
+                         user=user,
+                         pwd=pwd,
+                         headers=headers,
+                         on_403_error=token_provider.get_headers if token_provider is not None else None,
+                         pool_maxsize=pool_maxsize,
+                         pool_block=pool_block)
 
         self.patients = Patients(api_client=self)
         self.studies = Studies(api_client=self)
