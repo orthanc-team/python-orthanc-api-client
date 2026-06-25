@@ -5,3 +5,5 @@ from .studies import Studies
 from .patients import Patients
 from .jobs import Jobs
 from .worklists import Worklists
+from .education_projects import Projects
+from .education_images import Images

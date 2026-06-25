@@ -5,7 +5,7 @@ import logging
 import datetime
 import uuid
 
-from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType, Study, Job, JobStatus, JobType, InstancesSet, LabelsConstraint, LogLevel, RemoteJob, RetrieveMethod
+from orthanc_api_client import OrthancApiClient, generate_test_dicom_file, ChangeType, ResourceType, Study, Job, JobStatus, JobType, InstancesSet, LabelsConstraint, LogLevel, RemoteJob, RetrieveMethod, EducationPluginHeaderProvider
 from orthanc_api_client.helpers import *
 import orthanc_api_client.exceptions as api_exceptions
 import pathlib
@@ -13,6 +13,8 @@ import asyncio
 import tempfile
 import shutil
 import os
+
+from orthanc_api_client.resources.education_images import Dicomizationtatus
 
 here = pathlib.Path(__file__).parent.resolve()
 
@@ -33,6 +35,9 @@ class TestApiClient(unittest.TestCase):
 
         cls.oc = OrthancApiClient('http://localhost:10044', user='test', pwd='test')
         cls.oc.wait_started()
+
+        cls.od = OrthancApiClient('http://localhost:10045', token_provider=EducationPluginHeaderProvider('http://localhost:10045', 'test', 'test'))
+        cls.od.wait_started()
 
     @classmethod
     def tearDownClass(cls):
@@ -232,7 +237,7 @@ class TestApiClient(unittest.TestCase):
 
     def test_upload_folder(self):
         self.oa.delete_all_content()
-        instances_ids = self.oa.upload_folder(here / "stimuli", skip_extensions=['.zip', '.pdf', '.png'])
+        instances_ids = self.oa.upload_folder(here / "stimuli", skip_extensions=['.zip', '.pdf', '.png', '.jpeg'])
 
         self.assertLessEqual(1, len(instances_ids))
         self.oa.instances.delete(orthanc_ids=instances_ids)
@@ -250,7 +255,7 @@ class TestApiClient(unittest.TestCase):
         self.assertLessEqual(4, len(dicom_ids_set))
         self.oa.studies.delete(orthanc_ids=orthanc_ids_set)
         self.assertEqual(0, len(self.oa.studies.get_all_ids()))
-        self.assertEqual(3, len(rejected_files_list))
+        self.assertEqual(4, len(rejected_files_list))
 
     def test_upload_folder_return_details_unzip_before_upload(self):
         self.oa.delete_all_content()
@@ -259,7 +264,7 @@ class TestApiClient(unittest.TestCase):
         self.assertLessEqual(4, len(dicom_ids_set))
         self.oa.studies.delete(orthanc_ids=orthanc_ids_set)
         self.assertEqual(0, len(self.oa.studies.get_all_ids()))
-        self.assertEqual(3, len(rejected_files_list))
+        self.assertEqual(4, len(rejected_files_list))
 
     def test_upload_folder_return_details_error_case(self):
         # Let's make orthanc unresponsive
@@ -271,7 +276,7 @@ class TestApiClient(unittest.TestCase):
 
         self.assertEqual(0, len(dicom_ids_set))
         self.assertEqual(0, len(orthanc_ids_set))
-        self.assertEqual(10, len(rejected_files_list))
+        self.assertEqual(11, len(rejected_files_list))
 
         # let's uninhibit the destination
         with open(here / "docker-setup/uninhibit.lua", 'rb') as f:
@@ -1881,6 +1886,47 @@ class TestApiClient(unittest.TestCase):
     def test_metrics(self):
         self.assertEqual('4', self.oa.get_metrics().get('orthanc_available_dicom_threads'))
         self.assertIsNone(self.oa.get_metrics().get('name_that_does_not_exist'))
+
+    def test_education_create_project(self):
+        self.od.delete_all_content()
+
+        # prj creation
+        id = self.od.projects.create("prj-name", "prj-desc")
+        prj = self.od.projects.get(id)
+
+        # check prj creation
+        self.assertEqual(prj.name, "prj-name")
+        self.assertEqual(prj.description, "prj-desc")
+
+        # check that there is one single prj
+        all = self.od.projects.get_all()
+        self.assertEqual(len(all), 1)
+
+    def test_education_upload(self):
+        self.od.delete_all_content()
+
+        # upload 1 image
+        upload_id = self.od.images.upload_and_dicomize(file_path=here / "stimuli/education.jpeg", description="upload-desc")
+
+        # upload over?
+        wait_until(lambda: self.od.images.get_dicomization_status(upload_id) == Dicomizationtatus.SUCCESS, 5)
+
+        # check there is only one single image
+        images = self.od.images.get_series_without_a_project()
+        self.assertEqual(len(images), 1)
+
+        # let's link the image
+        prj_id = self.od.projects.create("prj-name", "prj-desc")
+
+        for image in images:
+            self.od.images.link_image_to_project(resource_id=image.resource_id, project_id=prj_id)
+
+        images = self.od.images.get_series_without_a_project()
+        self.assertEqual(len(images), 0)
+
+        images = self.od.images.get_images_by_project(project_id=prj_id)
+        self.assertEqual(len(images), 1)
+
 
 
 if __name__ == '__main__':

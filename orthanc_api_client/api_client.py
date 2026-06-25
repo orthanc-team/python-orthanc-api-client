@@ -16,10 +16,14 @@ from .exceptions import *
 from .dicomweb_servers import DicomWebServers
 from .modalities import DicomModalities
 from .change import Change, ChangeType, ResourceType
+from .resources.education_projects import Projects
+from .resources.education_images import Images
 from .transfers import Transfers
 from .peers import Peers
 from .logging import LogLevel
 from .capabilities import Capabilities
+
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -49,9 +53,48 @@ class Metrics:
         return self.metrics.get(metric_name)
 
 
+class EducationPluginHeaderProvider:
+
+    def __init__(self, orthanc_root_url, user, pwd):
+        """
+        Helper to get a token from  Orthanc (when Education plugin is enabled).
+        """
+        self.orthanc_url = orthanc_root_url
+        self.user = user
+        self.pwd = pwd
+        self._headers = None
+
+    def get_headers(self):
+        if self._headers is None:
+            self._headers = self._fetch_headers()
+
+        return self._headers
+
+    def _fetch_headers(self):
+        session = requests.Session()
+        r = session.post(
+            f"{self.orthanc_url}/education/do-login",
+            json={
+                "username": self.user,
+                "password": self.pwd
+            }
+        )
+        r.raise_for_status()
+
+        token = session.cookies.get_dict()["orthanc-education-user"]
+        return {
+            "Authorization": f"Bearer {token}"
+        }
+
 class OrthancApiClient(HttpClient):
 
-    def __init__(self, orthanc_root_url: str, user: Optional[str] = None, pwd: Optional[str] = None, api_token: Optional[str] = None, headers: Optional[Dict[str, str]] = None ) -> None:
+    def __init__(self,
+                 orthanc_root_url: str,
+                 user: Optional[str] = None,
+                 pwd: Optional[str] = None,
+                 api_token: Optional[str] = None,
+                 headers: Optional[Dict[str, str]] = None,
+                 token_provider: Optional[EducationPluginHeaderProvider] = None ) -> None:
         """Creates an HttpClient
 
         Parameters
@@ -62,7 +105,9 @@ class OrthancApiClient(HttpClient):
         api_token: a token obtained from inside an Orthanc python plugin through orthanc.GenerateRestApiAuthorizationToken
                    format: 'Bearer 3d03892c-fe...' or '3d03892c-fe...'
         headers: HTTP headers that will be included in each requests
+        token_provider: if the education plugin is in the game, this will allow to get the token (actually, the headers)
         """
+
         if api_token:
             if headers is None:
                 headers = {}
@@ -72,7 +117,10 @@ class OrthancApiClient(HttpClient):
                 header_value = f'Bearer {api_token}'
             headers['authorization'] = header_value
 
-        super().__init__(root_url=orthanc_root_url, user=user, pwd=pwd, headers=headers)
+        if token_provider:
+            headers = token_provider.get_headers()
+
+        super().__init__(root_url=orthanc_root_url, user=user, pwd=pwd, headers=headers, on_403_error=token_provider.get_headers if token_provider is not None else None)
 
         self.patients = Patients(api_client=self)
         self.studies = Studies(api_client=self)
@@ -85,6 +133,8 @@ class OrthancApiClient(HttpClient):
         self.peers = Peers(api_client=self)
         self.capabilities = Capabilities(api_client=self)
         self.worklists = Worklists(api_client=self)
+        self.projects = Projects(api_client=self)
+        self.images = Images(api_client=self)
 
     def __repr__(self) -> str:
         return f"{self._root_url}"

@@ -1,3 +1,9 @@
+V 0.25.0
+========
+
+- Added components for the education plugin.
+
+
 V 0.24.1
 ========
 

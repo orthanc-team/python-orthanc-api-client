@@ -1,4 +1,4 @@
-from .api_client import OrthancApiClient
+from .api_client import OrthancApiClient, EducationPluginHeaderProvider
 from .exceptions import *
 from .helpers import *
 from .capabilities import Capabilities

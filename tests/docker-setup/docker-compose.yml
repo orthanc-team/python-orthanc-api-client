@@ -24,7 +24,6 @@ services:
             "RemoteSelf": "orthanc-a"
           }
         }
-
       ORTHANC__EXECUTE_LUA_ENABLED: "true"
       TRANSFERS_PLUGIN_ENABLED: "true"
       ORTHANC__CHECK_REVISIONS: "true"
@@ -80,3 +79,43 @@ services:
 
       TRANSFERS_PLUGIN_ENABLED: "true"
       ORTHANC__OVERWRITE_INSTANCES: "true"
+
+  # extra orthanc for the tests related to the education plugin because the authentication mechanism is different
+  orthanc-d:
+    #image: orthancteam/orthanc:25.12.2
+    image: orthancteam/orthanc-pre-release:2026.06.24
+    # because we need this: https://orthanc.uclouvain.be/hg/orthanc-education/rev/0e695d856b0c
+    ports: ["10045:8042"]
+    environment:
+      VERBOSE_STARTUP: "true"
+      VERBOSE_ENABLED: "true"
+      ORTHANC__DICOM_AET: ORTHANCD
+      ORTHANC__NAME: orthanc-d-for-python-api-client-tests-education
+      ORTHANC__STABLE_AGE: "2"
+      ORTHANC__ORTHANC_EXPLORER_2__IS_DEFAULT_ORTHANC_UI: "false"
+      ORTHANC__EDUCATION: |
+        {
+          "Enabled" : true,
+          "PublicRoots" : [
+            "http://localhost:10045"
+          ],
+          "AuthenticationHttpHeader" : "Mail",
+          "Administrators" : {
+            "Authentication" : "Login",
+            "Credentials" : {
+              "test" : "test"
+            }
+          },
+          "StandardUsers" : {
+            "Authentication" : "RestrictedHttpHeader",
+            "RestrictedHeaders" : [ "api-key-to-change2"]
+          },
+          "WholeSlideImagingDicomizer" : "/usr/local/bin/OrthancWSIDicomizer",
+          "OpenSlideLibrary" : "libopenslide.so.0"
+        }
+      ORTHANC__EXECUTE_LUA_ENABLED: "true"
+      ORTHANC__CHECK_REVISIONS: "true"
+      ORTHANC__OVERWRITE_INSTANCES: "true"
+      # keep default KeepAliveTimeout and reduce the number of threads in order to test the retry mechanism
+      ORTHANC__KEEP_ALIVE_TIMEOUT: "1"
+      ORTHANC__HTTP_THREADS_COUNT: "10"

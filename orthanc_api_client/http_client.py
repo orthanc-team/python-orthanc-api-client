@@ -9,7 +9,7 @@ from orthanc_api_client import exceptions as api_exceptions
 
 class HttpClient:
 
-    def __init__(self, root_url: str, user: str = None, pwd: str = None, headers: any = None) -> None:
+    def __init__(self, root_url: str, user: str = None, pwd: str = None, headers: any = None, on_403_error = None) -> None:
         self._root_url = root_url
         self._http_session = requests.Session()
 
@@ -33,6 +33,9 @@ class HttpClient:
         url_schema = urllib.parse.urlparse(root_url).scheme + "://"
         self._http_session.mount(url_schema, HTTPAdapter(max_retries=retries))
 
+        self._on_403_error = on_403_error
+        self._token_updated = False
+
 
     def get_abs_url(self, endpoint: str) -> str:
         # remove the leading '/' because _root_url might be something like 'http://my.domain/orthanc/' and urljoin would then remove the '/orthanc'
@@ -46,7 +49,9 @@ class HttpClient:
             url = self.get_abs_url(endpoint)
             response = self._http_session.get(url, **kwargs)
 
-            self._raise_on_errors(response, url=url)
+            if self._raise_or_retry_on_errors(response, url=url):
+                response = self._http_session.get(url, **kwargs)
+                self._raise_or_retry_on_errors(response, url=url)
             return response
         except requests.RequestException as request_exception:
             self._translate_exception(request_exception, url=url)
@@ -62,7 +67,9 @@ class HttpClient:
             url = self.get_abs_url(endpoint)
             response = self._http_session.post(url, **kwargs)
 
-            self._raise_on_errors(response, url=url)
+            if self._raise_or_retry_on_errors(response, url=url):
+                response = self._http_session.post(url, **kwargs)
+                self._raise_or_retry_on_errors(response, url=url)
             return response
         except requests.RequestException as request_exception:
             self._translate_exception(request_exception, url=url)
@@ -72,7 +79,9 @@ class HttpClient:
             url = self.get_abs_url(endpoint)
             response = self._http_session.put(url, **kwargs)
 
-            self._raise_on_errors(response, url=url)
+            if self._raise_or_retry_on_errors(response, url=url):
+                response = self._http_session.put(url, **kwargs)
+                self._raise_or_retry_on_errors(response, url=url)
             return response
         except requests.RequestException as request_exception:
             self._translate_exception(request_exception, url=url)
@@ -82,7 +91,9 @@ class HttpClient:
             url = self.get_abs_url(endpoint)
             response = self._http_session.delete(url, **kwargs)
 
-            self._raise_on_errors(response, url=url)
+            if self._raise_or_retry_on_errors(response, url=url):
+                response = self._http_session.delete(url, **kwargs)
+                self._raise_or_retry_on_errors(response, url=url)
             return response
         except requests.RequestException as request_exception:
             self._translate_exception(request_exception, url=url)
@@ -96,11 +107,25 @@ class HttpClient:
     def __del__(self):
         self.close()
 
-    def _raise_on_errors(self, response, url):
+    def _raise_or_retry_on_errors(self, response, url) -> bool:
+        '''
+        Will fire the ad hoc exception based on the error code;
+        Will return True if a retry has to be performed;
+        Will return False if everything was ok (HTTP 200 code).
+        '''
         if response.status_code >= 200 and response.status_code < 300:
-            return
+            return False
 
         if response.status_code == 401:
+            raise api_exceptions.NotAuthorized(response.status_code, url=url)
+        if response.status_code == 403:
+            # with the education plugin, the token may have expired, so let's try to renew it before raising an exception
+            if self._on_403_error is not None and self._token_updated == False:
+                self._token_updated = True
+                headers = self._on_403_error()
+                self._http_session.headers.update(headers)
+                return True
+            self._token_updated = False
             raise api_exceptions.NotAuthorized(response.status_code, url=url)
         elif response.status_code == 404:
             raise api_exceptions.ResourceNotFound(
