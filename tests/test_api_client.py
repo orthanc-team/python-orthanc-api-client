@@ -1934,6 +1934,24 @@ class TestApiClient(unittest.TestCase):
         images = self.od.images.get_images_by_project(project_id=prj_id)
         self.assertEqual(len(images), 1)
 
+    def test_education_change_title(self):
+        self.od.delete_all_content()
+
+        # upload 1 image
+        upload_id = self.od.images.upload_and_dicomize(file_path=here / "stimuli/education.jpeg", description="upload-desc")
+
+        # upload over?
+        wait_until(lambda: self.od.images.get_dicomization_status(upload_id) == Dicomizationtatus.SUCCESS, 5)
+
+        # is title == to description?
+        images = self.od.images.get_series_without_a_project()
+        self.assertEqual(images[0].title, "upload-desc")
+
+        # let's change it
+        self.od.images.change_title(images[0].resource_id ,"new-title")
+        # actually changed
+        images = self.od.images.get_series_without_a_project()
+        self.assertEqual(images[0].title, "new-title")
 
 
     def test_pool_maxsize(self):

@@ -115,3 +115,18 @@ class Images(Resources):
                 return job['status']
         # TODO: raise exception?
         return None
+
+    def change_title(self, resource_id: str, title: str, level: str="Series") -> str:
+        payload = {
+            'resource' : {
+                'resource-id' : resource_id,
+                'level' : level,
+            },
+            "title": title
+        }
+
+        r = self._api_client.post(
+            endpoint=f"{self._url_segment}/change-title",
+            json=payload
+        )
+        r.raise_for_status()
