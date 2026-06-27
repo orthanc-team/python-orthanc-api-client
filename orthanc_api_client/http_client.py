@@ -116,6 +116,7 @@ class HttpClient:
         Will return False if everything was ok (HTTP 200 code).
         '''
         if response.status_code >= 200 and response.status_code < 300:
+            self._token_updated = False
             return False
 
         if response.status_code == 401:

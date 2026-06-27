@@ -1,7 +1,7 @@
 import json
 import typing
 from enum import StrEnum
-from typing import Dict
+from typing import Dict, List
 import uuid
 from .resources import Resources
 from ..education_image import Image
@@ -16,6 +16,18 @@ class Images(Resources):
 
     def __init__(self, api_client: 'OrthancApiClient'):
         super().__init__(api_client=api_client, url_segment='/education/api')
+
+    def get(self, resource_id) -> Image:
+        payload = {
+            "resource_id": resource_id,
+            "project": "_all-studies"
+        }
+        r = self._api_client.post(
+            endpoint=f"{self._url_segment}/list-images",
+            json=payload
+        )
+        print(r.content)
+        return Image.from_json(json.loads(r.content))
 
     def get_images_by_project(self, project_id: str) -> typing.List[Image]:
         payload = {
@@ -32,6 +44,18 @@ class Images(Resources):
 
     def get_studies_without_a_project(self) -> typing.List[Image]:
         return self.get_images_by_project(project_id="_unused-studies")
+
+    def get_all_images(self) -> typing.List[Image]:
+        return self.get_images_by_project(project_id="_all-studies")
+
+    def delete(self, resource_id):
+        if self._api_client.studies.get(resource_id) is not None:
+            self._api_client.studies.delete(resource_id)
+        elif self._api_client.series.get(resource_id) is not None:
+            self._api_client.series.delete(resource_id)
+
+    def delete_all(self):
+        self._api_client.delete_all_content()
 
     def link_image_to_project(self, resource_id: str, project_id: str, resource_level: str="Series"):
         """

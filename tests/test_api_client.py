@@ -1896,6 +1896,7 @@ class TestApiClient(unittest.TestCase):
 
     def test_education_create_project(self):
         self.od.delete_all_content()
+        self.od.projects.delete_all()
 
         # prj creation
         id = self.od.projects.create("prj-name", "prj-desc")
@@ -1909,8 +1910,32 @@ class TestApiClient(unittest.TestCase):
         all = self.od.projects.get_all()
         self.assertEqual(len(all), 1)
 
+        # check the project deletion
+        self.od.projects.delete(id)
+        all = self.od.projects.get_all()
+        self.assertEqual(len(all), 0)
+
+    def test_education_delete_all_projects(self):
+        self.od.delete_all_content()
+        self.od.projects.delete_all()
+
+        # prj creation
+        self.od.projects.create("prj-name", "prj-desc")
+        self.od.projects.create("prj-name2", "prj-desc2")
+
+        # check that there are 2 projects
+        all = self.od.projects.get_all()
+        self.assertEqual(len(all), 2)
+
+        # check the project deletion
+        self.od.projects.delete_all()
+        all = self.od.projects.get_all()
+        self.assertEqual(len(all), 0)
+
     def test_education_upload(self):
         self.od.delete_all_content()
+        self.od.images.delete_all()
+        self.od.projects.delete_all()
 
         # upload 1 image
         upload_id = self.od.images.upload_and_dicomize(file_path=here / "stimuli/education.jpeg", description="upload-desc")
@@ -1953,6 +1978,36 @@ class TestApiClient(unittest.TestCase):
         images = self.od.images.get_series_without_a_project()
         self.assertEqual(images[0].title, "new-title")
 
+    def test_education_set_viewer(self):
+        self.od.delete_all_content()
+        self.od.projects.delete_all()
+
+        # prj creation
+        id = self.od.projects.create("prj-name", "prj-desc")
+        prj = self.od.projects.get(id)
+
+        self.assertEqual(prj.primary_viewer.description, "stone")
+
+        self.od.projects.set_viewer(id, "volview")
+        prj = self.od.projects.get(id)
+        self.assertEqual(prj.primary_viewer.description, "volview")
+
+    def test_token_renewal(self):
+        self.od.delete_all_content()
+        self.od.projects.delete_all()
+
+        # put an expired token in the client
+        expired_token = "ZeyJhbGciOiJSUzI1NiIsImtpZCI6IjNhMjQzYWRhLTVhM2MtNDA0Mi04NmQ5LWFhZjBjM2ZiNzM3MCIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODI0ODYyNDgsImlhdCI6MTc4MjQ4MjY0OCwiaWQiOiJ0ZXN0IiwiaW5zdHJ1Y3Rvcl9vZiI6W10sImxlYXJuZXJfb2YiOltdLCJyb2xlIjoiYWRtaW4ifQ.L2DYuuNtHXnnhb6D7guT9t36b4pK-MTvk74UyoRsfHSqzFaikPEJZz6oM2Y2xkTqqwm_oOcjX_P683-s_MFAVycP-G3Fijfcz-hri-1_ewIMPd2mWGqg-jaXFDJBKD5Wo-Ws8rmWPweCu1VQ89dp6sYvPLKuJXCwaug5VFmGlP86lH6Cj4XuvFH9ncV1ynQzakEUAmoahL9H56QrrpXlD8J9TuoScPLqpxtAydFccL8r10Ysiyr-QWB4123BJUGo9jlpxYS29tpiswLbj94L8RX4vU5kjJu1ehn9jNJzNulPyarpaPHlBULJcQn8jyezqqQUuP1UbF5t09qszIZkEw"
+        expired_headers = {
+            "Authorization": f"Bearer {expired_token}"
+        }
+        self.od._http_session.headers.update(expired_headers)
+
+        id = self.od.projects.create("prj-name", "prj-desc")
+        prj = self.od.projects.get(id)
+
+        # check prj creation
+        self.assertEqual(prj.name, "prj-name")
 
     def test_pool_maxsize(self):
 
