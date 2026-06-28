@@ -1,4 +1,4 @@
-V 0.25.1
+V 0.25.2
 ========
 
 - Added components for the education plugin.

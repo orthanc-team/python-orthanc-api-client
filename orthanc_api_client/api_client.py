@@ -65,8 +65,8 @@ class EducationPluginHeaderProvider:
         self._headers = None
 
     def get_headers(self):
-        if self._headers is None:
-            self._headers = self._fetch_headers()
+        # Shouldn't we check that the token is expired?
+        self._headers = self._fetch_headers()
 
         return self._headers
 
