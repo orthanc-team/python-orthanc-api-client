@@ -75,7 +75,7 @@ class Images(Resources):
         r.raise_for_status()
 
 
-    def upload_and_dicomize(self, file_path: str, description: str) -> str:
+    def upload_and_dicomize(self, file_path: str, description: str, force_openslide: bool=False) -> str:
 
         # first: upload
         upload_id = str(uuid.uuid4())
@@ -116,7 +116,7 @@ class Images(Resources):
             "upload-id": upload_id,
             "type": "wsi",
             "background-color": "white",
-            "force-openslide": False,
+            "force-openslide": force_openslide,
             "reconstruct-pyramid": True,
             "study-description": description,
         }

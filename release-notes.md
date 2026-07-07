@@ -1,3 +1,8 @@
+V 0.25.3
+========
+
+- `Education plugin`: added a way to force open-slide for the dicomization
+
 V 0.25.2
 ========
 
